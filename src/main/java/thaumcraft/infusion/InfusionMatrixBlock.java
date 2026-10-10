@@ -1,5 +1,6 @@
 package thaumcraft.infusion;
 
+import thaumcraft.blockentity.TcBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -27,5 +28,11 @@ public class InfusionMatrixBlock extends Block implements EntityBlock {
             return null;
         }
         return (tickLevel, pos, tickState, entity) -> InfusionMatrixBlockEntity.tick(tickLevel, pos, tickState, (InfusionMatrixBlockEntity) entity);
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        TcBlockEntity.beforeRemove(state, level, pos, newState);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

@@ -31,6 +31,10 @@ public final class ValueOutput {
         return tag;
     }
 
+    public HolderLookup.Provider lookup() {
+        return provider;
+    }
+
     public <T> void store(String name, Codec<T> codec, T value) {
         codec.encodeStart(ops(), value).result().ifPresent(encoded -> tag.put(name, encoded));
     }

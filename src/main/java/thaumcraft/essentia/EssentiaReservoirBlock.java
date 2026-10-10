@@ -1,5 +1,6 @@
 package thaumcraft.essentia;
 
+import thaumcraft.blockentity.TcBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -55,7 +56,7 @@ public class EssentiaReservoirBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         return level.getBlockEntity(pos) instanceof EssentiaReservoirBlockEntity reservoir ? reservoir.getComparatorSignal() : 0;
     }
 
@@ -80,5 +81,11 @@ public class EssentiaReservoirBlock extends Block implements EntityBlock {
                 }
             }
         }
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        TcBlockEntity.beforeRemove(state, level, pos, newState);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

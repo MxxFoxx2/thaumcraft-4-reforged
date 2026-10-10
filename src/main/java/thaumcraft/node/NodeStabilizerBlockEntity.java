@@ -19,7 +19,7 @@ public class NodeStabilizerBlockEntity extends TcBlockEntity {
     }
 
     private void tick(Level level, BlockPos pos) {
-        if (!level.isClientSide() || pos.getY() >= level.getMaxY()) {
+        if (!level.isClientSide() || pos.getY() >= (level.getMaxBuildHeight() - 1)) {
             return;
         }
         BlockState above = level.getBlockState(pos.above());

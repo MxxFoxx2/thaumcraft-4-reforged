@@ -1,20 +1,22 @@
 package thaumcraft.essentia;
 
+import thaumcraft.blockentity.TcBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,6 +30,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
+import thaumcraft.block.ItemInteractions;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectKeys;
 import thaumcraft.aspect.AspectList;
@@ -108,16 +111,7 @@ public class TubeBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected BlockState updateShape(
-        BlockState state,
-        LevelReader level,
-        ScheduledTickAccess ticks,
-        BlockPos pos,
-        Direction directionToNeighbour,
-        BlockPos neighbourPos,
-        BlockState neighbourState,
-        RandomSource random
-    ) {
+    protected BlockState updateShape(BlockState state, Direction directionToNeighbour, BlockState neighbourState, LevelAccessor level, BlockPos pos, BlockPos neighbourPos) {
         return state.setValue(TubeArms.property(directionToNeighbour), TubeArms.compute(level, pos, state, directionToNeighbour));
     }
 
@@ -142,19 +136,19 @@ public class TubeBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useItemOn(
+    protected ItemInteractionResult useItemOn(
         ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult
     ) {
         if (kind == Kind.VALVE) {
             if (stack.getItem() instanceof WandItem || stack.is(asItem())) {
-                return InteractionResult.PASS;
+                return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
             }
-            return toggleValve(level, pos);
+            return ItemInteractions.skipping(toggleValve(level, pos));
         }
         if (kind == Kind.FILTER) {
-            return filterInteract(level, pos, player, stack, hitResult.getDirection());
+            return ItemInteractions.skipping(filterInteract(level, pos, player, stack, hitResult.getDirection()));
         }
-        return InteractionResult.TRY_WITH_EMPTY_HAND;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
@@ -210,5 +204,11 @@ public class TubeBlock extends Block implements EntityBlock {
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        TcBlockEntity.beforeRemove(state, level, pos, newState);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

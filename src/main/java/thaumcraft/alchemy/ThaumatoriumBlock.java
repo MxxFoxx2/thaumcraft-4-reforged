@@ -1,5 +1,6 @@
 package thaumcraft.alchemy;
 
+import thaumcraft.blockentity.TcBlockEntity;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,7 +21,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import javax.annotation.Nullable;
@@ -79,7 +79,7 @@ public class ThaumatoriumBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean movedByPiston) {
         if (!level.isClientSide()) {
             if (top) {
                 if (!level.getBlockState(pos.below()).is(ModBlocks.THAUMATORIUM.get())) {
@@ -99,7 +99,7 @@ public class ThaumatoriumBlock extends Block implements EntityBlock {
                 }
             }
         }
-        super.neighborChanged(state, level, pos, block, orientation, movedByPiston);
+        super.neighborChanged(state, level, pos, block, fromPos, movedByPiston);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ThaumatoriumBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof ThaumatoriumBlockEntity thaumatorium) {
             return AbstractContainerMenu.getRedstoneSignalFromContainer(thaumatorium);
         }
@@ -136,5 +136,11 @@ public class ThaumatoriumBlock extends Block implements EntityBlock {
             return (tickLevel, pos, tickState, entity) -> ThaumatoriumBlockEntity.clientTick(tickLevel, pos, tickState, (ThaumatoriumBlockEntity) entity);
         }
         return (tickLevel, pos, tickState, entity) -> ThaumatoriumBlockEntity.serverTick(tickLevel, pos, tickState, (ThaumatoriumBlockEntity) entity);
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        TcBlockEntity.beforeRemove(state, level, pos, newState);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

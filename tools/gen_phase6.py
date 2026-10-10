@@ -174,15 +174,7 @@ def essentia(ctx):
     tube_item(ctx, "filtered_essentia_tube", (5.5, 10.5), core_texture="pipe_filter")
     tube_item(ctx, "restricted_essentia_tube", (6.5, 9.5), core_texture="pipe_restrict")
     tube_item(ctx, "essentia_buffer", (4, 12), arm_texture="pipe_buffer")
-    ctx.write(ctx.ASSETS / "items" / "essentia_valve.json", {
-        "model": {
-            "type": "minecraft:composite",
-            "models": [
-                {"type": "minecraft:model", "model": ctx.ref("essentia_valve", "item")},
-                {"type": "minecraft:special", "base": ctx.ref("essentia_valve", "item"), "model": TUBE_VALVE_ITEM},
-            ],
-        },
-    })
+    ctx.composite_item("essentia_valve", ctx.ref("essentia_valve", "item"), TUBE_VALVE_ITEM)
     for name in ["essentia_tube", "directional_essentia_tube", "essentia_valve", "filtered_essentia_tube", "restricted_essentia_tube", "essentia_buffer"]:
         ctx.self_drop(name)
         ctx.mineable("pickaxe", name)

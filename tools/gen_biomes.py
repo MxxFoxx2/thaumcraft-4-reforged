@@ -146,12 +146,29 @@ def generate(ctx):
     def worldgen(kind, name, content):
         ctx.write(ctx.DATA / NS / "worldgen" / kind / f"{name}.json", content)
 
+    def legacy_provider(value):
+        if isinstance(value, dict):
+            if value.get("type") == "minecraft:weighted":
+                return {
+                    "type": "minecraft:weighted_state_provider",
+                    "entries": [{"data": {"Name": entry["data"]}, "weight": entry["weight"]} for entry in value["entries"]],
+                }
+            return {key: legacy_provider(entry) for key, entry in value.items()}
+        return value
+
+    def legacy_placement(modifier):
+        if modifier.get("type") == "minecraft:offset":
+            return {"type": "minecraft:random_offset", "xz_spread": modifier["x"], "y_spread": modifier["y"]}
+        return modifier
+
     def feature(name, content):
         if not modern:
-            content = {"type": content["type"], "config": {key: value for key, value in content.items() if key != "type"}}
+            content = legacy_provider({"type": content["type"], "config": {key: value for key, value in content.items() if key != "type"}})
         worldgen(profile.feature_folder, name, content)
 
     def placed(name, feature_name, placement):
+        if not modern:
+            placement = [legacy_placement(modifier) for modifier in placement]
         worldgen("placed_feature", name, {"feature": feature_name, "placement": placement})
 
     feature("magical_forest_decoration", {"type": f"{NS}:magical_forest_decoration"})
@@ -176,13 +193,17 @@ def generate(ctx):
         },
     )
     placed("magical_grass", f"{NS}:magical_grass", patch(12, "WORLD_SURFACE_WG", 32))
-    placed("magical_lily_pads", "minecraft:waterlily", patch(6, "WORLD_SURFACE_WG", 10))
+    lily = "minecraft:waterlily"
+    if not modern:
+        feature("single_lily_pad", {"type": "minecraft:simple_block", "to_place": {"type": "minecraft:simple_state_provider", "state": {"Name": "minecraft:lily_pad"}}})
+        lily = f"{NS}:single_lily_pad"
+    placed("magical_lily_pads", lily, patch(6, "WORLD_SURFACE_WG", 10))
 
     placed("eerie_trees", "minecraft:oak", surface_trees(2))
     placed("tainted_trees", "minecraft:oak", surface_trees(2))
     placed("eerie_flowers", "minecraft:flower_default", patch(1, "MOTION_BLOCKING", 64))
-    placed("eerie_grass", "minecraft:grass", patch(2, "WORLD_SURFACE_WG", 32))
-    placed("tainted_grass", "minecraft:grass", patch(2, "WORLD_SURFACE_WG", 32))
+    placed("eerie_grass", profile.vanilla_feature("minecraft:grass"), patch(2, "WORLD_SURFACE_WG", 32))
+    placed("tainted_grass", profile.vanilla_feature("minecraft:grass"), patch(2, "WORLD_SURFACE_WG", 32))
 
     def features(vegetal, ground=True):
         steps = [[] for _ in range(STEPS)]
@@ -213,6 +234,9 @@ def generate(ctx):
         legacy["sky_color"] = int(attributes["minecraft:visual/sky_color"][1:], 16)
         legacy["fog_color"] = 12638463
         legacy["water_fog_color"] = 329011
+        music = attributes.get("minecraft:audio/background_music")
+        if music:
+            legacy["music"] = {**music["default"], "replace_current_music": False}
         by_category = attributes["minecraft:gameplay/natural_mob_spawns"]["argument"]["spawns_by_category"]
         worldgen(
             "biome",

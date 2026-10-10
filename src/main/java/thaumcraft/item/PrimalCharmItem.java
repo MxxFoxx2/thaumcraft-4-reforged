@@ -1,6 +1,6 @@
 package thaumcraft.item;
 
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -11,7 +11,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import javax.annotation.Nullable;
 import thaumcraft.research.ResearchManager;
 
@@ -33,11 +32,11 @@ public class PrimalCharmItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         RandomSource random = RandomSource.create(stack.hashCode() + System.currentTimeMillis() / 6000L);
         if (random.nextInt(200) < 25) {
-            builder.accept(Component.translatable("tc.primalcharm." + random.nextInt(5)).withStyle(ChatFormatting.GOLD));
+            tooltip.add(Component.translatable("tc.primalcharm." + random.nextInt(5)).withStyle(ChatFormatting.GOLD));
         }
-        super.appendHoverText(stack, context, display, builder, flag);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 }

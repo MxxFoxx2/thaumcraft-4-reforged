@@ -1,7 +1,6 @@
 package thaumcraft.item;
 
 import java.util.List;
-import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -20,7 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -132,14 +130,14 @@ public class ManaBeanItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         AspectList list = AspectKeys.ASPECTS.get(stack);
         if (list != null) {
             for (Aspect aspect : list.getAspectsSorted()) {
-                builder.accept(Component.empty().append(aspect.getDescription()).append(" x" + list.getAmount(aspect)));
+                tooltip.add(Component.empty().append(aspect.getDescription()).append(" x" + list.getAmount(aspect)));
             }
         }
-        super.appendHoverText(stack, context, display, builder, flag);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 
     @Override

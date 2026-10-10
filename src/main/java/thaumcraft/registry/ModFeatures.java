@@ -1,6 +1,5 @@
 package thaumcraft.registry;
 
-import com.mojang.serialization.MapCodec;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -11,18 +10,15 @@ import thaumcraft.world.biome.MagicalForestDecorationFeature;
 import thaumcraft.world.gen.ThaumcraftWorldGenFeature;
 
 public final class ModFeatures {
-    private static final DeferredRegister<MapCodec<? extends Feature>> FEATURE_TYPES = DeferredRegister.create(Registries.FEATURE_TYPE, Thaumcraft.MODID);
+    private static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(Registries.FEATURE, Thaumcraft.MODID);
 
-    public static final Supplier<MapCodec<ThaumcraftWorldGenFeature>> WORLD_GENERATION = FEATURE_TYPES.register("world_generation", () -> ThaumcraftWorldGenFeature.CODEC);
-    public static final Supplier<MapCodec<MagicalForestDecorationFeature>> MAGICAL_FOREST_DECORATION = FEATURE_TYPES.register(
-        "magical_forest_decoration",
-        () -> MagicalForestDecorationFeature.CODEC
-    );
+    public static final Supplier<ThaumcraftWorldGenFeature> WORLD_GENERATION = FEATURES.register("world_generation", ThaumcraftWorldGenFeature::new);
+    public static final Supplier<MagicalForestDecorationFeature> MAGICAL_FOREST_DECORATION = FEATURES.register("magical_forest_decoration", MagicalForestDecorationFeature::new);
 
     private ModFeatures() {
     }
 
     public static void register(IEventBus bus) {
-        FEATURE_TYPES.register(bus);
+        FEATURES.register(bus);
     }
 }

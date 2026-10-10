@@ -49,152 +49,152 @@ public final class ModBlockEntities {
 
     public static final Supplier<BlockEntityType<ManaPodBlockEntity>> MANA_POD = BLOCK_ENTITIES.register(
         "mana_pod",
-        () -> new BlockEntityType<>(ManaPodBlockEntity::new, ModBlocks.MANA_POD.get())
+        () -> BlockEntityType.Builder.of(ManaPodBlockEntity::new, ModBlocks.MANA_POD.get()).build(null)
     );
     public static final Supplier<BlockEntityType<WardingStoneBlockEntity>> WARDING_STONE = BLOCK_ENTITIES.register(
         "warding_stone",
-        () -> new BlockEntityType<>(WardingStoneBlockEntity::new, ModBlocks.WARDING_PAVING_STONE.get())
+        () -> BlockEntityType.Builder.of(WardingStoneBlockEntity::new, ModBlocks.WARDING_PAVING_STONE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<NodeBlockEntity>> NODE = BLOCK_ENTITIES.register(
         "node",
-        () -> new BlockEntityType<>(NodeBlockEntity::new, ModBlocks.AURA_NODE.get(), ModBlocks.CHARGED_OBSIDIAN_TOTEM.get(), ModBlocks.SILVERWOOD_KNOT.get())
+        () -> BlockEntityType.Builder.of(NodeBlockEntity::new, ModBlocks.AURA_NODE.get(), ModBlocks.CHARGED_OBSIDIAN_TOTEM.get(), ModBlocks.SILVERWOOD_KNOT.get()).build(null)
     );
     public static final Supplier<BlockEntityType<EnergizedNodeBlockEntity>> ENERGIZED_NODE = BLOCK_ENTITIES.register(
         "energized_node",
-        () -> new BlockEntityType<>(EnergizedNodeBlockEntity::new, ModBlocks.ENERGIZED_AURA_NODE.get())
+        () -> BlockEntityType.Builder.of(EnergizedNodeBlockEntity::new, ModBlocks.ENERGIZED_AURA_NODE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<NodeStabilizerBlockEntity>> NODE_STABILIZER = BLOCK_ENTITIES.register(
         "node_stabilizer",
-        () -> new BlockEntityType<>(NodeStabilizerBlockEntity::new, ModBlocks.NODE_STABILIZER.get(), ModBlocks.ADVANCED_NODE_STABILIZER.get())
+        () -> BlockEntityType.Builder.of(NodeStabilizerBlockEntity::new, ModBlocks.NODE_STABILIZER.get(), ModBlocks.ADVANCED_NODE_STABILIZER.get()).build(null)
     );
     public static final Supplier<BlockEntityType<NodeTransducerBlockEntity>> NODE_TRANSDUCER = BLOCK_ENTITIES.register(
         "node_transducer",
-        () -> new BlockEntityType<>(NodeTransducerBlockEntity::new, ModBlocks.NODE_TRANSDUCER.get())
+        () -> BlockEntityType.Builder.of(NodeTransducerBlockEntity::new, ModBlocks.NODE_TRANSDUCER.get()).build(null)
     );
     public static final Supplier<BlockEntityType<VisRelayBlockEntity>> VIS_RELAY = BLOCK_ENTITIES.register(
         "vis_relay",
-        () -> new BlockEntityType<>(VisRelayBlockEntity::new, ModBlocks.VIS_RELAY.get())
+        () -> BlockEntityType.Builder.of(VisRelayBlockEntity::new, ModBlocks.VIS_RELAY.get()).build(null)
     );
     public static final Supplier<BlockEntityType<WandPedestalBlockEntity>> WAND_PEDESTAL = BLOCK_ENTITIES.register(
         "wand_pedestal",
-        () -> new BlockEntityType<>(WandPedestalBlockEntity::new, ModBlocks.WAND_RECHARGE_PEDESTAL.get())
+        () -> BlockEntityType.Builder.of(WandPedestalBlockEntity::new, ModBlocks.WAND_RECHARGE_PEDESTAL.get()).build(null)
     );
     public static final Supplier<BlockEntityType<NodeJarBlockEntity>> NODE_JAR = BLOCK_ENTITIES.register(
         "node_jar",
-        () -> new BlockEntityType<>(NodeJarBlockEntity::new, ModBlocks.NODE_JAR.get())
+        () -> BlockEntityType.Builder.of(NodeJarBlockEntity::new, ModBlocks.NODE_JAR.get()).build(null)
     );
     public static final Supplier<BlockEntityType<ResearchTableBlockEntity>> RESEARCH_TABLE = BLOCK_ENTITIES.register(
         "research_table",
-        () -> new BlockEntityType<>(ResearchTableBlockEntity::new, ModBlocks.RESEARCH_TABLE.get())
+        () -> BlockEntityType.Builder.of(ResearchTableBlockEntity::new, ModBlocks.RESEARCH_TABLE.get()).build(null)
     );
 
     public static final Supplier<BlockEntityType<JarBlockEntity>> JAR = BLOCK_ENTITIES.register(
         "jar",
-        () -> new BlockEntityType<>(JarBlockEntity::new, ModBlocks.WARDED_JAR.get())
+        () -> BlockEntityType.Builder.of(JarBlockEntity::new, ModBlocks.WARDED_JAR.get()).build(null)
     );
     public static final Supplier<BlockEntityType<VoidJarBlockEntity>> VOID_JAR = BLOCK_ENTITIES.register(
         "void_jar",
-        () -> new BlockEntityType<>(VoidJarBlockEntity::new, ModBlocks.VOID_JAR.get())
+        () -> BlockEntityType.Builder.of(VoidJarBlockEntity::new, ModBlocks.VOID_JAR.get()).build(null)
     );
     public static final Supplier<BlockEntityType<TubeBlockEntity>> TUBE = BLOCK_ENTITIES.register(
         "essentia_tube",
-        () -> new BlockEntityType<>(TubeBlockEntity::new, ModBlocks.ESSENTIA_TUBE.get())
+        () -> BlockEntityType.Builder.of(TubeBlockEntity::new, ModBlocks.ESSENTIA_TUBE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<ValveTubeBlockEntity>> VALVE_TUBE = BLOCK_ENTITIES.register(
         "essentia_valve",
-        () -> new BlockEntityType<>(ValveTubeBlockEntity::new, ModBlocks.ESSENTIA_VALVE.get())
+        () -> BlockEntityType.Builder.of(ValveTubeBlockEntity::new, ModBlocks.ESSENTIA_VALVE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<FilterTubeBlockEntity>> FILTER_TUBE = BLOCK_ENTITIES.register(
         "filtered_essentia_tube",
-        () -> new BlockEntityType<>(FilterTubeBlockEntity::new, ModBlocks.FILTERED_ESSENTIA_TUBE.get())
+        () -> BlockEntityType.Builder.of(FilterTubeBlockEntity::new, ModBlocks.FILTERED_ESSENTIA_TUBE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<RestrictTubeBlockEntity>> RESTRICT_TUBE = BLOCK_ENTITIES.register(
         "restricted_essentia_tube",
-        () -> new BlockEntityType<>(RestrictTubeBlockEntity::new, ModBlocks.RESTRICTED_ESSENTIA_TUBE.get())
+        () -> BlockEntityType.Builder.of(RestrictTubeBlockEntity::new, ModBlocks.RESTRICTED_ESSENTIA_TUBE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<OnewayTubeBlockEntity>> ONEWAY_TUBE = BLOCK_ENTITIES.register(
         "directional_essentia_tube",
-        () -> new BlockEntityType<>(OnewayTubeBlockEntity::new, ModBlocks.DIRECTIONAL_ESSENTIA_TUBE.get())
+        () -> BlockEntityType.Builder.of(OnewayTubeBlockEntity::new, ModBlocks.DIRECTIONAL_ESSENTIA_TUBE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<EssentiaBufferBlockEntity>> ESSENTIA_BUFFER = BLOCK_ENTITIES.register(
         "essentia_buffer",
-        () -> new BlockEntityType<>(EssentiaBufferBlockEntity::new, ModBlocks.ESSENTIA_BUFFER.get())
+        () -> BlockEntityType.Builder.of(EssentiaBufferBlockEntity::new, ModBlocks.ESSENTIA_BUFFER.get()).build(null)
     );
     public static final Supplier<BlockEntityType<CentrifugeBlockEntity>> CENTRIFUGE = BLOCK_ENTITIES.register(
         "alchemical_centrifuge",
-        () -> new BlockEntityType<>(CentrifugeBlockEntity::new, ModBlocks.ALCHEMICAL_CENTRIFUGE.get())
+        () -> BlockEntityType.Builder.of(CentrifugeBlockEntity::new, ModBlocks.ALCHEMICAL_CENTRIFUGE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<EssentiaCrystallizerBlockEntity>> ESSENTIA_CRYSTALLIZER = BLOCK_ENTITIES.register(
         "essentia_crystallizer",
-        () -> new BlockEntityType<>(EssentiaCrystallizerBlockEntity::new, ModBlocks.ESSENTIA_CRYSTALLIZER.get())
+        () -> BlockEntityType.Builder.of(EssentiaCrystallizerBlockEntity::new, ModBlocks.ESSENTIA_CRYSTALLIZER.get()).build(null)
     );
     public static final Supplier<BlockEntityType<EssentiaReservoirBlockEntity>> ESSENTIA_RESERVOIR = BLOCK_ENTITIES.register(
         "essentia_reservoir",
-        () -> new BlockEntityType<>(EssentiaReservoirBlockEntity::new, ModBlocks.ESSENTIA_RESERVOIR.get())
+        () -> BlockEntityType.Builder.of(EssentiaReservoirBlockEntity::new, ModBlocks.ESSENTIA_RESERVOIR.get()).build(null)
     );
     public static final Supplier<BlockEntityType<CrucibleBlockEntity>> CRUCIBLE = BLOCK_ENTITIES.register(
         "crucible",
-        () -> new BlockEntityType<>(CrucibleBlockEntity::new, ModBlocks.CRUCIBLE.get())
+        () -> BlockEntityType.Builder.of(CrucibleBlockEntity::new, ModBlocks.CRUCIBLE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<AlembicBlockEntity>> ALEMBIC = BLOCK_ENTITIES.register(
         "alembic",
-        () -> new BlockEntityType<>(AlembicBlockEntity::new, ModBlocks.ALEMBIC.get())
+        () -> BlockEntityType.Builder.of(AlembicBlockEntity::new, ModBlocks.ALEMBIC.get()).build(null)
     );
     public static final Supplier<BlockEntityType<AlchemicalFurnaceBlockEntity>> ALCHEMICAL_FURNACE = BLOCK_ENTITIES.register(
         "alchemical_furnace",
-        () -> new BlockEntityType<>(AlchemicalFurnaceBlockEntity::new, ModBlocks.ALCHEMICAL_FURNACE.get())
+        () -> BlockEntityType.Builder.of(AlchemicalFurnaceBlockEntity::new, ModBlocks.ALCHEMICAL_FURNACE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<AdvancedAlchemicalFurnaceBlockEntity>> ADVANCED_ALCHEMICAL_FURNACE = BLOCK_ENTITIES.register(
         "advanced_alchemical_furnace",
-        () -> new BlockEntityType<>(AdvancedAlchemicalFurnaceBlockEntity::new, ModBlocks.ADVANCED_ALCHEMICAL_FURNACE.get())
+        () -> BlockEntityType.Builder.of(AdvancedAlchemicalFurnaceBlockEntity::new, ModBlocks.ADVANCED_ALCHEMICAL_FURNACE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<AdvancedAlchemicalFurnaceNozzleBlockEntity>> ADVANCED_ALCHEMICAL_FURNACE_NOZZLE = BLOCK_ENTITIES.register(
         "advanced_alchemical_furnace_nozzle",
-        () -> new BlockEntityType<>(AdvancedAlchemicalFurnaceNozzleBlockEntity::new, ModBlocks.ADVANCED_ALCHEMICAL_FURNACE.get())
+        () -> BlockEntityType.Builder.of(AdvancedAlchemicalFurnaceNozzleBlockEntity::new, ModBlocks.ADVANCED_ALCHEMICAL_FURNACE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<ThaumatoriumBlockEntity>> THAUMATORIUM = BLOCK_ENTITIES.register(
         "thaumatorium",
-        () -> new BlockEntityType<>(ThaumatoriumBlockEntity::new, ModBlocks.THAUMATORIUM.get())
+        () -> BlockEntityType.Builder.of(ThaumatoriumBlockEntity::new, ModBlocks.THAUMATORIUM.get()).build(null)
     );
     public static final Supplier<BlockEntityType<ThaumatoriumTopBlockEntity>> THAUMATORIUM_TOP = BLOCK_ENTITIES.register(
         "thaumatorium_top",
-        () -> new BlockEntityType<>(ThaumatoriumTopBlockEntity::new, ModBlocks.THAUMATORIUM_TOP.get())
+        () -> BlockEntityType.Builder.of(ThaumatoriumTopBlockEntity::new, ModBlocks.THAUMATORIUM_TOP.get()).build(null)
     );
     public static final Supplier<BlockEntityType<MnemonicMatrixBlockEntity>> MNEMONIC_MATRIX = BLOCK_ENTITIES.register(
         "mnemonic_matrix",
-        () -> new BlockEntityType<>(MnemonicMatrixBlockEntity::new, ModBlocks.MNEMONIC_MATRIX.get())
+        () -> BlockEntityType.Builder.of(MnemonicMatrixBlockEntity::new, ModBlocks.MNEMONIC_MATRIX.get()).build(null)
     );
     public static final Supplier<BlockEntityType<FluxScrubberBlockEntity>> FLUX_SCRUBBER = BLOCK_ENTITIES.register(
         "flux_scrubber",
-        () -> new BlockEntityType<>(FluxScrubberBlockEntity::new, ModBlocks.FLUX_SCRUBBER.get())
+        () -> BlockEntityType.Builder.of(FluxScrubberBlockEntity::new, ModBlocks.FLUX_SCRUBBER.get()).build(null)
     );
     public static final Supplier<BlockEntityType<BellowsBlockEntity>> BELLOWS = BLOCK_ENTITIES.register(
         "arcane_bellows",
-        () -> new BlockEntityType<>(BellowsBlockEntity::new, ModBlocks.ARCANE_BELLOWS.get())
+        () -> BlockEntityType.Builder.of(BellowsBlockEntity::new, ModBlocks.ARCANE_BELLOWS.get()).build(null)
     );
     public static final Supplier<BlockEntityType<ArcaneWorkbenchBlockEntity>> ARCANE_WORKBENCH = BLOCK_ENTITIES.register(
         "arcane_workbench",
-        () -> new BlockEntityType<>(ArcaneWorkbenchBlockEntity::new, ModBlocks.ARCANE_WORKTABLE.get())
+        () -> BlockEntityType.Builder.of(ArcaneWorkbenchBlockEntity::new, ModBlocks.ARCANE_WORKTABLE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<VisChargeRelayBlockEntity>> VIS_CHARGE_RELAY = BLOCK_ENTITIES.register(
         "vis_charge_relay",
-        () -> new BlockEntityType<>(VisChargeRelayBlockEntity::new, ModBlocks.VIS_CHARGE_RELAY.get())
+        () -> BlockEntityType.Builder.of(VisChargeRelayBlockEntity::new, ModBlocks.VIS_CHARGE_RELAY.get()).build(null)
     );
     public static final Supplier<BlockEntityType<DeconstructionTableBlockEntity>> DECONSTRUCTION_TABLE = BLOCK_ENTITIES.register(
         "deconstruction_table",
-        () -> new BlockEntityType<>(DeconstructionTableBlockEntity::new, ModBlocks.DECONSTRUCTION_TABLE.get())
+        () -> BlockEntityType.Builder.of(DeconstructionTableBlockEntity::new, ModBlocks.DECONSTRUCTION_TABLE.get()).build(null)
     );
     public static final Supplier<BlockEntityType<InfusionMatrixBlockEntity>> INFUSION_MATRIX = BLOCK_ENTITIES.register(
         "infusion_matrix",
-        () -> new BlockEntityType<>(InfusionMatrixBlockEntity::new, ModBlocks.RUNIC_MATRIX.get())
+        () -> BlockEntityType.Builder.of(InfusionMatrixBlockEntity::new, ModBlocks.RUNIC_MATRIX.get()).build(null)
     );
     public static final Supplier<BlockEntityType<PedestalBlockEntity>> PEDESTAL = BLOCK_ENTITIES.register(
         "arcane_pedestal",
-        () -> new BlockEntityType<>(PedestalBlockEntity::new, ModBlocks.ARCANE_PEDESTAL.get())
+        () -> BlockEntityType.Builder.of(PedestalBlockEntity::new, ModBlocks.ARCANE_PEDESTAL.get()).build(null)
     );
     public static final Supplier<BlockEntityType<InfusionPillarBlockEntity>> INFUSION_PILLAR = BLOCK_ENTITIES.register(
         "infusion_pillar",
-        () -> new BlockEntityType<>(InfusionPillarBlockEntity::new, ModBlocks.INFUSION_PILLAR.get())
+        () -> BlockEntityType.Builder.of(InfusionPillarBlockEntity::new, ModBlocks.INFUSION_PILLAR.get()).build(null)
     );
 
     private ModBlockEntities() {

@@ -1,6 +1,6 @@
 package thaumcraft.item;
 
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -10,7 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.registry.ModSounds;
@@ -67,10 +66,10 @@ public class ThaumonomiconItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         if (cheat) {
-            builder.accept(Component.literal("Cheat Sheet"));
+            tooltip.add(Component.literal("Cheat Sheet"));
         }
-        super.appendHoverText(stack, context, display, builder, flag);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 }

@@ -77,7 +77,7 @@ public enum Aspect implements StringRepresentable {
     private final String tag;
     private final int color;
     private final @Nullable String chatcolor;
-    private final Aspect @Nullable [] components;
+    private final @Nullable Aspect[] components;
     private final int blend;
     private final ResourceLocation image;
 
@@ -89,7 +89,7 @@ public enum Aspect implements StringRepresentable {
         this(tag, color, null, new Aspect[]{first, second}, blend);
     }
 
-    Aspect(String tag, int color, @Nullable String chatcolor, Aspect @Nullable [] components, int blend) {
+    Aspect(String tag, int color, @Nullable String chatcolor, @Nullable Aspect[] components, int blend) {
         this.tag = tag;
         this.color = color;
         this.chatcolor = chatcolor;
@@ -110,7 +110,7 @@ public enum Aspect implements StringRepresentable {
         return chatcolor;
     }
 
-    public Aspect @Nullable [] getComponents() {
+    public @Nullable Aspect[] getComponents() {
         return components;
     }
 

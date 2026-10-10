@@ -1,6 +1,6 @@
 package thaumcraft.item;
 
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -11,7 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.node.Revealer;
 import thaumcraft.platform.ArmorSlot;
@@ -33,9 +32,9 @@ public class GogglesItem extends Item implements Revealer, VisDiscountGear {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
-        super.appendHoverText(stack, context, display, builder, flag);
-        builder.accept(Component.translatable("tc.visdiscount").append(": " + getVisDiscount(stack, null, null) + "%").withStyle(ChatFormatting.DARK_PURPLE));
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
+        tooltip.add(Component.translatable("tc.visdiscount").append(": " + getVisDiscount(stack, null, null) + "%").withStyle(ChatFormatting.DARK_PURPLE));
     }
 
     @Override

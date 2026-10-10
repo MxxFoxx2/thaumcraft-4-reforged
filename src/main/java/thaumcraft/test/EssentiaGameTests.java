@@ -1,60 +1,30 @@
 package thaumcraft.test;
 
-import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.FunctionGameTestInstance;
+import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.TestData;
-import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.RegisterGameTestsEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.essentia.JarBlockEntity;
 import thaumcraft.registry.ModBlocks;
 
-@EventBusSubscriber(modid = Thaumcraft.MODID)
+@GameTestHolder(Thaumcraft.MODID)
+@PrefixGameTestTemplate(false)
 public final class EssentiaGameTests {
-    private static final DeferredRegister<Consumer<GameTestHelper>> FUNCTIONS = DeferredRegister.create(Registries.TEST_FUNCTION, Thaumcraft.MODID);
-    private static final String[] TESTS = {"essentia_moves_through_tubes", "void_jar_voids_overflow"};
-
-    static {
-        FUNCTIONS.register(TESTS[0], () -> EssentiaGameTests::essentiaMovesThroughTubes);
-        FUNCTIONS.register(TESTS[1], () -> EssentiaGameTests::voidJarVoidsOverflow);
-    }
-
     private EssentiaGameTests() {
     }
 
     public static void register(IEventBus bus) {
-        FUNCTIONS.register(bus);
     }
 
-    @SubscribeEvent
-    static void registerTests(RegisterGameTestsEvent event) {
-        if (TESTS.length == 0) {
-            return;
-        }
-        Holder<TestEnvironmentDefinition<?>> environment = event.registerEnvironment(
-            Thaumcraft.id("essentia_default"),
-            new TestEnvironmentDefinition.AllOf()
-        );
-        for (String name : TESTS) {
-            ResourceKey<Consumer<GameTestHelper>> function = ResourceKey.create(Registries.TEST_FUNCTION, Thaumcraft.id(name));
-            event.registerTest(
-                Thaumcraft.id(name),
-                new FunctionGameTestInstance(function, new TestData<>(environment, Thaumcraft.id("test/platform"), 200, 0, true))
-            );
-        }
-    }
-
-    private static void essentiaMovesThroughTubes(GameTestHelper helper) {
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void essentiaMovesThroughTubes(GameTestHelper helper) {
         BlockPos source = new BlockPos(1, 1, 1);
         BlockPos target = new BlockPos(4, 1, 1);
         helper.setBlock(source, ModBlocks.WARDED_JAR.get());
@@ -62,8 +32,8 @@ public final class EssentiaGameTests {
         for (int x = 1; x <= 4; x++) {
             helper.setBlock(new BlockPos(x, 2, 1), ModBlocks.ESSENTIA_TUBE.get());
         }
-        JarBlockEntity sourceJar = helper.getBlockEntity(source, JarBlockEntity.class);
-        JarBlockEntity targetJar = helper.getBlockEntity(target, JarBlockEntity.class);
+        JarBlockEntity sourceJar = helper.<JarBlockEntity>getBlockEntity(source);
+        JarBlockEntity targetJar = helper.<JarBlockEntity>getBlockEntity(target);
         sourceJar.addToContainer(Aspect.AIR, 10);
         targetJar.setAspectFilter(Aspect.AIR);
         helper.succeedWhen(() -> {
@@ -72,16 +42,17 @@ public final class EssentiaGameTests {
         });
     }
 
-    private static void voidJarVoidsOverflow(GameTestHelper helper) {
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void voidJarVoidsOverflow(GameTestHelper helper) {
         BlockPos position = new BlockPos(1, 1, 1);
         helper.setBlock(position, ModBlocks.VOID_JAR.get());
-        JarBlockEntity voidJar = helper.getBlockEntity(position, JarBlockEntity.class);
+        JarBlockEntity voidJar = helper.<JarBlockEntity>getBlockEntity(position);
         helper.assertValueEqual(voidJar.addToContainer(Aspect.FIRE, 60), 0, "first add remainder");
         helper.assertValueEqual(voidJar.addToContainer(Aspect.FIRE, 20), 0, "overflow remainder");
         helper.assertValueEqual(voidJar.getAmount(), 64, "void jar amount");
         BlockPos plainPosition = new BlockPos(3, 1, 1);
         helper.setBlock(plainPosition, ModBlocks.WARDED_JAR.get());
-        JarBlockEntity plainJar = helper.getBlockEntity(plainPosition, JarBlockEntity.class);
+        JarBlockEntity plainJar = helper.<JarBlockEntity>getBlockEntity(plainPosition);
         plainJar.addToContainer(Aspect.FIRE, 60);
         helper.assertValueEqual(plainJar.addToContainer(Aspect.FIRE, 20), 16, "plain jar remainder");
         helper.succeed();

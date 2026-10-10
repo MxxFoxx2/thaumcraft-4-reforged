@@ -42,7 +42,7 @@ public final class MoundGenerator {
             name = text.substring(0, bracket);
             properties = text.substring(bracket + 1, text.length() - 1);
         }
-        Block block = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(name));
+        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(name));
         BlockState state = block.defaultBlockState();
         if (properties != null) {
             for (String pair : properties.split(",")) {

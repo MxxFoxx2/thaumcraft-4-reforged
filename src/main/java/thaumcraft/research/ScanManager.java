@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -17,7 +17,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
@@ -83,7 +82,7 @@ public final class ScanManager {
         if (state.isAir()) {
             return null;
         }
-        ItemStack stack = state.getCloneItemStack(level, pos, false);
+        ItemStack stack = state.getBlock().getCloneItemStack(level, pos, state);
         if (stack.isEmpty()) {
             return null;
         }
@@ -118,7 +117,7 @@ public final class ScanManager {
     public static String entityKey(Entity entity) {
         StringBuilder key = new StringBuilder();
         if (entity instanceof Player player) {
-            key.append("player_").append(player.getGameProfile().name());
+            key.append("player_").append(player.getGameProfile().getName());
         } else {
             key.append(BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()));
             List<EntityAspects> candidates = AspectRegistry.active().exportEntities().get(entity.getType());
@@ -147,17 +146,12 @@ public final class ScanManager {
     }
 
     private static boolean matchesData(EntityAspects candidate, Entity entity) {
-        TagValueOutput output = TagValueOutput.createWithContext(
-            ProblemReporter.DISCARDING,
-            entity.level().registryAccess()
-        );
-        entity.saveWithoutId(output);
-        return candidate.matches(output.buildResult());
+        return candidate.matches(entity.saveWithoutId(new CompoundTag()));
     }
 
     public static @Nullable AspectList entityAspects(Entity entity) {
         if (entity instanceof Player player) {
-            String name = player.getGameProfile().name();
+            String name = player.getGameProfile().getName();
             AspectList tags = new AspectList();
             tags.add(Aspect.MAN, 4);
             if (name.equalsIgnoreCase("azanor")) {
@@ -215,8 +209,9 @@ public final class ScanManager {
                     if (notify) {
                         for (Aspect parent : aspect.getComponents()) {
                             if (!knowledge.hasDiscoveredAspect(parent)) {
-                                player.sendOverlayMessage(
-                                    Component.translatable("tc.discoveryerror", Component.translatable("tc.aspect.help." + parent.getTag()))
+                                player.displayClientMessage(
+                                    Component.translatable("tc.discoveryerror", Component.translatable("tc.aspect.help." + parent.getTag())),
+                                    true
                                 );
                                 break;
                             }
@@ -228,7 +223,7 @@ public final class ScanManager {
             return true;
         }
         if (notify) {
-            player.sendOverlayMessage(Component.translatable("tc.unknownobject"));
+            player.displayClientMessage(Component.translatable("tc.unknownobject"), true);
         }
         return false;
     }

@@ -3,15 +3,12 @@ package thaumcraft.test;
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.FunctionGameTestInstance;
+import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.TestData;
-import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
@@ -21,15 +18,13 @@ import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.RegisterGameTestsEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import thaumcraft.Thaumcraft;
 import thaumcraft.arcane.ArcaneWorkbenchBlockEntity;
 import thaumcraft.aspect.Aspect;
@@ -42,59 +37,24 @@ import thaumcraft.wand.WandRegistry;
 import thaumcraft.wand.WandTriggers;
 import thaumcraft.wand.Wands;
 
-@EventBusSubscriber(modid = Thaumcraft.MODID)
+@GameTestHolder(Thaumcraft.MODID)
+@PrefixGameTestTemplate(false)
 public final class ArcaneGameTests {
-    private static final DeferredRegister<Consumer<GameTestHelper>> FUNCTIONS = DeferredRegister.create(Registries.TEST_FUNCTION, Thaumcraft.MODID);
-    private static final String[] TESTS = {"arcane_workbench_consumes_vis", "wand_recipe_builds_wand", "table_wand_becomes_worktable"};
-
-    static {
-        FUNCTIONS.register(TESTS[0], () -> ArcaneGameTests::workbenchConsumesVis);
-        FUNCTIONS.register(TESTS[1], () -> ArcaneGameTests::wandRecipeBuildsWand);
-        FUNCTIONS.register(TESTS[2], () -> ArcaneGameTests::tableWandBecomesWorktable);
-    }
-
     private ArcaneGameTests() {
     }
 
     public static void register(IEventBus bus) {
-        FUNCTIONS.register(bus);
-    }
-
-    @SubscribeEvent
-    static void registerTests(RegisterGameTestsEvent event) {
-        if (TESTS.length == 0) {
-            return;
-        }
-        Holder<TestEnvironmentDefinition<?>> environment = event.registerEnvironment(
-            Thaumcraft.id("arcane_default"),
-            new TestEnvironmentDefinition.AllOf()
-        );
-        for (String name : TESTS) {
-            ResourceKey<Consumer<GameTestHelper>> function = ResourceKey.create(Registries.TEST_FUNCTION, Thaumcraft.id(name));
-            event.registerTest(
-                Thaumcraft.id(name),
-                new FunctionGameTestInstance(function, new TestData<>(environment, Thaumcraft.id("test/platform"), 200, 0, true))
-            );
-        }
     }
 
     private static ServerPlayer mockServerPlayer(GameTestHelper helper) {
-        ServerPlayer player = (ServerPlayer) helper.makeMockServerPlayer(GameType.SURVIVAL);
-        CommonListenerCookie cookie = CommonListenerCookie.createInitial(player.getGameProfile(), false);
-        Connection connection = new Connection(PacketFlow.SERVERBOUND);
-        new EmbeddedChannel(connection);
-        new ServerGamePacketListenerImpl(helper.getLevel().getServer(), connection, player, cookie) {
-            @Override
-            public void send(Packet<?> packet) {
-            }
-        };
-        return player;
+        return TestSupport.mockServerPlayer(helper);
     }
 
-    private static void workbenchConsumesVis(GameTestHelper helper) {
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void workbenchConsumesVis(GameTestHelper helper) {
         BlockPos tablePos = new BlockPos(1, 1, 1);
         helper.setBlock(tablePos, ModBlocks.ARCANE_WORKTABLE.get());
-        ArcaneWorkbenchBlockEntity workbench = helper.getBlockEntity(tablePos, ArcaneWorkbenchBlockEntity.class);
+        ArcaneWorkbenchBlockEntity workbench = helper.<ArcaneWorkbenchBlockEntity>getBlockEntity(tablePos);
         ServerPlayer player = mockServerPlayer(helper);
         Knowledge.get(player).addResearch("VISPOWER");
         ItemStack wand = Wands.create(WandRegistry.CAP_GOLD, WandRegistry.ROD_GREATWOOD, false);
@@ -109,7 +69,7 @@ public final class ArcaneGameTests {
         ItemStack result = menu.getSlot(ArcaneWorkbenchMenu.RESULT_SLOT).getItem();
         helper.assertTrue(result.is(ModBlocks.VIS_RELAY.get().asItem()) && result.getCount() == 2, "arcane result missing");
         helper.assertValueEqual(menu.getMatchedAspects().getAmount(Aspect.FIRE), 8, "matched fire cost");
-        menu.clicked(ArcaneWorkbenchMenu.RESULT_SLOT, 0, ContainerInput.PICKUP, player);
+        menu.clicked(ArcaneWorkbenchMenu.RESULT_SLOT, 0, ClickType.PICKUP, player);
         helper.assertTrue(menu.getCarried().is(ModBlocks.VIS_RELAY.get().asItem()), "result not taken");
         helper.assertValueEqual(Wands.getVis(workbench.getWand(), Aspect.FIRE), fireBefore - 800, "fire vis left");
         helper.assertValueEqual(Wands.getVis(workbench.getWand(), Aspect.AIR), fireBefore, "air vis untouched");
@@ -119,7 +79,8 @@ public final class ArcaneGameTests {
         helper.succeed();
     }
 
-    private static void wandRecipeBuildsWand(GameTestHelper helper) {
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void wandRecipeBuildsWand(GameTestHelper helper) {
         ServerPlayer player = mockServerPlayer(helper);
         List<ItemStack> grid = new ArrayList<>();
         for (int slot = 0; slot < 9; slot++) {
@@ -139,7 +100,8 @@ public final class ArcaneGameTests {
         helper.succeed();
     }
 
-    private static void tableWandBecomesWorktable(GameTestHelper helper) {
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void tableWandBecomesWorktable(GameTestHelper helper) {
         BlockPos tablePos = new BlockPos(1, 1, 1);
         helper.setBlock(tablePos, ModBlocks.TABLE.get());
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
@@ -148,7 +110,7 @@ public final class ArcaneGameTests {
         boolean done = WandTriggers.perform(helper.getLevel(), wand, player, helper.absolutePos(tablePos), Direction.UP);
         helper.assertTrue(done, "trigger did not fire");
         helper.assertBlockPresent(ModBlocks.ARCANE_WORKTABLE.get(), tablePos);
-        ArcaneWorkbenchBlockEntity workbench = helper.getBlockEntity(tablePos, ArcaneWorkbenchBlockEntity.class);
+        ArcaneWorkbenchBlockEntity workbench = helper.<ArcaneWorkbenchBlockEntity>getBlockEntity(tablePos);
         helper.assertTrue(Wands.isWand(workbench.getWand()), "wand not placed in the workbench");
         helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty(), "wand still in hand");
         helper.succeed();

@@ -13,7 +13,7 @@ public enum PlantSoil {
 
     public boolean canSustain(BlockState state, BlockGetter level, BlockPos pos) {
         return switch (this) {
-            case PLAINS -> state.is(BlockTags.SUPPORTS_VEGETATION);
+            case PLAINS -> state.is(BlockTags.DIRT);
             case DESERT -> state.is(BlockTags.SAND);
             case CAVE -> state.isFaceSturdy(level, pos, Direction.UP);
         };

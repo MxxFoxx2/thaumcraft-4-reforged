@@ -52,7 +52,7 @@ public class ThaumatoriumBlockEntity extends TcBlockEntity implements AspectCont
     private final NonNullList<ItemStack> input = NonNullList.withSize(1, ItemStack.EMPTY);
     private AspectList essentia = new AspectList();
     private final List<String> recipeKeys = new ArrayList<>();
-    private final List<@Nullable UUID> recipePlayers = new ArrayList<>();
+    private final List<UUID> recipePlayers = new ArrayList<>();
     private int currentCraft = -1;
     private int maxRecipes = 1;
     private @Nullable Aspect currentSuction;
@@ -538,7 +538,7 @@ public class ThaumatoriumBlockEntity extends TcBlockEntity implements AspectCont
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         this.input.clear();
-        ContainerHelper.loadAllItems(input, this.input);
+        ContainerHelper.loadAllItems(input.tag(), this.input, input.lookup());
         essentia = input.read("Essentia", AspectList.CODEC).orElseGet(AspectList::new);
         maxRecipes = input.getIntOr("maxrec", 1);
         List<String> keys = input.read("recipes", Codec.STRING.listOf()).orElseGet(List::of);
@@ -566,7 +566,7 @@ public class ThaumatoriumBlockEntity extends TcBlockEntity implements AspectCont
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, input);
+        ContainerHelper.saveAllItems(output.tag(), input, output.lookup());
         output.store("Essentia", AspectList.CODEC, essentia);
         output.putInt("maxrec", maxRecipes);
         output.putInt("currentCraft", currentCraft);

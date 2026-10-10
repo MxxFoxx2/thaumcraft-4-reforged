@@ -1,5 +1,6 @@
 package thaumcraft.block;
 
+import net.minecraft.world.phys.Vec3;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,7 +12,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class MagicalLeavesBlock extends LeavesBlock {
@@ -20,7 +20,7 @@ public class MagicalLeavesBlock extends LeavesBlock {
     private final boolean sparkle;
 
     public MagicalLeavesBlock(Supplier<? extends Block> sapling, int saplingChance, boolean sparkle, Properties properties) {
-        super(AmbientLeavesBlockSoundPlayer.noAmbientSound(), properties);
+        super(properties);
         this.sapling = sapling;
         this.saplingChance = saplingChance;
         this.sparkle = sparkle;
@@ -41,7 +41,7 @@ public class MagicalLeavesBlock extends LeavesBlock {
         super.animateTick(state, level, pos, random);
         if (sparkle && random.nextInt(500) == 0) {
             level.addParticle(
-                new DustParticleOptions(0xCCDDEE, 1.0F),
+                new DustParticleOptions(Vec3.fromRGB24(0xCCDDEE).toVector3f(), 1.0F),
                 pos.getX() + 0.5F + random.nextFloat() - random.nextFloat(),
                 pos.getY() + 0.5F + random.nextFloat() - random.nextFloat(),
                 pos.getZ() + 0.5F + random.nextFloat() - random.nextFloat(),

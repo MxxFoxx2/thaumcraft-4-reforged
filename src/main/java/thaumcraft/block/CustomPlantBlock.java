@@ -1,5 +1,10 @@
 package thaumcraft.block;
 
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.Codec;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -8,7 +13,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -46,6 +50,14 @@ public class CustomPlantBlock extends BushBlock {
     }
 
     @Override
+    protected MapCodec<? extends BushBlock> codec() {
+        return RecordCodecBuilder.<CustomPlantBlock>mapCodec(instance -> instance.group(
+            Codec.STRING.xmap(name -> Kind.valueOf(name), Kind::name).fieldOf("kind").forGetter(plant -> plant.kind),
+            BlockBehaviour.<CustomPlantBlock>propertiesCodec()
+        ).apply(instance, CustomPlantBlock::new));
+    }
+
+    @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
@@ -61,11 +73,11 @@ public class CustomPlantBlock extends BushBlock {
     }
 
     @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (kind == Kind.VISHROOM && !level.isClientSide() && entity instanceof LivingEntity living) {
             living.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
         }
-        super.entityInside(state, level, pos, entity, effectApplier, isPrecise);
+        super.entityInside(state, level, pos, entity);
     }
 
     @Override
@@ -75,7 +87,7 @@ public class CustomPlantBlock extends BushBlock {
                 | (int) ((0.7F + random.nextFloat() * 0.3F) * 255.0F) << 8
                 | (int) ((0.7F + random.nextFloat() * 0.3F) * 255.0F);
             level.addParticle(
-                new DustParticleOptions(color, 0.6F),
+                new DustParticleOptions(Vec3.fromRGB24(color).toVector3f(), 0.6F),
                 pos.getX() + 0.5F + (random.nextFloat() - random.nextFloat()) * 0.1F,
                 pos.getY() + 0.5F + (random.nextFloat() - random.nextFloat()) * 0.15F,
                 pos.getZ() + 0.5F + (random.nextFloat() - random.nextFloat()) * 0.1F,
@@ -91,7 +103,7 @@ public class CustomPlantBlock extends BushBlock {
             level.addParticle(ParticleTypes.FLAME, x, y, z, 0.0, 0.0, 0.0);
         } else if (kind == Kind.VISHROOM && random.nextInt(3) == 0) {
             level.addParticle(
-                new DustParticleOptions(0x804CCC, 0.5F),
+                new DustParticleOptions(Vec3.fromRGB24(0x804CCC).toVector3f(), 0.5F),
                 pos.getX() + 0.5F + (random.nextFloat() - random.nextFloat()) * 0.4F,
                 pos.getY() + 0.3F,
                 pos.getZ() + 0.5F + (random.nextFloat() - random.nextFloat()) * 0.4F,

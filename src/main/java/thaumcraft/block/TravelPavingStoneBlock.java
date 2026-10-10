@@ -1,5 +1,6 @@
 package thaumcraft.block;
 
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -21,7 +22,7 @@ public class TravelPavingStoneBlock extends Block {
             if (level.isClientSide()) {
                 for (int index = 0; index < 5; index++) {
                     level.addParticle(
-                        new DustParticleOptions(0x008000, 1.0F),
+                        new DustParticleOptions(Vec3.fromRGB24(0x008000).toVector3f(), 1.0F),
                         pos.getX() + level.getRandom().nextFloat(),
                         pos.getY() + 1.0,
                         pos.getZ() + level.getRandom().nextFloat(),

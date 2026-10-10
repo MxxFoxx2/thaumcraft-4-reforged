@@ -200,14 +200,14 @@ public class DeconstructionTableBlockEntity extends TcBlockEntity implements Wor
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         items.clear();
-        ContainerHelper.loadAllItems(input, items);
+        ContainerHelper.loadAllItems(input.tag(), items, input.lookup());
         aspect = input.read("Aspect", Aspect.CODEC).orElse(null);
     }
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, items, true);
+        ContainerHelper.saveAllItems(output.tag(), items, true, output.lookup());
         if (aspect != null) {
             output.store("Aspect", Aspect.CODEC, aspect);
         }

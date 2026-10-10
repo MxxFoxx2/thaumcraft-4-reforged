@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.RedstoneWireBlock;
+import net.minecraft.world.level.block.RedStoneWireBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.TripWireBlock;
@@ -278,7 +278,7 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
     }
 
     private static boolean isCircuits(Block block) {
-        return block instanceof RedstoneWireBlock
+        return block instanceof RedStoneWireBlock
             || block instanceof TorchBlock
             || block instanceof LeverBlock
             || block instanceof ButtonBlock
@@ -300,7 +300,7 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
     private void recalculateBonus(ServerLevel serverLevel) {
         RandomSource random = serverLevel.getRandom();
         BlockPos above = worldPosition.above();
-        if (serverLevel.isDarkOutside()
+        if (serverLevel.isNight()
             && serverLevel.getMaxLocalRawBrightness(above) < 4
             && !serverLevel.canSeeSky(above)
             && random.nextInt(20) == 0) {
@@ -454,7 +454,7 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         items.clear();
-        ContainerHelper.loadAllItems(input, items);
+        ContainerHelper.loadAllItems(input.tag(), items, input.lookup());
         nextRecalc = input.getIntOr("nextRecalc", 0);
         bonusAspects = input.read("bonusAspects", AspectList.CODEC).orElse(new AspectList());
     }
@@ -462,7 +462,7 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, items, true);
+        ContainerHelper.saveAllItems(output.tag(), items, true, output.lookup());
         output.putInt("nextRecalc", nextRecalc);
         output.store("bonusAspects", AspectList.CODEC, bonusAspects);
     }

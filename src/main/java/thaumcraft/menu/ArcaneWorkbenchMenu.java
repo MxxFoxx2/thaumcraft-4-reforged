@@ -7,13 +7,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -117,12 +116,12 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
         }
         List<ItemStack> grid = gridStacks();
         CraftingInput input = CraftingInput.ofPositioned(ArcaneCrafting.GRID_SIZE, ArcaneCrafting.GRID_SIZE, grid).input();
-        Optional<RecipeHolder<CraftingRecipe>> recipe = level.recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, level);
+        Optional<RecipeHolder<CraftingRecipe>> recipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
         ItemStack result = ItemStack.EMPTY;
         if (recipe.isPresent()) {
             RecipeHolder<CraftingRecipe> holder = recipe.get();
-            if (resultContainer.setRecipeUsed(serverPlayer, holder)) {
-                ItemStack assembled = holder.value().assemble(input);
+            if (resultContainer.setRecipeUsed(level, serverPlayer, holder)) {
+                ItemStack assembled = holder.value().assemble(input, level.registryAccess());
                 if (assembled.isItemEnabled(level.enabledFeatures())) {
                     result = assembled;
                 }
@@ -173,9 +172,9 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public void clicked(int slotIndex, int buttonNum, ContainerInput containerInput, Player clicker) {
+    public void clicked(int slotIndex, int buttonNum, ClickType containerInput, Player clicker) {
         int button = buttonNum;
-        if (containerInput == ContainerInput.THROW) {
+        if (containerInput == ClickType.THROW) {
             button = 1;
         }
         if ((slotIndex == RESULT_SLOT || slotIndex == WAND_SLOT) && button > 0) {
@@ -232,7 +231,7 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
         }
         slot.onTake(player, stack);
         if (index == RESULT_SLOT) {
-            player.drop(stack, false, Prediction.PREDICTED);
+            player.drop(stack, false);
         }
         return original;
     }

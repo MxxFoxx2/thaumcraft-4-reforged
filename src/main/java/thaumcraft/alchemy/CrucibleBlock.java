@@ -1,5 +1,6 @@
 package thaumcraft.alchemy;
 
+import thaumcraft.blockentity.TcBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -8,8 +9,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -24,7 +25,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -58,17 +58,12 @@ public class CrucibleBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected VoxelShape getEntityInsideCollisionShape(BlockState state, BlockGetter level, BlockPos pos, Entity entity) {
-        return Shapes.block();
-    }
-
-    @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (level.isClientSide() || !(level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible)) {
             return;
         }
         boolean hot = crucible.getHeat() > CrucibleBlockEntity.BOIL_HEAT && crucible.getWaterAmount() > 0;
-        if (entity instanceof ItemEntity item && !item.entityTags().contains(SPECIAL_ITEM_TAG) && hot) {
+        if (entity instanceof ItemEntity item && !item.getTags().contains(SPECIAL_ITEM_TAG) && hot) {
             crucible.attemptSmelt(item);
             return;
         }
@@ -82,11 +77,11 @@ public class CrucibleBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useItemOn(
+    protected ItemInteractionResult useItemOn(
         ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult
     ) {
         if (Wands.isWand(stack)) {
-            return InteractionResult.PASS;
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
         if (stack.is(Items.WATER_BUCKET) && level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible) {
             if (!level.isClientSide() && crucible.getWaterAmount() < CrucibleBlockEntity.TANK_CAPACITY) {
@@ -95,17 +90,17 @@ public class CrucibleBlock extends Block implements EntityBlock {
                 RandomSource random = level.getRandom();
                 level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.GENERIC_SWIM, SoundSource.BLOCKS, 0.33F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.3F);
             }
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
-        return InteractionResult.TRY_WITH_EMPTY_HAND;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean movedByPiston) {
         if (level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible) {
             crucible.resetBellows();
         }
-        super.neighborChanged(state, level, pos, block, orientation, movedByPiston);
+        super.neighborChanged(state, level, pos, block, fromPos, movedByPiston);
     }
 
     @Override
@@ -122,7 +117,7 @@ public class CrucibleBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible) {
             int size = crucible.getAspects().visSize();
             return (int) Math.floor(size / 100.0F * 14.0F) + (size > 0 ? 1 : 0);
@@ -151,5 +146,11 @@ public class CrucibleBlock extends Block implements EntityBlock {
             return (tickLevel, pos, tickState, entity) -> CrucibleBlockEntity.clientTick(tickLevel, pos, (CrucibleBlockEntity) entity);
         }
         return (tickLevel, pos, tickState, entity) -> CrucibleBlockEntity.serverTick(tickLevel, pos, (CrucibleBlockEntity) entity);
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        TcBlockEntity.beforeRemove(state, level, pos, newState);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

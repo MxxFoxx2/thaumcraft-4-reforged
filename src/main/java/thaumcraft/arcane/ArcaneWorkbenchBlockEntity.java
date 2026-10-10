@@ -188,13 +188,13 @@ public class ArcaneWorkbenchBlockEntity extends TcBlockEntity implements Worldly
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         items.clear();
-        ContainerHelper.loadAllItems(input, items);
+        ContainerHelper.loadAllItems(input.tag(), items, input.lookup());
         items.set(OUTPUT_SLOT, ItemStack.EMPTY);
     }
 
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, items, true);
+        ContainerHelper.saveAllItems(output.tag(), items, true, output.lookup());
     }
 }

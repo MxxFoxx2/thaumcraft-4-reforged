@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.RecipeCraftingHolder;
@@ -58,16 +57,9 @@ public class SlotCraftingArcaneWorkbench extends Slot {
     }
 
     @Override
-    public ItemStack safeClone(Player player) {
-        ItemStack result = super.safeClone(player);
-        result.getItem().onCraftedBy(result, player);
-        return result;
-    }
-
-    @Override
     protected void checkTakeAchievements(ItemStack carried) {
         if (removeCount > 0) {
-            carried.onCraftedBy(player, removeCount);
+            carried.onCraftedBy(player.level(), player, removeCount);
             EventHooks.firePlayerCraftingEvent(player, carried, craftMatrix);
         }
         if (container instanceof RecipeCraftingHolder holder) {
@@ -100,9 +92,12 @@ public class SlotCraftingArcaneWorkbench extends Slot {
         CraftingInput input = CraftingInput.of(ArcaneCrafting.GRID_SIZE, ArcaneCrafting.GRID_SIZE, grid);
         int left = 0;
         int top = 0;
-        NonNullList<ItemStack> remaining = CraftingRecipe.defaultCraftingReminder(input);
+        NonNullList<ItemStack> remaining = NonNullList.withSize(input.size(), ItemStack.EMPTY);
+        for (int index = 0; index < input.size(); index++) {
+            remaining.set(index, input.getItem(index).getCraftingRemainingItem());
+        }
         if (player.level() instanceof ServerLevel serverLevel) {
-            Optional<RecipeHolder<CraftingRecipe>> vanilla = serverLevel.recipeAccess().getRecipeFor(RecipeType.CRAFTING, positioned.input(), serverLevel);
+            Optional<RecipeHolder<CraftingRecipe>> vanilla = serverLevel.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, positioned.input(), serverLevel);
             if (vanilla.isPresent()) {
                 input = positioned.input();
                 left = positioned.left();
@@ -128,7 +123,7 @@ public class SlotCraftingArcaneWorkbench extends Slot {
                         replacement.grow(current.getCount());
                         craftMatrix.setItem(slot, replacement);
                     } else if (!player.getInventory().add(replacement)) {
-                        player.drop(replacement, false, Prediction.PREDICTED);
+                        player.drop(replacement, false);
                     }
                 }
             }

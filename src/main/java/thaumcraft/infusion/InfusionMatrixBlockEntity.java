@@ -22,7 +22,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Block;
@@ -423,8 +422,7 @@ public class InfusionMatrixBlockEntity extends TcBlockEntity implements WandInte
                         );
                     } else if (itemCount-- <= 1) {
                         ItemStack current = pedestal.getStack();
-                        ItemStackTemplate remainder = current.getItem().getCraftingRemainder(current);
-                        pedestal.setStackFromInfusion(remainder == null ? ItemStack.EMPTY : remainder.create());
+                        pedestal.setStackFromInfusion(current.getCraftingRemainingItem());
                         recipeRemaining.remove(index);
                     }
                     return;

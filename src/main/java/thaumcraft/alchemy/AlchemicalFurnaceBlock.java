@@ -1,5 +1,6 @@
 package thaumcraft.alchemy;
 
+import thaumcraft.blockentity.TcBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import javax.annotation.Nullable;
 import thaumcraft.platform.Menus;
@@ -51,11 +51,11 @@ public class AlchemicalFurnaceBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean movedByPiston) {
         if (level.getBlockEntity(pos) instanceof AlchemicalFurnaceBlockEntity furnace) {
             furnace.resetBellows();
         }
-        super.neighborChanged(state, level, pos, block, orientation, movedByPiston);
+        super.neighborChanged(state, level, pos, block, fromPos, movedByPiston);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class AlchemicalFurnaceBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof AlchemicalFurnaceBlockEntity furnace) {
             return furnace.getComparatorSignal();
         }
@@ -82,5 +82,11 @@ public class AlchemicalFurnaceBlock extends Block implements EntityBlock {
             return null;
         }
         return (tickLevel, pos, tickState, entity) -> AlchemicalFurnaceBlockEntity.serverTick(tickLevel, pos, tickState, (AlchemicalFurnaceBlockEntity) entity);
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        TcBlockEntity.beforeRemove(state, level, pos, newState);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

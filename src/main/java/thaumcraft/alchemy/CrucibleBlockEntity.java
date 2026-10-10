@@ -60,7 +60,7 @@ public class CrucibleBlockEntity extends TcBlockEntity implements AspectContaine
         super(type, pos, state);
     }
 
-    public Transfer.@Nullable FluidTank exposedFluids(@Nullable Direction side) {
+    public @Nullable Transfer.FluidTank exposedFluids(@Nullable Direction side) {
         return tank;
     }
 

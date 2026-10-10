@@ -21,7 +21,7 @@ public class ArcaneWandRecipe implements DynamicArcaneRecipe {
 
     static @Nullable WandCap findCap(ItemStack stack) {
         for (WandCap cap : WandRegistry.caps()) {
-            if (stack.is(BuiltInRegistries.ITEM.getValue(cap.item()))) {
+            if (stack.is(BuiltInRegistries.ITEM.get(cap.item()))) {
                 return cap;
             }
         }
@@ -30,7 +30,7 @@ public class ArcaneWandRecipe implements DynamicArcaneRecipe {
 
     static @Nullable WandRod findRod(ItemStack stack) {
         for (WandRod rod : WandRegistry.rods()) {
-            if (stack.is(BuiltInRegistries.ITEM.getValue(rod.item()))) {
+            if (stack.is(BuiltInRegistries.ITEM.get(rod.item()))) {
                 return rod;
             }
         }

@@ -20,7 +20,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Prediction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumcraft.node.Node;
 import thaumcraft.node.NodeBlockEntity;
@@ -82,7 +81,7 @@ public final class ThaumcraftCommand {
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         dispatcher.register(
             Commands.literal(Thaumcraft.MODID)
-                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(
                     Commands.literal("fx")
                         .then(
@@ -469,7 +468,7 @@ public final class ThaumcraftCommand {
             ItemStack stack = Wands.create(cap, rod, sceptre);
             Wands.fill(stack);
             if (!target.getInventory().add(stack)) {
-                target.drop(stack, false, Prediction.SERVER_ONLY);
+                target.drop(stack, false);
             }
         }
         context.getSource().sendSuccess(
@@ -508,7 +507,7 @@ public final class ThaumcraftCommand {
     }
 
     private static int aspectsItem(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1);
+        ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1, false);
         return print(context, AspectHelper.getBonusTags(stack, AspectHelper.getObjectTags(stack)));
     }
 

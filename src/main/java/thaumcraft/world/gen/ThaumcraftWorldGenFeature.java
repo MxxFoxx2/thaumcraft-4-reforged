@@ -1,6 +1,5 @@
 package thaumcraft.world.gen;
 
-import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -16,6 +15,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.neoforged.neoforge.common.Tags;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
@@ -24,17 +25,18 @@ import thaumcraft.world.WorldGenConfig;
 import thaumcraft.world.tree.GreatwoodTreeGenerator;
 import thaumcraft.world.tree.SilverwoodTreeGenerator;
 
-public record ThaumcraftWorldGenFeature() implements Feature {
-    public static final MapCodec<ThaumcraftWorldGenFeature> CODEC = MapCodec.unit(ThaumcraftWorldGenFeature::new);
+public class ThaumcraftWorldGenFeature extends Feature<NoneFeatureConfiguration> {
 
-    @Override
-    public MapCodec<ThaumcraftWorldGenFeature> codec() {
-        return CODEC;
+    public ThaumcraftWorldGenFeature() {
+        super(NoneFeatureConfiguration.CODEC);
     }
 
     @Override
-    public boolean place(WorldGenLevel level, ChunkGenerator chunkGenerator, RandomSource randomSource, BlockPos origin) {
-        Random random = new Random(randomSource.nextLong());
+    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        WorldGenLevel level = context.level();
+        ChunkGenerator chunkGenerator = context.chunkGenerator();
+        BlockPos origin = context.origin();
+        Random random = new Random(context.random().nextLong());
         int chunkX = origin.getX() >> 4;
         int chunkZ = origin.getZ() >> 4;
         boolean flat = chunkGenerator instanceof FlatLevelSource;

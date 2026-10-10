@@ -34,7 +34,7 @@ public final class HilltopStonesGenerator {
         Biome biome = level.getBiome(new BlockPos(i, j, k)).value();
         BlockState ground = LegacyGen.get(level, i, j - 1, k);
         BlockState replace = ground.is(BlockTags.DIRT) ? ground : Blocks.GRASS_BLOCK.defaultBlockState();
-        boolean genVines = !biome.coldEnoughToSnow(new BlockPos(i, j, k), level.getSeaLevel());
+        boolean genVines = !biome.coldEnoughToSnow(new BlockPos(i, j, k));
         BlockState tile = ModBlocks.OBSIDIAN_TILE.get().defaultBlockState();
         for (int x = i - 3; x <= i + 3; x++) {
             for (int z = k - 3; z <= k + 3; z++) {

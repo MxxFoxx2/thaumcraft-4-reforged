@@ -34,11 +34,11 @@ public final class VillageStructures {
 
     @SubscribeEvent
     static void onServerAboutToStart(ServerAboutToStartEvent event) {
-        Registry<StructureTemplatePool> pools = event.getServer().registryAccess().lookupOrThrow(Registries.TEMPLATE_POOL);
-        Registry<StructureProcessorList> processorLists = event.getServer().registryAccess().lookupOrThrow(Registries.PROCESSOR_LIST);
+        Registry<StructureTemplatePool> pools = event.getServer().registryAccess().registryOrThrow(Registries.TEMPLATE_POOL);
+        Registry<StructureProcessorList> processorLists = event.getServer().registryAccess().registryOrThrow(Registries.PROCESSOR_LIST);
         BIOMES.forEach((biome, processorName) -> {
-            StructureTemplatePool pool = pools.getValueOrThrow(ResourceKey.create(Registries.TEMPLATE_POOL, ResourceLocation.withDefaultNamespace("village/" + biome + "/houses")));
-            Holder<StructureProcessorList> processors = processorLists.getOrThrow(ResourceKey.create(Registries.PROCESSOR_LIST, ResourceLocation.withDefaultNamespace(processorName)));
+            StructureTemplatePool pool = pools.get(ResourceKey.create(Registries.TEMPLATE_POOL, ResourceLocation.withDefaultNamespace("village/" + biome + "/houses")));
+            Holder<StructureProcessorList> processors = processorLists.getHolderOrThrow(ResourceKey.create(Registries.PROCESSOR_LIST, ResourceLocation.withDefaultNamespace(processorName)));
             HOUSES.forEach((house, weight) -> inject(pool, Thaumcraft.MODID + ":village/" + biome + "/" + house, processors, weight));
         });
     }

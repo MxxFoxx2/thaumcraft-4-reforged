@@ -2,6 +2,7 @@ package thaumcraft.world.gen;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.StructureManager;
@@ -24,7 +25,7 @@ public final class NodeHooks {
 
     private static int firstUncoveredY(WorldGenLevel level, int x, int z) {
         int y = 5;
-        while (y < level.getMaxY() && !level.isEmptyBlock(new BlockPos(x, y + 1, z))) {
+        while (y < level.getMaxBuildHeight() - 1 && !level.isEmptyBlock(new BlockPos(x, y + 1, z))) {
             y++;
         }
         return y;
@@ -40,8 +41,8 @@ public final class NodeHooks {
         if (level instanceof WorldGenRegion region) {
             manager = manager.forWorldGenRegion(region);
         }
-        for (StructureStart start : manager.startsForStructure(chunkX, chunkZ, NodeHooks::isTemple)) {
-            if (!start.isValid() || start.getChunkPos().x() != chunkX || start.getChunkPos().z() != chunkZ) {
+        for (StructureStart start : manager.startsForStructure(new ChunkPos(chunkX, chunkZ), NodeHooks::isTemple)) {
+            if (!start.isValid() || start.getChunkPos().x != chunkX || start.getChunkPos().z != chunkZ) {
                 continue;
             }
             BlockPos center = start.getBoundingBox().getCenter();
@@ -71,7 +72,7 @@ public final class NodeHooks {
             if (level.isEmptyBlock(candidate) || level.getBlockState(candidate).canBeReplaced()) {
                 q += p;
             }
-            if (q > level.getMaxY()) {
+            if (q > level.getMaxBuildHeight() - 1) {
                 return false;
             }
             NodeGenerator.createRandomNodeAt(level, new BlockPos(x, q, z), random, false, false, false);
@@ -107,7 +108,7 @@ public final class NodeHooks {
         int x = chunkX * 16 + random.nextInt(16);
         int z = chunkZ * 16 + random.nextInt(16);
         int topY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1;
-        if (topY > level.getMaxY()) {
+        if (topY > level.getMaxBuildHeight() - 1) {
             return;
         }
         if (LegacyGen.get(level, x, topY, z).is(BlockTags.LEAVES)) {

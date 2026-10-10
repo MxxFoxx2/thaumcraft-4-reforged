@@ -1,13 +1,9 @@
 package thaumcraft.research;
 
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import thaumcraft.Thaumcraft;
 import thaumcraft.crafting.CraftingRecipeRef;
@@ -16,11 +12,6 @@ import thaumcraft.crafting.TcRecipes;
 @EventBusSubscriber(modid = Thaumcraft.MODID)
 public final class RecipeSync {
     private RecipeSync() {
-    }
-
-    @SubscribeEvent
-    public static void onDatapackSync(OnDatapackSyncEvent event) {
-        event.sendRecipes(RecipeType.CRAFTING);
     }
 
     @SubscribeEvent
@@ -62,7 +53,7 @@ public final class RecipeSync {
         }
         if (TcRecipes.get(key) instanceof CraftingRecipeRef reference) {
             ResourceLocation id = reference.recipe();
-            if (server.getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, id)).isEmpty()) {
+            if (server.getRecipeManager().byKey(id).isEmpty()) {
                 Thaumcraft.LOGGER.debug("Research {} recipe {} points to missing crafting recipe {}", research.key(), key, id);
                 return 1;
             }

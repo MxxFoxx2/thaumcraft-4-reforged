@@ -15,7 +15,7 @@ public final class ScanClientHooks {
     }
 
     private static @Nullable Scanner scanner;
-    private static @Nullable Supplier<@Nullable Player> localPlayer;
+    private static @Nullable Supplier<Player> localPlayer;
 
     private ScanClientHooks() {
     }
@@ -24,7 +24,7 @@ public final class ScanClientHooks {
         scanner = value;
     }
 
-    public static void setLocalPlayer(Supplier<@Nullable Player> value) {
+    public static void setLocalPlayer(Supplier<Player> value) {
         localPlayer = value;
     }
 

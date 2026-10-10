@@ -40,7 +40,7 @@ public record TcStack(ResourceLocation item, int count, @Nullable AspectList asp
     }
 
     public @Nullable Item resolve() {
-        Item resolved = BuiltInRegistries.ITEM.getValue(item);
+        Item resolved = BuiltInRegistries.ITEM.get(item);
         return resolved == Items.AIR ? null : resolved;
     }
 

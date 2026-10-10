@@ -2,9 +2,8 @@ package thaumcraft.client.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.List;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +30,9 @@ public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu
     private int startAspect;
 
     public ThaumatoriumScreen(ThaumatoriumMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 176, 166);
+        super(menu, inventory, title);
+        imageWidth = 176;
+        imageHeight = 166;
         menu.updateRecipes();
         lastSize = menu.recipes().size();
         refreshIndex();
@@ -67,20 +68,19 @@ public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
     }
 
-    private void sheet(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int u, int v, int color) {
+    private void sheet(GuiGraphics graphics, int x, int y, int width, int height, int u, int v, int color) {
         GuiBlit.blit(graphics, TEXTURE, x, y, width, height, u, v, width, height, 256, 256, color);
     }
 
-    private void sheet(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int u, int v) {
+    private void sheet(GuiGraphics graphics, int x, int y, int width, int height, int u, int v) {
         sheet(graphics, x, y, width, height, u, v, 0xFFFFFFFF);
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         sheet(graphics, leftPos, topPos, imageWidth, imageHeight, 0, 0);
         List<CrucibleRecipe> recipes = menu.recipes();
         if (index >= recipes.size()) {
@@ -120,16 +120,16 @@ public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu
         drawAspects(graphics, recipe);
         drawOutput(graphics, recipe, mouseX, mouseY);
         if (maxRecipes() > 1) {
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(leftPos + 136, topPos + 33);
-            graphics.pose().scale(0.5F, 0.5F);
+            graphics.pose().pushPose();
+            graphics.pose().translate(leftPos + 136, topPos + 33, 0.0F);
+            graphics.pose().scale(0.5F, 0.5F, 1.0F);
             String text = keys.size() + "/" + maxRecipes();
-            graphics.text(font, text, -font.width(text) / 2, 0, 0xFFFFFFFF, false);
-            graphics.pose().popMatrix();
+            graphics.drawString(font, text, -font.width(text) / 2, 0, 0xFFFFFFFF, false);
+            graphics.pose().popPose();
         }
     }
 
-    private void drawAspects(GuiGraphicsExtractor graphics, CrucibleRecipe recipe) {
+    private void drawAspects(GuiGraphics graphics, CrucibleRecipe recipe) {
         AspectList aspects = recipe.aspects();
         List<Aspect> sorted = aspects.getAspectsSorted();
         int count = 0;
@@ -162,19 +162,19 @@ public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu
         }
     }
 
-    private void drawOutput(GuiGraphicsExtractor graphics, CrucibleRecipe recipe, int mouseX, int mouseY) {
+    private void drawOutput(GuiGraphics graphics, CrucibleRecipe recipe, int mouseX, int mouseY) {
         ItemStack output = recipe.result().create();
         int x = leftPos + 112;
         int y = topPos + 16;
-        graphics.item(output, x, y);
-        graphics.itemDecorations(font, output, x, y);
+        graphics.renderItem(output, x, y);
+        graphics.renderItemDecorations(font, output, x, y);
         boolean selectable = selected().size() < maxRecipes() || selected().contains(recipe.key());
         if (selectable) {
             float alpha = 0.3F + Mth.sin(minecraft.player.tickCount / 4.0F) * 0.3F + 0.3F;
             graphics.fill(x, y, x + 16, y + 16, FastColor.ARGB32.colorFromFloat(Math.clamp(1.0F - alpha, 0.0F, 1.0F) * 0.6F, 0.0F, 0.0F, 0.0F));
         }
         if (mouseX >= x && mouseY >= y && mouseX < x + 16 && mouseY < y + 16) {
-            graphics.setTooltipForNextFrame(font, output, mouseX, mouseY);
+            graphics.renderTooltip(font, output, mouseX, mouseY);
         }
     }
 
@@ -187,11 +187,11 @@ public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && handleClick(event.x(), event.y())) {
+    public boolean mouseClicked(double eventX, double eventY, int button) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && handleClick(eventX, eventY)) {
             return true;
         }
-        return super.mouseClicked(event, doubleClick);
+        return super.mouseClicked(eventX, eventY, button);
     }
 
     private boolean handleClick(double mouseX, double mouseY) {

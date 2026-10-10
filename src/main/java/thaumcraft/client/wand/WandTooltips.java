@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +34,7 @@ public final class WandTooltips {
             return;
         }
         Player player = event.getEntity();
-        boolean shift = Minecraft.getInstance().hasShiftDown();
+        boolean shift = Screen.hasShiftDown();
         List<Component> lines = event.getToolTip();
         List<Component> vis = new ArrayList<>();
         MutableComponent average = Component.empty();

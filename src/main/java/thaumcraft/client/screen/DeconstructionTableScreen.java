@@ -3,9 +3,8 @@ package thaumcraft.client.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +26,7 @@ public class DeconstructionTableScreen extends AbstractContainerScreen<Deconstru
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
     }
 
     private boolean overAspect(double mouseX, double mouseY) {
@@ -37,8 +36,7 @@ public class DeconstructionTableScreen extends AbstractContainerScreen<Deconstru
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         GuiBlit.blit(graphics, TEXTURE, leftPos, topPos, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight, 256, 256, 0xFFFFFFFF);
         if (menu.getBreakTime() > 0) {
             int scaled = menu.getBreakTimeScaled(46);
@@ -51,20 +49,20 @@ public class DeconstructionTableScreen extends AbstractContainerScreen<Deconstru
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
         Aspect aspect = menu.getAspect();
         if (aspect != null && overAspect(mouseX, mouseY)) {
-            graphics.setTooltipForNextFrame(font, List.of(Component.literal(aspect.getName()), aspect.getDescription()), Optional.empty(), mouseX, mouseY - 8);
+            graphics.renderTooltip(font, List.of(Component.literal(aspect.getName()), aspect.getDescription()), Optional.empty(), mouseX, mouseY - 8);
         }
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && menu.getAspect() != null && overAspect(event.x(), event.y())) {
+    public boolean mouseClicked(double eventX, double eventY, int button) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && menu.getAspect() != null && overAspect(eventX, eventY)) {
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, DeconstructionTableMenu.BUTTON_COLLECT);
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.HHOFF.get(), 1.0F + minecraft.level.getRandom().nextFloat() * 0.1F, 0.2F));
         }
-        return super.mouseClicked(event, doubleClick);
+        return super.mouseClicked(eventX, eventY, button);
     }
 }

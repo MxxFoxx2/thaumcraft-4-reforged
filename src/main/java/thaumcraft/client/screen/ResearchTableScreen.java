@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.mojang.math.Axis;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -63,7 +63,9 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
     }
 
     public ResearchTableScreen(ResearchTableMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 255, 255);
+        super(menu, inventory, title);
+        imageWidth = 255;
+        imageHeight = 255;
     }
 
     private PlayerKnowledge knowledge() {
@@ -98,11 +100,11 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         return offsetX >= 0 && offsetY >= 0 && offsetX < width && offsetY < height;
     }
 
-    private void blit(GuiGraphicsExtractor graphics, ResourceLocation texture, int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, int color) {
+    private void blit(GuiGraphics graphics, ResourceLocation texture, int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, int color) {
         GuiBlit.blit(graphics, texture, x, y, width, height, u, v, width, height, textureWidth, textureHeight, color);
     }
 
-    private void blitSheet(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int u, int v) {
+    private void blitSheet(GuiGraphics graphics, int x, int y, int width, int height, int u, int v) {
         blit(graphics, TEXTURE, x, y, width, height, u, v, 256, 256, 0xFFFFFFFF);
     }
 
@@ -155,7 +157,7 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         return null;
     }
 
-    private void drawOrb(GuiGraphicsExtractor graphics, double x, double y) {
+    private void drawOrb(GuiGraphics graphics, double x, double y) {
         int count = minecraft.player.tickCount;
         float red = 0.7F + Mth.sin((float) ((count + x) / 10.0)) * 0.15F + 0.15F;
         float green = 0.7F + Mth.sin((float) ((count + x + y) / 11.0)) * 0.15F + 0.15F;
@@ -163,14 +165,13 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         drawOrb(graphics, x, y, FastColor.ARGB32.colorFromFloat(1.0F, Math.min(red, 1.0F), Math.min(green, 1.0F), Math.min(blue, 1.0F)));
     }
 
-    private void drawOrb(GuiGraphicsExtractor graphics, double x, double y, int color) {
+    private void drawOrb(GuiGraphics graphics, double x, double y, int color) {
         int part = minecraft.player.tickCount % 8;
         blit(graphics, AspectRenderer.PARTICLES, (int) x, (int) y, 16, 16, 128 + part * 16, 128, 256, 256, FastColor.ARGB32.opaque(color));
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         blitSheet(graphics, leftPos, topPos, 255, 167, 0, 0);
         blitSheet(graphics, leftPos + 40, topPos + 167, 184, 88, 0, 166);
         if (page < lastPage) {
@@ -195,7 +196,7 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         drawSheet(graphics, mouseX, mouseY, note);
     }
 
-    private void drawAspects(GuiGraphicsExtractor graphics) {
+    private void drawAspects(GuiGraphics graphics) {
         AspectList pool = knowledge().aspects();
         AspectList bonus = bonus();
         lastPage = (pool.size() - 20) / 5;
@@ -219,21 +220,21 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         }
     }
 
-    private void drawLine(GuiGraphicsExtractor graphics, double x, double y, double x2, double y2) {
+    private void drawLine(GuiGraphics graphics, double x, double y, double x2, double y2) {
         float alpha = Mth.clamp(0.3F + Mth.sin((float) (minecraft.player.tickCount + x)) * 0.3F + 0.3F, 0.0F, 1.0F);
         int color = FastColor.ARGB32.colorFromFloat(alpha, 0.0F, 0.6F, 0.8F);
         GuiLines.strip(graphics, new float[] {(float) x, (float) x2}, new float[] {(float) y, (float) y2}, new int[] {color, color}, true);
     }
 
-    private void drawRune(GuiGraphicsExtractor graphics, double x, double y, int rune, float alpha) {
-        graphics.pose().pushMatrix();
-        graphics.pose().translate((float) x, (float) y);
-        graphics.pose().rotate((float) -Math.PI / 2.0F);
+    private void drawRune(GuiGraphics graphics, double x, double y, int rune, float alpha) {
+        graphics.pose().pushPose();
+        graphics.pose().translate((float) x, (float) y, 0.0F);
+        graphics.pose().mulPose(Axis.ZP.rotation((float) -Math.PI / 2.0F));
         GuiBlit.blit(graphics, SCRIPT, -5, -5, 10, 10, rune * 16, 0, 16, 16, 256, 16, FastColor.ARGB32.colorFromFloat(alpha, 0.0F, 0.0F, 0.0F));
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
     }
 
-    private void drawSheet(GuiGraphicsExtractor graphics, int mouseX, int mouseY, ResearchNote note) {
+    private void drawSheet(GuiGraphics graphics, int mouseX, int mouseY, ResearchNote note) {
         if (note == null || note.key().isEmpty()) {
             runes.clear();
             return;
@@ -306,12 +307,12 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
         ResearchHud.renderNotifications(graphics, ResearchNotifications.now());
         ResearchNote note = note();
         if (canDuplicate(note) && inside(mouseX, mouseY, leftPos + 37, topPos + 5, 24, 24)) {
@@ -323,20 +324,20 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
             Component first = Component.translatable("tile.researchtable.noink.0");
             Component second = Component.translatable("tile.researchtable.noink.1");
             int half = Math.max(font.width(first), font.width(second)) / 2;
-            graphics.setTooltipForNextFrame(font, List.of(first, second), Optional.empty(), leftPos + 157 - half, topPos + 84);
+            graphics.renderTooltip(font, List.of(first, second), Optional.empty(), leftPos + 157 - half, topPos + 84);
         }
         if (draggedAspect != null) {
-            graphics.nextStratum();
+            graphics.flush();
             drawOrb(graphics, mouseX - 8, mouseY - 8, draggedAspect.getColor());
         }
     }
 
-    private void drawCopyCost(GuiGraphicsExtractor graphics, ResearchNote note) {
+    private void drawCopyCost(GuiGraphics graphics, ResearchNote note) {
         ResearchItem research = ResearchCategories.getResearch(note.key());
         if (research == null) {
             return;
         }
-        graphics.nextStratum();
+        graphics.flush();
         blitSheet(graphics, leftPos + 100, topPos + 21, 48, 16, 184, 224);
         AspectList cost = HexGrid.requiredTags(research, note.copies());
         int count = 0;
@@ -344,10 +345,10 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
             AspectRenderer.drawTag(graphics, leftPos + 148 + count * 16, topPos + 21, aspect, cost.getAmount(aspect));
             count++;
         }
-        graphics.text(font, Component.translatable("tc.research.copy"), leftPos + 100, topPos + 12, 0xFFFFFFFF, true);
+        graphics.drawString(font, Component.translatable("tc.research.copy"), leftPos + 100, topPos + 12, 0xFFFFFFFF, true);
     }
 
-    private void drawAspectTooltips(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    private void drawAspectTooltips(GuiGraphics graphics, int mouseX, int mouseY) {
         Aspect hovered = null;
         List<Aspect> visible = visibleAspects();
         for (int drawn = 0; drawn < visible.size(); drawn++) {
@@ -365,9 +366,9 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         if (hovered == null) {
             return;
         }
-        graphics.setTooltipForNextFrame(font, List.of(Component.literal(hovered.getName()), hovered.getDescription()), Optional.empty(), mouseX, mouseY - 8);
+        graphics.renderTooltip(font, List.of(Component.literal(hovered.getName()), hovered.getDescription()), Optional.empty(), mouseX, mouseY - 8);
         if (researcherOne() && !hovered.isPrimal() && hovered.getComponents() != null) {
-            graphics.nextStratum();
+            graphics.flush();
             AspectRenderer.drawBack(graphics, mouseX + 6, mouseY + 6);
             AspectRenderer.drawBack(graphics, mouseX + 24, mouseY + 6);
             AspectRenderer.drawTag(graphics, mouseX + 8, mouseY + 8, hovered.getComponents()[0], 0.0F);
@@ -376,16 +377,16 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && handleClick(event)) {
+    public boolean mouseClicked(double eventX, double eventY, int button) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && handleClick(eventX, eventY)) {
             return true;
         }
-        return super.mouseClicked(event, doubleClick);
+        return super.mouseClicked(eventX, eventY, button);
     }
 
-    private boolean handleClick(MouseButtonEvent event) {
-        double mouseX = event.x();
-        double mouseY = event.y();
+    private boolean handleClick(double eventX, double eventY) {
+        double mouseX = eventX;
+        double mouseY = eventY;
         if (inside(mouseX, mouseY, leftPos + 10, topPos + 40, 80, 80)) {
             Aspect aspect = aspectAt(mouseX, mouseY, false);
             if (aspect != null) {
@@ -440,7 +441,7 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
                 return true;
             }
         }
-        if (event.hasShiftDown() && researcherTwo()) {
+        if (hasShiftDown() && researcherTwo()) {
             Aspect aspect = aspectAt(mouseX, mouseY, true);
             if (aspect != null && !aspect.isPrimal() && aspect.getComponents() != null) {
                 AspectList pool = knowledge().aspects();
@@ -464,12 +465,12 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && draggedAspect != null) {
-            handleDrop(event.x(), event.y());
+    public boolean mouseReleased(double eventX, double eventY, int button) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && draggedAspect != null) {
+            handleDrop(eventX, eventY);
             draggedAspect = null;
         }
-        return super.mouseReleased(event);
+        return super.mouseReleased(eventX, eventY, button);
     }
 
     private void handleDrop(double mouseX, double mouseY) {

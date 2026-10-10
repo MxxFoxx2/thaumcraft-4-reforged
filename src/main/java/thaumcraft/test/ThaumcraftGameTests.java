@@ -112,7 +112,7 @@ public final class ThaumcraftGameTests {
         }
         for (String id : List.of("axolotl", "warden", "husk")) {
             EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.withDefaultNamespace(id));
-            Entity entity = helper.spawn(type, new BlockPos(1, 2, 1));
+            Entity entity = helper.spawn(type, new BlockPos(1, 3, 1));
             ScanManager.Target target = ScanManager.resolveEntity(entity);
             helper.assertTrue(target != null && target.aspects() != null && target.aspects().size() > 0, "no aspects for " + id);
             entity.discard();
@@ -148,9 +148,9 @@ public final class ThaumcraftGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void wandTapsNode(GameTestHelper helper) {
-        BlockPos nodePos = helper.absolutePos(new BlockPos(3, 2, 3));
+        BlockPos nodePos = helper.absolutePos(new BlockPos(3, 3, 3));
         NodeGenerator.createNodeAt(helper.getLevel(), nodePos, NodeType.NORMAL, null, primals(20));
-        NodeBlockEntity node = helper.<NodeBlockEntity>getBlockEntity(new BlockPos(3, 2, 3));
+        NodeBlockEntity node = helper.<NodeBlockEntity>getBlockEntity(new BlockPos(3, 3, 3));
         int before = node.getAspects().visSize();
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         ItemStack wand = Wands.create(WandRegistry.CAP_IRON, WandRegistry.ROD_WOOD, false);
@@ -165,9 +165,9 @@ public final class ThaumcraftGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void pedestalChargesWand(GameTestHelper helper) {
-        NodeGenerator.createNodeAt(helper.getLevel(), helper.absolutePos(new BlockPos(3, 4, 3)), NodeType.NORMAL, null, primals(20));
-        helper.setBlock(new BlockPos(1, 1, 1), ModBlocks.WAND_RECHARGE_PEDESTAL.get());
-        WandPedestalBlockEntity pedestal = helper.<WandPedestalBlockEntity>getBlockEntity(new BlockPos(1, 1, 1));
+        NodeGenerator.createNodeAt(helper.getLevel(), helper.absolutePos(new BlockPos(3, 5, 3)), NodeType.NORMAL, null, primals(20));
+        helper.setBlock(new BlockPos(1, 2, 1), ModBlocks.WAND_RECHARGE_PEDESTAL.get());
+        WandPedestalBlockEntity pedestal = helper.<WandPedestalBlockEntity>getBlockEntity(new BlockPos(1, 2, 1));
         ItemStack wand = Wands.create(WandRegistry.CAP_GOLD, WandRegistry.ROD_GREATWOOD, false);
         pedestal.setStack(wand);
         helper.succeedWhen(() -> helper.assertTrue(totalVis(pedestal.getStack()) >= 600, "pedestal did not charge the wand"));
@@ -175,7 +175,7 @@ public final class ThaumcraftGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void nodeJarTrigger(GameTestHelper helper) {
-        BlockPos center = new BlockPos(3, 2, 3);
+        BlockPos center = new BlockPos(3, 3, 3);
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
                 for (int y = -1; y <= 1; y++) {

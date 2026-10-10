@@ -36,7 +36,7 @@ public final class AlchemyGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void crucibleRecipeOutput(GameTestHelper helper) {
-        BlockPos crucibleOffset = new BlockPos(2, 1, 2);
+        BlockPos crucibleOffset = new BlockPos(2, 2, 2);
         helper.setBlock(crucibleOffset.below(), Blocks.LAVA);
         helper.setBlock(crucibleOffset, ModBlocks.CRUCIBLE.get());
         CrucibleBlockEntity crucible = helper.<CrucibleBlockEntity>getBlockEntity(crucibleOffset);
@@ -55,7 +55,7 @@ public final class AlchemyGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void cauldronToCrucible(GameTestHelper helper) {
-        BlockPos offset = new BlockPos(2, 1, 2);
+        BlockPos offset = new BlockPos(2, 2, 2);
         helper.setBlock(offset, Blocks.CAULDRON);
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         ItemStack wand = Wands.create(WandRegistry.CAP_GOLD, WandRegistry.ROD_GREATWOOD, false);

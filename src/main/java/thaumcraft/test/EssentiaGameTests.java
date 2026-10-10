@@ -25,12 +25,12 @@ public final class EssentiaGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void essentiaMovesThroughTubes(GameTestHelper helper) {
-        BlockPos source = new BlockPos(1, 1, 1);
-        BlockPos target = new BlockPos(4, 1, 1);
+        BlockPos source = new BlockPos(1, 2, 1);
+        BlockPos target = new BlockPos(4, 2, 1);
         helper.setBlock(source, ModBlocks.WARDED_JAR.get());
         helper.setBlock(target, ModBlocks.WARDED_JAR.get());
         for (int x = 1; x <= 4; x++) {
-            helper.setBlock(new BlockPos(x, 2, 1), ModBlocks.ESSENTIA_TUBE.get());
+            helper.setBlock(new BlockPos(x, 3, 1), ModBlocks.ESSENTIA_TUBE.get());
         }
         JarBlockEntity sourceJar = helper.<JarBlockEntity>getBlockEntity(source);
         JarBlockEntity targetJar = helper.<JarBlockEntity>getBlockEntity(target);
@@ -44,13 +44,13 @@ public final class EssentiaGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void voidJarVoidsOverflow(GameTestHelper helper) {
-        BlockPos position = new BlockPos(1, 1, 1);
+        BlockPos position = new BlockPos(1, 2, 1);
         helper.setBlock(position, ModBlocks.VOID_JAR.get());
         JarBlockEntity voidJar = helper.<JarBlockEntity>getBlockEntity(position);
         helper.assertValueEqual(voidJar.addToContainer(Aspect.FIRE, 60), 0, "first add remainder");
         helper.assertValueEqual(voidJar.addToContainer(Aspect.FIRE, 20), 0, "overflow remainder");
         helper.assertValueEqual(voidJar.getAmount(), 64, "void jar amount");
-        BlockPos plainPosition = new BlockPos(3, 1, 1);
+        BlockPos plainPosition = new BlockPos(3, 2, 1);
         helper.setBlock(plainPosition, ModBlocks.WARDED_JAR.get());
         JarBlockEntity plainJar = helper.<JarBlockEntity>getBlockEntity(plainPosition);
         plainJar.addToContainer(Aspect.FIRE, 60);

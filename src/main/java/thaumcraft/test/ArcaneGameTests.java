@@ -52,7 +52,7 @@ public final class ArcaneGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void workbenchConsumesVis(GameTestHelper helper) {
-        BlockPos tablePos = new BlockPos(1, 1, 1);
+        BlockPos tablePos = new BlockPos(1, 2, 1);
         helper.setBlock(tablePos, ModBlocks.ARCANE_WORKTABLE.get());
         ArcaneWorkbenchBlockEntity workbench = helper.<ArcaneWorkbenchBlockEntity>getBlockEntity(tablePos);
         ServerPlayer player = mockServerPlayer(helper);
@@ -102,7 +102,7 @@ public final class ArcaneGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void tableWandBecomesWorktable(GameTestHelper helper) {
-        BlockPos tablePos = new BlockPos(1, 1, 1);
+        BlockPos tablePos = new BlockPos(1, 2, 1);
         helper.setBlock(tablePos, ModBlocks.TABLE.get());
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         ItemStack wand = Wands.create(WandRegistry.CAP_IRON, WandRegistry.ROD_GREATWOOD, false);

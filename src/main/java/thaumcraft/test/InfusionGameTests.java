@@ -41,12 +41,12 @@ import thaumcraft.research.ResearchManager;
 @PrefixGameTestTemplate(false)
 public final class InfusionGameTests {
     private static final BlockPos[] RING = {
-        new BlockPos(1, 1, 3), new BlockPos(5, 1, 3), new BlockPos(3, 1, 1), new BlockPos(3, 1, 5),
-        new BlockPos(1, 1, 1), new BlockPos(5, 1, 5), new BlockPos(1, 1, 5), new BlockPos(5, 1, 1)
+        new BlockPos(1, 2, 3), new BlockPos(5, 2, 3), new BlockPos(3, 2, 1), new BlockPos(3, 2, 5),
+        new BlockPos(1, 2, 1), new BlockPos(5, 2, 5), new BlockPos(1, 2, 5), new BlockPos(5, 2, 1)
     };
     private static final BlockPos[] JARS = {
-        new BlockPos(0, 4, 0), new BlockPos(6, 4, 0), new BlockPos(0, 4, 6), new BlockPos(6, 4, 6),
-        new BlockPos(0, 5, 3), new BlockPos(6, 5, 3)
+        new BlockPos(0, 5, 0), new BlockPos(6, 5, 0), new BlockPos(0, 5, 6), new BlockPos(6, 5, 6),
+        new BlockPos(0, 6, 3), new BlockPos(6, 6, 3)
     };
 
     private InfusionGameTests() {
@@ -60,33 +60,33 @@ public final class InfusionGameTests {
     }
 
     private static void buildFrame(GameTestHelper helper) {
-        helper.setBlock(new BlockPos(3, 1, 3), ModBlocks.ARCANE_PEDESTAL.get());
-        helper.setBlock(new BlockPos(3, 3, 3), ModBlocks.RUNIC_MATRIX.get());
+        helper.setBlock(new BlockPos(3, 2, 3), ModBlocks.ARCANE_PEDESTAL.get());
+        helper.setBlock(new BlockPos(3, 4, 3), ModBlocks.RUNIC_MATRIX.get());
         for (int x = 2; x <= 4; x += 2) {
             for (int z = 2; z <= 4; z += 2) {
-                helper.setBlock(new BlockPos(x, 1, z), ModBlocks.ARCANE_STONE_BRICKS.get());
-                helper.setBlock(new BlockPos(x, 2, z), ModBlocks.ARCANE_STONE.get());
+                helper.setBlock(new BlockPos(x, 2, z), ModBlocks.ARCANE_STONE_BRICKS.get());
+                helper.setBlock(new BlockPos(x, 3, z), ModBlocks.ARCANE_STONE.get());
             }
         }
     }
 
     private static void form(GameTestHelper helper) {
-        BlockPos origin = helper.absolutePos(new BlockPos(2, 1, 2));
+        BlockPos origin = helper.absolutePos(new BlockPos(2, 2, 2));
         InfusionTriggers.replace(helper.getLevel(), origin);
     }
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void altarForms(GameTestHelper helper) {
         buildFrame(helper);
-        BlockPos origin = helper.absolutePos(new BlockPos(2, 1, 2));
+        BlockPos origin = helper.absolutePos(new BlockPos(2, 2, 2));
         helper.assertTrue(InfusionTriggers.fits(helper.getLevel(), origin), "blueprint does not fit");
         form(helper);
-        InfusionMatrixBlockEntity matrix = helper.<InfusionMatrixBlockEntity>getBlockEntity(new BlockPos(3, 3, 3));
+        InfusionMatrixBlockEntity matrix = helper.<InfusionMatrixBlockEntity>getBlockEntity(new BlockPos(3, 4, 3));
         helper.assertTrue(matrix.isActive(), "matrix not active");
         helper.assertTrue(matrix.validLocation(), "structure invalid");
-        helper.assertTrue(helper.getBlockState(new BlockPos(2, 2, 2)).is(ModBlocks.INFUSION_PILLAR_TOP.get()), "no pillar top");
-        helper.assertTrue(helper.getBlockState(new BlockPos(4, 1, 4)).is(ModBlocks.INFUSION_PILLAR.get()), "no pillar");
-        helper.assertValueEqual(helper.<InfusionPillarBlockEntity>getBlockEntity(new BlockPos(4, 1, 4)).getOrientation(), 5, "orientation");
+        helper.assertTrue(helper.getBlockState(new BlockPos(2, 3, 2)).is(ModBlocks.INFUSION_PILLAR_TOP.get()), "no pillar top");
+        helper.assertTrue(helper.getBlockState(new BlockPos(4, 2, 4)).is(ModBlocks.INFUSION_PILLAR.get()), "no pillar");
+        helper.assertValueEqual(helper.<InfusionPillarBlockEntity>getBlockEntity(new BlockPos(4, 2, 4)).getOrientation(), 5, "orientation");
         helper.succeed();
     }
 
@@ -94,7 +94,7 @@ public final class InfusionGameTests {
     public static void stabilitySymmetry(GameTestHelper helper) {
         buildFrame(helper);
         form(helper);
-        InfusionMatrixBlockEntity matrix = helper.<InfusionMatrixBlockEntity>getBlockEntity(new BlockPos(3, 3, 3));
+        InfusionMatrixBlockEntity matrix = helper.<InfusionMatrixBlockEntity>getBlockEntity(new BlockPos(3, 4, 3));
         matrix.recalculateSurroundings();
         helper.assertValueEqual(matrix.getSymmetry(), 0, "empty symmetry");
         helper.setBlock(RING[0], ModBlocks.ARCANE_PEDESTAL.get());
@@ -107,7 +107,7 @@ public final class InfusionGameTests {
         helper.assertValueEqual(matrix.getSymmetry(), 0, "mirrored pedestal symmetry");
         Block candle = ModBlocks.CANDLES.values().iterator().next().get();
         for (int index = 0; index < 20; index++) {
-            helper.setBlock(new BlockPos(0, 1 + index / 7, index % 7), candle);
+            helper.setBlock(new BlockPos(0, 2 + index / 7, index % 7), candle);
         }
         matrix.recalculateSurroundings();
         helper.assertValueEqual(matrix.getSymmetry(), 2, "candle symmetry");
@@ -138,7 +138,7 @@ public final class InfusionGameTests {
         buildFrame(helper);
         form(helper);
         ItemStack central = chosen.central().displayStacks().get(0).copyWithCount(1);
-        helper.<PedestalBlockEntity>getBlockEntity(new BlockPos(3, 1, 3)).setStack(central);
+        helper.<PedestalBlockEntity>getBlockEntity(new BlockPos(3, 2, 3)).setStack(central);
         for (int index = 0; index < chosen.components().size(); index++) {
             helper.setBlock(RING[index], ModBlocks.ARCANE_PEDESTAL.get());
             helper.<PedestalBlockEntity>getBlockEntity(RING[index]).setStack(chosen.components().get(index).displayStacks().get(0).copyWithCount(1));
@@ -147,7 +147,7 @@ public final class InfusionGameTests {
     }
 
     private static InfusionMatrixBlockEntity start(GameTestHelper helper, ServerPlayer player) {
-        InfusionMatrixBlockEntity matrix = helper.<InfusionMatrixBlockEntity>getBlockEntity(new BlockPos(3, 3, 3));
+        InfusionMatrixBlockEntity matrix = helper.<InfusionMatrixBlockEntity>getBlockEntity(new BlockPos(3, 4, 3));
         matrix.recalculateSurroundings();
         matrix.craftingStart(player);
         helper.assertTrue(matrix.isCrafting(), "crafting did not start");
@@ -155,7 +155,7 @@ public final class InfusionGameTests {
     }
 
     private static void run(GameTestHelper helper, InfusionMatrixBlockEntity matrix, int ticks) {
-        BlockPos matrixPos = helper.absolutePos(new BlockPos(3, 3, 3));
+        BlockPos matrixPos = helper.absolutePos(new BlockPos(3, 4, 3));
         for (int tick = 0; tick < ticks && (tick == 0 || matrix.isCrafting()); tick++) {
             InfusionMatrixBlockEntity.tick(helper.getLevel(), matrixPos, matrix.getBlockState(), matrix);
         }
@@ -168,7 +168,7 @@ public final class InfusionGameTests {
         ItemStack central = chosen.central().displayStacks().get(0);
         InfusionMatrixBlockEntity matrix = start(helper, player);
         run(helper, matrix, 600);
-        PedestalBlockEntity center = helper.<PedestalBlockEntity>getBlockEntity(new BlockPos(3, 1, 3));
+        PedestalBlockEntity center = helper.<PedestalBlockEntity>getBlockEntity(new BlockPos(3, 2, 3));
         helper.assertTrue(center.getStack().is(central.getItem()), "central item changed without essentia");
         helper.succeed();
     }
@@ -194,7 +194,7 @@ public final class InfusionGameTests {
         }
         run(helper, matrix, 4000);
         helper.assertFalse(matrix.isCrafting(), "crafting did not finish");
-        PedestalBlockEntity center = helper.<PedestalBlockEntity>getBlockEntity(new BlockPos(3, 1, 3));
+        PedestalBlockEntity center = helper.<PedestalBlockEntity>getBlockEntity(new BlockPos(3, 2, 3));
         helper.assertTrue(chosen.result().matches(center.getStack()), "central item is not the result: " + center.getStack());
         for (int index = 0; index < aspects.size(); index++) {
             JarBlockEntity jar = helper.<JarBlockEntity>getBlockEntity(JARS[index]);

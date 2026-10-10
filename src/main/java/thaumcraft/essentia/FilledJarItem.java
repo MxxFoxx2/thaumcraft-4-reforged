@@ -1,14 +1,13 @@
 package thaumcraft.essentia;
 
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.block.Block;
 import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
@@ -36,13 +35,13 @@ public class FilledJarItem extends BlockItem implements AspectProvidingItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
-        AspectTooltips.append(stack, builder, " x ", true);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        AspectTooltips.append(stack, tooltip::add, " x ", true);
         Aspect filter = EssentiaKeys.FILTER.get(stack);
         if (filter != null) {
             Component name = AspectTooltips.isDiscovered(filter) ? Component.literal(filter.getName()) : Component.translatable("tc.aspect.unknown");
-            builder.accept(name.copy().withStyle(ChatFormatting.DARK_PURPLE));
+            tooltip.add(name.copy().withStyle(ChatFormatting.DARK_PURPLE));
         }
-        super.appendHoverText(stack, context, display, builder, flag);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 }

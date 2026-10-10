@@ -5,7 +5,6 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
@@ -17,22 +16,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.CookingFuel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import thaumcraft.compat.ValueInput;
 import thaumcraft.compat.ValueOutput;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.loot.NeoForgeLootContextParams;
 import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
@@ -127,24 +117,11 @@ public class AlchemicalFurnaceBlockEntity extends TcBlockEntity implements World
     }
 
     public static boolean isFuel(ItemStack stack) {
-        return stack.has(DataComponents.COOKING_FUEL);
+        return stack.getBurnTime(null) > 0;
     }
 
     private int getBurnDuration(ServerLevel serverLevel, ItemStack fuel) {
-        CookingFuel fuelComponent = fuel.get(DataComponents.COOKING_FUEL);
-        if (fuelComponent == null) {
-            return 0;
-        }
-        LootContext context = new LootContext.Builder(
-            new LootParams.Builder(serverLevel)
-                .withParameter(LootContextParams.BLOCK_STATE, getBlockState())
-                .withParameter(LootContextParams.BLOCK_ENTITY, this)
-                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(worldPosition))
-                .withParameter(LootContextParams.CONTAINER, this)
-                .withOptionalParameter(NeoForgeLootContextParams.QUERIED_STACK, fuel.isEmpty() ? null : fuel)
-                .create(LootContextParamSets.CONTAINER_PROCESS)
-        ).create(Optional.empty());
-        return ResolvableInt.getFromItem(fuel, DataComponents.COOKING_FUEL, CookingFuel::burnTime, context, 0);
+        return fuel.getBurnTime(null);
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, AlchemicalFurnaceBlockEntity furnace) {
@@ -170,10 +147,10 @@ public class AlchemicalFurnaceBlockEntity extends TcBlockEntity implements World
             if (furnace.burnTime > 0) {
                 dirty = true;
                 furnace.speedBoost = fuel.is(ModItems.ALUMENTUM.get());
-                ItemStackTemplate remainder = fuel.getCraftingRemainder();
+                ItemStack remainder = fuel.getCraftingRemainingItem();
                 fuel.shrink(1);
-                if (fuel.isEmpty() && remainder != null) {
-                    furnace.items.set(FUEL_SLOT, remainder.create());
+                if (fuel.isEmpty() && !remainder.isEmpty()) {
+                    furnace.items.set(FUEL_SLOT, remainder);
                 }
             }
         }
@@ -387,7 +364,7 @@ public class AlchemicalFurnaceBlockEntity extends TcBlockEntity implements World
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         items.clear();
-        ContainerHelper.loadAllItems(input, items);
+        ContainerHelper.loadAllItems(input.tag(), items, input.lookup());
         burnTime = input.getIntOr("BurnTime", 0);
         currentItemBurnTime = input.getIntOr("BurnTotal", 0);
         cookTime = input.getIntOr("CookTime", 0);
@@ -398,7 +375,7 @@ public class AlchemicalFurnaceBlockEntity extends TcBlockEntity implements World
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, items);
+        ContainerHelper.saveAllItems(output.tag(), items, output.lookup());
         output.putInt("BurnTime", burnTime);
         output.putInt("BurnTotal", currentItemBurnTime);
         output.putInt("CookTime", cookTime);

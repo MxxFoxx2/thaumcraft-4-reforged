@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
@@ -48,7 +47,7 @@ public class EnergizedNodeBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean movedByPiston) {
         BlockPos below = pos.below();
         if (level.getBlockState(below).getBlock() instanceof NodeStabilizerBlock && !level.hasNeighborSignal(below)) {
             if (!(level.getBlockEntity(pos.above()) instanceof NodeTransducerBlockEntity)) {
@@ -57,7 +56,7 @@ public class EnergizedNodeBlock extends Block implements EntityBlock {
         } else {
             explodify(level, pos);
         }
-        super.neighborChanged(state, level, pos, block, orientation, movedByPiston);
+        super.neighborChanged(state, level, pos, block, fromPos, movedByPiston);
     }
 
     public static void explodify(Level level, BlockPos pos) {

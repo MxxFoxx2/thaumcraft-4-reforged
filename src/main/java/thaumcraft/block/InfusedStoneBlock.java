@@ -1,5 +1,6 @@
 package thaumcraft.block;
 
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.RandomSource;
@@ -27,7 +28,7 @@ public class InfusedStoneBlock extends DropExperienceBlock {
             RandomSource random = level.getRandom();
             for (int index = 0; index < 3; index++) {
                 level.addParticle(
-                    new DustParticleOptions(color, 1.0F),
+                    new DustParticleOptions(Vec3.fromRGB24(color).toVector3f(), 1.0F),
                     pos.getX() + random.nextFloat(),
                     pos.getY() + random.nextFloat(),
                     pos.getZ() + random.nextFloat(),

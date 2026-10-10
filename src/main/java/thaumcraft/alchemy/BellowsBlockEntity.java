@@ -5,14 +5,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.TagValueInput;
 import thaumcraft.compat.ValueInput;
 import thaumcraft.compat.ValueOutput;
 import thaumcraft.blockentity.TcBlockEntity;
@@ -107,11 +105,10 @@ public class BellowsBlockEntity extends TcBlockEntity {
         BlockPos target = pos.relative(state.getValue(BellowsBlock.FACING));
         if (level.getBlockEntity(target) instanceof AbstractFurnaceBlockEntity furnace) {
             CompoundTag tag = furnace.saveCustomOnly(level.registryAccess());
-            int spent = tag.getIntOr("cooking_time_spent", 0);
+            int spent = tag.getInt("CookTime");
             if (spent > 0 && spent < 199) {
-                tag.putInt("cooking_time_spent", spent + 1);
-                ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag);
-                furnace.loadCustomOnly(input);
+                tag.putInt("CookTime", spent + 1);
+                furnace.loadCustomOnly(tag, level.registryAccess());
             }
         }
     }

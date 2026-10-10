@@ -1,5 +1,6 @@
 package thaumcraft.alchemy;
 
+import thaumcraft.blockentity.TcBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -9,6 +10,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -68,7 +70,7 @@ public class AlembicBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof AlembicBlockEntity alembic) {
             float ratio = (float) alembic.getAmount() / alembic.getMaxAmount();
             return (int) Math.floor(ratio * 14.0F) + (alembic.getAmount() > 0 ? 1 : 0);
@@ -77,21 +79,21 @@ public class AlembicBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useItemOn(
+    protected ItemInteractionResult useItemOn(
         ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult
     ) {
         if (Wands.isWand(stack)) {
-            return InteractionResult.PASS;
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
         if (!(level.getBlockEntity(pos) instanceof AlembicBlockEntity alembic)) {
-            return InteractionResult.PASS;
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
         RandomSource random = level.getRandom();
         if (stack.is(ModItems.JAR_LABEL.get()) && alembic.getAspectFilter() == null) {
             AspectList labelAspects = AspectKeys.ASPECTS.get(stack);
             Aspect labelAspect = labelAspects == null || labelAspects.isEmpty() ? null : labelAspects.getAspects().get(0);
             if (alembic.getAmount() == 0 && labelAspect == null) {
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
             if (!level.isClientSide()) {
                 if (alembic.getAmount() == 0) {
@@ -104,7 +106,7 @@ public class AlembicBlock extends Block implements EntityBlock {
                 alembic.sync();
                 level.playSound(null, pos, ModSounds.PAGE.get(), SoundSource.BLOCKS, 1.0F, 0.9F);
             }
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
         boolean plainJar = stack.is(ModBlocks.WARDED_JAR.get().asItem()) || stack.is(ModBlocks.VOID_JAR.get().asItem());
         if (alembic.getAmount() > 0 && alembic.getAspect() != null && (stack.getItem() instanceof FilledJarItem || plainJar)) {
@@ -112,9 +114,9 @@ public class AlembicBlock extends Block implements EntityBlock {
                 alembic.sync();
                 level.playSound(null, pos, SoundEvents.GENERIC_SWIM, SoundSource.BLOCKS, 0.5F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.3F);
             }
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
-        return InteractionResult.TRY_WITH_EMPTY_HAND;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     private boolean fillJar(AlembicBlockEntity alembic, ItemStack stack, Player player, InteractionHand hand) {
@@ -222,5 +224,11 @@ public class AlembicBlock extends Block implements EntityBlock {
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new AlembicBlockEntity(pos, state);
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        TcBlockEntity.beforeRemove(state, level, pos, newState);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

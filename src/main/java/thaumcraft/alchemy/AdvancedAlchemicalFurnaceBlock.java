@@ -8,7 +8,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -101,12 +100,7 @@ public class AdvancedAlchemicalFurnaceBlock extends Block implements EntityBlock
     }
 
     @Override
-    protected VoxelShape getEntityInsideCollisionShape(BlockState state, BlockGetter level, BlockPos pos, Entity entity) {
-        return Shapes.block();
-    }
-
-    @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (level.isClientSide() || state.getValue(PART) != Part.CORE || !(entity instanceof ItemEntity item)) {
             return;
         }
@@ -129,7 +123,11 @@ public class AdvancedAlchemicalFurnaceBlock extends Block implements EntityBlock
     }
 
     @Override
-    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+    protected void onRemove(BlockState state, Level worldLevel, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (state.is(newState.getBlock()) || !(worldLevel instanceof ServerLevel level)) {
+            super.onRemove(state, worldLevel, pos, newState, movedByPiston);
+            return;
+        }
         if (state.getValue(PART) == Part.CORE) {
             revertAround(level, pos, false);
         } else {
@@ -140,13 +138,14 @@ public class AdvancedAlchemicalFurnaceBlock extends Block implements EntityBlock
                         BlockState candidateState = level.getBlockState(candidate);
                         if (candidateState.is(this) && candidateState.getValue(PART) == Part.CORE) {
                             revertAround(level, candidate, true);
+                            super.onRemove(state, level, pos, newState, movedByPiston);
                             return;
                         }
                     }
                 }
             }
         }
-        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     private void revertAround(ServerLevel level, BlockPos core, boolean includeCore) {
@@ -175,7 +174,7 @@ public class AdvancedAlchemicalFurnaceBlock extends Block implements EntityBlock
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof AdvancedAlchemicalFurnaceNozzleBlockEntity nozzle && nozzle.getFurnace() != null) {
             AdvancedAlchemicalFurnaceBlockEntity furnace = nozzle.getFurnace();
             float ratio = (float) furnace.getVis() / furnace.getMaxVis();

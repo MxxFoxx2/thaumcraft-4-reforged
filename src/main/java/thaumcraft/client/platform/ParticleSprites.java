@@ -1,12 +1,9 @@
 package thaumcraft.client.platform;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,15 +14,11 @@ public final class ParticleSprites {
     }
 
     public static @Nullable TextureAtlasSprite block(BlockState state) {
-        Material.Baked material = Minecraft.getInstance().getModelManager().getBlockStateModelSet().getParticleMaterial(state);
-        return material == null ? null : material.sprite();
+        return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(state);
     }
 
     public static @Nullable TextureAtlasSprite item(Level level, ItemStack stack, RandomSource random) {
-        ItemStackRenderState renderState = new ItemStackRenderState();
-        Minecraft.getInstance().getItemModelResolver().updateForTopItem(renderState, stack, ItemDisplayContext.GROUND, level, null, 0);
-        Material.Baked material = renderState.pickParticleMaterial(random);
-        return material == null ? null : material.sprite();
+        return Minecraft.getInstance().getItemRenderer().getModel(stack, level, null, 0).getParticleIcon();
     }
 
     public static float u(TextureAtlasSprite sprite, float fraction) {

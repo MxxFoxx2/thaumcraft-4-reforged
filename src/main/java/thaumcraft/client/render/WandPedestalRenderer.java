@@ -1,16 +1,12 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -22,11 +18,11 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import thaumcraft.blockentity.WandPedestalBlockEntity;
 
-public class WandPedestalRenderer implements BlockEntityRenderer<WandPedestalBlockEntity, WandPedestalRenderer.State> {
-    private final ItemModelResolver itemModelResolver;
-
-    public static class State extends BlockEntityRenderState {
-        final ItemStackRenderState item = new ItemStackRenderState();
+public class WandPedestalRenderer implements BlockEntityRenderer<WandPedestalBlockEntity> {
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
+        final ItemSlot item = new ItemSlot();
         float ticks;
         float bob;
         boolean draining;
@@ -36,17 +32,19 @@ public class WandPedestalRenderer implements BlockEntityRenderer<WandPedestalBlo
     }
 
     public WandPedestalRenderer(BlockEntityRendererProvider.Context context) {
-        this.itemModelResolver = context.itemModelResolver();
     }
 
     @Override
-    public State createRenderState() {
-        return new State();
+    public void render(WandPedestalBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
     }
 
-    @Override
-    public void extractRenderState(WandPedestalBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    private void extract(WandPedestalBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition) {
         ItemStack stack = entity.getStack();
         state.item.clear();
         state.draining = false;
@@ -57,26 +55,25 @@ public class WandPedestalRenderer implements BlockEntityRenderer<WandPedestalBlo
         state.ticks = (viewer == null ? 0 : viewer.tickCount) + partialTicks;
         state.bob = Mth.sin(state.ticks % 32767.0F / 16.0F) * 0.05F;
         state.nanoTime = System.nanoTime();
-        itemModelResolver.updateForTopItem(state.item, stack.copyWithCount(1), ItemDisplayContext.GROUND, entity.getLevel(), null, (int) entity.getBlockPos().asLong());
+        state.item.set(stack.copyWithCount(1), ItemDisplayContext.GROUND, entity.getLevel(), (int) entity.getBlockPos().asLong());
         state.draining = entity.isDraining();
         state.drainPos = entity.getDrainPos();
         state.drainColor = entity.getDrainColor();
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
         if (state.item.isEmpty()) {
             return;
         }
         poseStack.pushPose();
         poseStack.translate(0.5F, 1.15F + state.bob, 0.5F);
         poseStack.mulPose(Axis.YP.rotationDegrees(state.ticks % 360.0F));
-        state.item.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+        state.item.submit(poseStack, buffers, state.lightCoords, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
         if (state.draining) {
             BlockPos pos = state.blockPos;
             WorldRendering.submitFloatyLine(
-                collector,
+                buffers,
                 poseStack,
                 pos,
                 pos.getX() + 0.5,

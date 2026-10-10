@@ -1,9 +1,9 @@
 package thaumcraft.client.research;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
-import net.minecraft.client.gui.components.toasts.ToastManager;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.client.platform.BrowserDraw;
@@ -17,7 +17,6 @@ public class ResearchToast implements Toast {
     private final ResearchItem research;
     private final ItemStack icon;
     private final Component name;
-    private Visibility visibility = Visibility.SHOW;
 
     public ResearchToast(ResearchItem research) {
         this.research = research;
@@ -26,34 +25,26 @@ public class ResearchToast implements Toast {
     }
 
     @Override
-    public Visibility getWantedVisibility() {
-        return visibility;
-    }
-
-    @Override
-    public void update(ToastManager manager, long fullyVisibleForMs) {
-        visibility = fullyVisibleForMs >= DISPLAY_TIME ? Visibility.HIDE : Visibility.SHOW;
-    }
-
-    @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, Font font, long fullyVisibleForMs) {
+    public Visibility render(GuiGraphics graphics, ToastComponent manager, long fullyVisibleForMs) {
+        Font font = manager.getMinecraft().font;
         BrowserDraw.toastBackground(graphics, width(), height());
-        graphics.text(font, TITLE, 30, 7, 0xFFFFFF00, false);
+        graphics.drawString(font, TITLE, 30, 7, 0xFFFFFF00, false);
         int nameWidth = font.width(name);
         if (nameWidth <= MAX_NAME_WIDTH) {
-            graphics.text(font, name, 30, 18, 0xFFFFFFFF, false);
+            graphics.drawString(font, name, 30, 18, 0xFFFFFFFF, false);
         } else {
             float scale = MAX_NAME_WIDTH / nameWidth;
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(30.0F, 16.0F + 2.0F / scale);
-            graphics.pose().scale(scale, scale);
-            graphics.text(font, name, 0, 0, 0xFFFFFFFF, false);
-            graphics.pose().popMatrix();
+            graphics.pose().pushPose();
+            graphics.pose().translate(30.0F, 16.0F + 2.0F / scale, 0.0F);
+            graphics.pose().scale(scale, scale, 1.0F);
+            graphics.drawString(font, name, 0, 0, 0xFFFFFFFF, false);
+            graphics.pose().popPose();
         }
         if (!icon.isEmpty()) {
-            graphics.fakeItem(icon, 8, 8);
+            graphics.renderFakeItem(icon, 8, 8);
         } else if (research.iconTexture() != null) {
             BrowserDraw.full(graphics, research.iconTexture(), 8, 8, 16, 16, 0xFFFFFFFF);
         }
+        return fullyVisibleForMs >= DISPLAY_TIME ? Visibility.HIDE : Visibility.SHOW;
     }
 }

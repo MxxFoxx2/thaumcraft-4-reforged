@@ -7,10 +7,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.fx.ClientFx;
-import thaumcraft.client.platform.ModRenderPipelines;
 import thaumcraft.client.research.ResearchBrowserScreen;
 import thaumcraft.client.research.ThaumometerClient;
 import thaumcraft.client.screen.AlchemicalFurnaceScreen;
@@ -39,12 +37,5 @@ public final class ThaumcraftClient {
         event.register(ModMenus.DECONSTRUCTION_TABLE.get(), DeconstructionTableScreen::new);
         event.register(ModMenus.ALCHEMICAL_FURNACE.get(), AlchemicalFurnaceScreen::new);
         event.register(ModMenus.THAUMATORIUM.get(), ThaumatoriumScreen::new);
-    }
-
-    @SubscribeEvent
-    static void registerPipelines(RegisterRenderPipelinesEvent event) {
-        event.registerPipeline(ModRenderPipelines.ADDITIVE_PARTICLE);
-        event.registerPipeline(ModRenderPipelines.TRANSLUCENT_PARTICLE);
-        event.registerPipeline(ModRenderPipelines.GUI_ADDITIVE);
     }
 }

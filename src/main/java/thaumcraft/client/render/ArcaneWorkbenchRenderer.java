@@ -1,15 +1,13 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -19,34 +17,35 @@ import javax.annotation.Nullable;
 import thaumcraft.arcane.ArcaneWorkbenchBlockEntity;
 import thaumcraft.wand.WandItem;
 
-public class ArcaneWorkbenchRenderer implements BlockEntityRenderer<ArcaneWorkbenchBlockEntity, ArcaneWorkbenchRenderer.State> {
-    private final ItemModelResolver itemModelResolver;
-
-    public static class State extends BlockEntityRenderState {
-        final ItemStackRenderState wand = new ItemStackRenderState();
+public class ArcaneWorkbenchRenderer implements BlockEntityRenderer<ArcaneWorkbenchBlockEntity> {
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
+        final ItemSlot wand = new ItemSlot();
     }
 
     public ArcaneWorkbenchRenderer(BlockEntityRendererProvider.Context context) {
-        this.itemModelResolver = context.itemModelResolver();
     }
 
     @Override
-    public State createRenderState() {
-        return new State();
+    public void render(ArcaneWorkbenchBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
     }
 
-    @Override
-    public void extractRenderState(ArcaneWorkbenchBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    private void extract(ArcaneWorkbenchBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition) {
         state.wand.clear();
         ItemStack wand = entity.getWand();
         if (entity.getLevel() != null && wand.getItem() instanceof WandItem) {
-            itemModelResolver.updateForTopItem(state.wand, wand.copyWithCount(1), ItemDisplayContext.FIXED, entity.getLevel(), null, (int) entity.getBlockPos().asLong());
+            state.wand.set(wand.copyWithCount(1), ItemDisplayContext.FIXED, entity.getLevel(), (int) entity.getBlockPos().asLong());
         }
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
         if (state.wand.isEmpty()) {
             return;
         }
@@ -54,7 +53,7 @@ public class ArcaneWorkbenchRenderer implements BlockEntityRenderer<ArcaneWorkbe
         poseStack.translate(0.65F, 1.0625F, 0.25F);
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.mulPose(Axis.ZP.rotationDegrees(20.0F));
-        state.wand.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+        state.wand.submit(poseStack, buffers, state.lightCoords, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 

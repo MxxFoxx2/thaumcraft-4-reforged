@@ -1,16 +1,14 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
+import net.minecraft.core.BlockPos;
+import thaumcraft.client.platform.ItemGeometry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -26,31 +24,33 @@ import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.client.platform.VertexQuadSink;
 import thaumcraft.registry.ModItems;
 
-public class DeconstructionTableRenderer implements BlockEntityRenderer<DeconstructionTableBlockEntity, DeconstructionTableRenderer.State> {
+public class DeconstructionTableRenderer implements BlockEntityRenderer<DeconstructionTableBlockEntity> {
     private static final float TAG_SCALE = 0.024F;
 
-    private final ItemModelResolver itemModelResolver;
-
-    public static class State extends BlockEntityRenderState {
-        final ItemStackRenderState thaumometer = new ItemStackRenderState();
-        final ItemStackRenderState item = new ItemStackRenderState();
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
+        final ItemSlot thaumometer = new ItemSlot();
+        final ItemSlot item = new ItemSlot();
         @Nullable Aspect aspect;
         float ticks;
         float hover;
     }
 
     public DeconstructionTableRenderer(BlockEntityRendererProvider.Context context) {
-        this.itemModelResolver = context.itemModelResolver();
     }
 
     @Override
-    public State createRenderState() {
-        return new State();
+    public void render(DeconstructionTableBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
     }
 
-    @Override
-    public void extractRenderState(DeconstructionTableBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    private void extract(DeconstructionTableBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition) {
         state.thaumometer.clear();
         state.item.clear();
         state.aspect = null;
@@ -58,31 +58,30 @@ public class DeconstructionTableRenderer implements BlockEntityRenderer<Deconstr
             return;
         }
         int seed = (int) entity.getBlockPos().asLong();
-        itemModelResolver.updateForTopItem(state.thaumometer, new ItemStack(ModItems.THAUMOMETER.get()), ItemDisplayContext.FIXED, entity.getLevel(), null, seed);
+        state.thaumometer.set(new ItemStack(ModItems.THAUMOMETER.get()), ItemDisplayContext.FIXED, entity.getLevel(), seed);
         Entity viewer = Minecraft.getInstance().getCameraEntity();
         state.ticks = (viewer == null ? 0 : viewer.tickCount) + partialTicks;
         state.hover = Mth.sin(state.ticks / 14.0F) * 0.2F + 0.2F;
         ItemStack stack = entity.getItem(0);
         if (!stack.isEmpty()) {
-            itemModelResolver.updateForTopItem(state.item, stack.copyWithCount(1), ItemDisplayContext.GROUND, entity.getLevel(), null, seed + 1);
+            state.item.set(stack.copyWithCount(1), ItemDisplayContext.GROUND, entity.getLevel(), seed + 1);
         }
         state.aspect = entity.getAspect();
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
         if (!state.thaumometer.isEmpty()) {
             poseStack.pushPose();
             poseStack.translate(0.5F, 0.92F, 0.5F);
             poseStack.scale(0.8F, 0.8F, 0.8F);
-            state.thaumometer.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+            state.thaumometer.submit(poseStack, buffers, state.lightCoords, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
         if (!state.item.isEmpty()) {
             poseStack.pushPose();
             poseStack.translate(0.5F, 1.15F + Mth.sin(state.hover) * 0.1F + 0.1F, 0.5F);
             poseStack.mulPose(Axis.YP.rotationDegrees(state.ticks % 360.0F));
-            state.item.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+            state.item.submit(poseStack, buffers, state.lightCoords, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
         Aspect aspect = state.aspect;
@@ -95,7 +94,7 @@ public class DeconstructionTableRenderer implements BlockEntityRenderer<Deconstr
             ResourceLocation image = aspect.getImage();
             int color = 0xCC000000 | aspect.getColor() & 0xFFFFFF;
             int light = state.lightCoords;
-            collector.submitCustomGeometry(poseStack, TcRenderTypes.translucent(image), (pose, buffer) -> {
+            ItemGeometry.submit(buffers, poseStack, TcRenderTypes.translucent(image), (pose, buffer) -> {
                 VertexQuadSink sink = new VertexQuadSink(pose, buffer);
                 sink.vertex(-8.0F, -8.0F, 0.0F, 0.0F, 0.0F, color, light);
                 sink.vertex(-8.0F, 8.0F, 0.0F, 0.0F, 1.0F, color, light);

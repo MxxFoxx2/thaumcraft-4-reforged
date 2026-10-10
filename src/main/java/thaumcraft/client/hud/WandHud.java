@@ -2,11 +2,12 @@ package thaumcraft.client.hud;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.mojang.math.Axis;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.Thaumcraft;
@@ -24,10 +25,10 @@ public final class WandHud {
     private WandHud() {
     }
 
-    public static void render(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+    public static void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
-        if (player == null || minecraft.level == null || minecraft.gui.screen() != null) {
+        if (player == null || minecraft.level == null || minecraft.screen != null) {
             return;
         }
         ItemStack stack = player.getMainHandItem();
@@ -47,20 +48,20 @@ public final class WandHud {
         }
         int max = Wands.getMaxVis(stack);
         boolean sneaking = player.isShiftKeyDown();
-        graphics.pose().pushMatrix();
-        graphics.pose().pushMatrix();
-        graphics.pose().scale(0.5F, 0.5F);
+        graphics.pose().pushPose();
+        graphics.pose().pushPose();
+        graphics.pose().scale(0.5F, 0.5F, 1.0F);
         blit(graphics, 0, 0, 0, 0, 64, 64, 0xFFFFFFFF);
-        graphics.pose().popMatrix();
-        graphics.pose().translate(16.0F, 16.0F);
+        graphics.pose().popPose();
+        graphics.pose().translate(16.0F, 16.0F, 0.0F);
         int count = 0;
         for (Aspect aspect : Aspect.getPrimalAspects()) {
             int amount = current.get(aspect);
-            graphics.pose().pushMatrix();
-            graphics.pose().rotate((float) Math.toRadians(90.0F));
-            graphics.pose().rotate((float) Math.toRadians(-15 + count * 24));
-            graphics.pose().translate(0.0F, -32.0F);
-            graphics.pose().scale(0.5F, 0.5F);
+            graphics.pose().pushPose();
+            graphics.pose().mulPose(Axis.ZP.rotation((float) Math.toRadians(90.0F)));
+            graphics.pose().mulPose(Axis.ZP.rotation((float) Math.toRadians(-15 + count * 24)));
+            graphics.pose().translate(0.0F, -32.0F, 0.0F);
+            graphics.pose().scale(0.5F, 0.5F, 1.0F);
             int level = max <= 0 ? 0 : (int) (30.0F * amount / max);
             blit(graphics, -4, 35 - level, 104, 0, 8, level, 0xCC000000 | aspect.getColor());
             blit(graphics, -8, -3, 72, 0, 16, 42, 0xFFFFFFFF);
@@ -71,18 +72,18 @@ public final class WandHud {
                 blit(graphics, -4, -8, 120, 0, 8, 8, 0xFFFFFFFF);
             }
             if (sneaking) {
-                graphics.pose().pushMatrix();
-                graphics.pose().rotate((float) Math.toRadians(-90.0F));
-                graphics.text(minecraft.font, String.valueOf(amount / 100), -32, -4, 0xFFFFFFFF, true);
-                graphics.pose().popMatrix();
+                graphics.pose().pushPose();
+                graphics.pose().mulPose(Axis.ZP.rotation((float) Math.toRadians(-90.0F)));
+                graphics.drawString(minecraft.font, String.valueOf(amount / 100), -32, -4, 0xFFFFFFFF, true);
+                graphics.pose().popPose();
             }
-            graphics.pose().popMatrix();
+            graphics.pose().popPose();
             count++;
         }
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
     }
 
-    private static void blit(GuiGraphicsExtractor graphics, int x, int y, int u, int v, int width, int height, int argb) {
+    private static void blit(GuiGraphics graphics, int x, int y, int u, int v, int width, int height, int argb) {
         if (width <= 0 || height <= 0) {
             return;
         }

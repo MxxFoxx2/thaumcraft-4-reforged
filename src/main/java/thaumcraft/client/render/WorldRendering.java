@@ -1,12 +1,14 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.MultiBufferSource;
+import thaumcraft.client.platform.ItemGeometry;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
@@ -24,23 +26,24 @@ public final class WorldRendering {
     private WorldRendering() {
     }
 
-    public static FacingQuads.Camera camera(CameraRenderState camera, BlockPos origin) {
+    public static FacingQuads.Camera camera(Camera camera, BlockPos origin) {
         return new FacingQuads.Camera(
-            camera.yRot,
-            camera.xRot,
-            (float) (camera.pos.x - origin.getX()),
-            (float) (camera.pos.y - origin.getY()),
-            (float) (camera.pos.z - origin.getZ())
+            camera.getYRot(),
+            camera.getXRot(),
+            (float) (camera.getPosition().x - origin.getX()),
+            (float) (camera.getPosition().y - origin.getY()),
+            (float) (camera.getPosition().z - origin.getZ())
         );
     }
 
     public static int ambientLight(@Nullable Level level, BlockPos pos) {
         if (level == null) {
-            return LightCoordsUtil.FULL_BRIGHT;
+            return LightTexture.FULL_BRIGHT;
         }
-        int light = LightCoordsUtil.getLightCoords(level, pos);
+        int light = LevelRenderer.getLightColor(level, pos);
         for (Direction direction : Direction.values()) {
-            light = LightCoordsUtil.max(light, LightCoordsUtil.getLightCoords(level, pos.relative(direction)));
+            int other = LevelRenderer.getLightColor(level, pos.relative(direction));
+            light = LightTexture.pack(Math.max(LightTexture.block(light), LightTexture.block(other)), Math.max(LightTexture.sky(light), LightTexture.sky(other)));
         }
         return light;
     }
@@ -50,7 +53,7 @@ public final class WorldRendering {
     }
 
     public static void submitFloatyLine(
-        SubmitNodeCollector collector,
+        MultiBufferSource buffers,
         PoseStack poseStack,
         BlockPos origin,
         double startX,
@@ -79,7 +82,8 @@ public final class WorldRendering {
             distance,
             FloatyLineGeometry.DEFAULT_WIDTH
         );
-        collector.submitCustomGeometry(
+        ItemGeometry.submit(
+            buffers,
             poseStack,
             TcRenderTypes.additive(WISPY),
             (pose, buffer) -> FloatyLineGeometry.render(params, new VertexQuadSink(pose, buffer))

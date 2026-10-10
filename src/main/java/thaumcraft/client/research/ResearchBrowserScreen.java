@@ -5,20 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import net.minecraft.client.Minecraft;
+import org.lwjgl.glfw.GLFW;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -43,7 +41,7 @@ import thaumcraft.research.ResearchNotes;
 public class ResearchBrowserScreen extends Screen {
     private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/gui_research.png");
     private static final ResourceLocation NODES = Thaumcraft.id("textures/misc/nodes.png");
-    private static final Style GALACTIC = Style.EMPTY.withFont(new FontDescription.Resource(ResourceLocation.withDefaultNamespace("alt")));
+    private static final Style GALACTIC = Style.EMPTY.withFont(ResourceLocation.withDefaultNamespace("alt"));
     private static final int PANE_WIDTH = 256;
     private static final int PANE_HEIGHT = 230;
     private static final int VIEW_WIDTH = 224;
@@ -82,7 +80,7 @@ public class ResearchBrowserScreen extends Screen {
     public static void open() {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player != null) {
-            minecraft.gui.setScreen(new ResearchBrowserScreen());
+            minecraft.setScreen(new ResearchBrowserScreen());
         }
     }
 
@@ -122,16 +120,16 @@ public class ResearchBrowserScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent event) {
-        if (minecraft.options.keyInventory.matches(event)) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (minecraft.options.keyInventory.matches(keyCode, scanCode)) {
             HIGHLIGHTED.clear();
             onClose();
             return true;
         }
-        if (event.isEscape()) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             HIGHLIGHTED.clear();
         }
-        return super.keyPressed(event);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -209,29 +207,29 @@ public class ResearchBrowserScreen extends Screen {
         return font.split(component, Math.max(1, wrapWidth)).size();
     }
 
-    private void scaledText(GuiGraphicsExtractor graphics, Component text, int x, int y, int color, boolean shadow) {
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x, y);
-        graphics.pose().scale(0.5F, 0.5F);
-        graphics.text(minecraft.font, text, 0, 0, color, shadow);
-        graphics.pose().popMatrix();
+    private void scaledText(GuiGraphics graphics, Component text, int x, int y, int color, boolean shadow) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(0.5F, 0.5F, 1.0F);
+        graphics.drawString(minecraft.font, text, 0, 0, color, shadow);
+        graphics.pose().popPose();
     }
 
-    private void scaledWrapped(GuiGraphicsExtractor graphics, Component text, int x, int y, int wrapWidth, int color) {
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x, y);
-        graphics.pose().scale(0.5F, 0.5F);
+    private void scaledWrapped(GuiGraphics graphics, Component text, int x, int y, int wrapWidth, int color) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(0.5F, 0.5F, 1.0F);
         int lineY = 0;
         for (var line : minecraft.font.split(text, Math.max(1, wrapWidth))) {
-            graphics.text(minecraft.font, line, 0, lineY, color, true);
+            graphics.drawString(minecraft.font, line, 0, lineY, color, true);
             lineY += minecraft.font.lineHeight;
         }
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
         if (minecraft.player == null || ResearchCategories.get(selectedCategory) == null) {
             return;
         }
@@ -239,7 +237,7 @@ public class ResearchBrowserScreen extends Screen {
         drawOverlays(graphics, mouseX, mouseY);
     }
 
-    private void drawMap(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+    private void drawMap(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         long time = Util.getNanos() / 50000000L;
         int offsetX = Mth.floor(prevMapX + (mapX - prevMapX) * partialTick);
         int offsetY = Mth.floor(prevMapY + (mapY - prevMapY) * partialTick);
@@ -365,7 +363,7 @@ public class ResearchBrowserScreen extends Screen {
             icons.add(() -> {
                 ItemStack stack = item.iconItem() == null ? ItemStack.EMPTY : item.iconItem().create();
                 if (!stack.isEmpty()) {
-                    graphics.item(stack, iconX, iconY);
+                    graphics.renderItem(stack, iconX, iconY);
                 } else if (item.iconTexture() != null) {
                     BrowserDraw.full(graphics, item.iconTexture(), iconX, iconY, 16, 16, iconTint);
                 }
@@ -378,16 +376,16 @@ public class ResearchBrowserScreen extends Screen {
                 currentHighlight = item;
             }
         }
-        graphics.nextStratum();
+        graphics.flush();
         for (Runnable icon : icons) {
             icon.run();
         }
-        graphics.nextStratum();
+        graphics.flush();
         for (int[] position : darkened) {
             graphics.fill(position[0], position[1], position[0] + 16, position[1] + 16, 0xE6000000);
         }
         graphics.disableScissor();
-        graphics.nextStratum();
+        graphics.flush();
 
         List<ResearchCategory> tabs = visibleTabs();
         for (int index = 0; index < tabs.size(); index++) {
@@ -422,8 +420,8 @@ public class ResearchBrowserScreen extends Screen {
         GuiBlit.blit(graphics, TEXTURE, paneX, paneY, PANE_WIDTH, PANE_HEIGHT, 0, 0, PANE_WIDTH, PANE_HEIGHT, 256, 256, 0xFFFFFFFF);
     }
 
-    private void drawOverlays(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        graphics.nextStratum();
+    private void drawOverlays(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.flush();
         if (popupTime > System.currentTimeMillis()) {
             int centerX = left() + 128;
             int centerY = top() + 128;
@@ -432,7 +430,7 @@ public class ResearchBrowserScreen extends Screen {
             graphics.fill(centerX - 78, centerY - half - 3, centerX + 78, centerY + half + 3, SHADE);
             int lineY = centerY - half;
             for (var line : minecraft.font.split(message, 150)) {
-                graphics.text(minecraft.font, line, centerX - 75, lineY, -7302913, false);
+                graphics.drawString(minecraft.font, line, centerX - 75, lineY, -7302913, false);
                 lineY += minecraft.font.lineHeight;
             }
         }
@@ -443,7 +441,7 @@ public class ResearchBrowserScreen extends Screen {
             int localX = mouseX - (left() - 24 + (swop ? 280 : 0));
             int localY = mouseY - (top() + count * 24);
             if (localX >= 0 && localX < 24 && localY >= 0 && localY < 24) {
-                graphics.text(minecraft.font, Component.translatable(tabs.get(index).nameKey()), mouseX, mouseY - 8, 0xFFFFFFFF, true);
+                graphics.drawString(minecraft.font, Component.translatable(tabs.get(index).nameKey()), mouseX, mouseY - 8, 0xFFFFFFFF, true);
             }
         }
         if (currentHighlight != null) {
@@ -451,7 +449,7 @@ public class ResearchBrowserScreen extends Screen {
         }
     }
 
-    private void drawTooltip(GuiGraphicsExtractor graphics, ResearchItem item, int mouseX, int mouseY) {
+    private void drawTooltip(GuiGraphics graphics, ResearchItem item, int mouseX, int mouseY) {
         Font font = minecraft.font;
         PlayerKnowledge knowledge = knowledge();
         Set<String> done = knowledge.research();
@@ -531,10 +529,10 @@ public class ResearchBrowserScreen extends Screen {
             }
         }
         int nameColor = unlockable ? (item.isSpecial() ? -128 : -1) : (item.isSpecial() ? -8355776 : -8355712);
-        graphics.text(font, name, x, y, nameColor, true);
+        graphics.drawString(font, name, x, y, nameColor, true);
     }
 
-    private void drawLine(GuiGraphicsExtractor graphics, int x, int y, int x2, int y2, float red, float green, float blue, float partialTick, boolean wiggle) {
+    private void drawLine(GuiGraphics graphics, int x, int y, int x2, int y2, float red, float green, float blue, float partialTick, boolean wiggle) {
         float count = minecraft.player.tickCount + partialTick;
         double distanceX = x - x2;
         double distanceY = y - y2;
@@ -582,7 +580,7 @@ public class ResearchBrowserScreen extends Screen {
         GuiLines.strip(graphics, pointsX, pointsY, colors, false);
     }
 
-    private void drawForbidden(GuiGraphicsExtractor graphics, int x, int y) {
+    private void drawForbidden(GuiGraphics graphics, int x, int y) {
         int frames = 32;
         int part = minecraft.player.tickCount % frames;
         int frame = frames - 1 - part;
@@ -590,12 +588,12 @@ public class ResearchBrowserScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) {
-            return super.mouseClicked(event, doubleClick);
+    public boolean mouseClicked(double eventX, double eventY, int button) {
+        if (button != InputConstants.MOUSE_BUTTON_LEFT) {
+            return super.mouseClicked(eventX, eventY, button);
         }
-        double mouseX = event.x();
-        double mouseY = event.y();
+        double mouseX = eventX;
+        double mouseY = eventY;
         int viewX = left() + 8;
         int viewY = top() + 17;
         dragging = mouseX >= viewX && mouseX < viewX + VIEW_WIDTH && mouseY >= viewY && mouseY < viewY + VIEW_HEIGHT;
@@ -638,15 +636,15 @@ public class ResearchBrowserScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(event, doubleClick);
+        return super.mouseClicked(eventX, eventY, button);
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && dragging) {
+    public boolean mouseDragged(double eventX, double eventY, int button, double dragX, double dragY) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT && dragging) {
             int viewX = left() + 8;
             int viewY = top() + 17;
-            if (event.x() >= viewX && event.x() < viewX + VIEW_WIDTH && event.y() >= viewY && event.y() < viewY + VIEW_HEIGHT) {
+            if (eventX >= viewX && eventX < viewX + VIEW_WIDTH && eventY >= viewY && eventY < viewY + VIEW_HEIGHT) {
                 mapX -= dragX;
                 mapY -= dragY;
                 targetX = mapX;
@@ -668,14 +666,14 @@ public class ResearchBrowserScreen extends Screen {
             }
             return true;
         }
-        return super.mouseDragged(event, dragX, dragY);
+        return super.mouseDragged(eventX, eventY, button, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+    public boolean mouseReleased(double eventX, double eventY, int button) {
+        if (button == InputConstants.MOUSE_BUTTON_LEFT) {
             dragging = false;
         }
-        return super.mouseReleased(event);
+        return super.mouseReleased(eventX, eventY, button);
     }
 }

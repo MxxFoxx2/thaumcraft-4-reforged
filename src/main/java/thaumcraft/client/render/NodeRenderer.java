@@ -1,15 +1,14 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
+import thaumcraft.client.platform.ItemGeometry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -33,7 +32,7 @@ import thaumcraft.node.NodeBlockEntity;
 import thaumcraft.node.NodeModifier;
 import thaumcraft.node.NodeType;
 
-public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntityRenderer<T, NodeRenderer.State> {
+public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
     private static final ResourceLocation NODES = Thaumcraft.id("textures/misc/nodes.png");
     private static final ResourceLocation RING = Thaumcraft.id("textures/item/lightningringv.png");
     private static final int RING_FRAMES = 16;
@@ -42,7 +41,9 @@ public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntity
     public record Drain(double startX, double startY, double startZ, double endX, double endY, double endZ, int color, float distance) {
     }
 
-    public static class State extends BlockEntityRenderState {
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
         boolean skip;
         boolean full;
         boolean depthIgnore;
@@ -65,14 +66,18 @@ public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntity
 
     protected abstract void fill(T entity, State state, float partialTicks);
 
-    @Override
-    public State createRenderState() {
-        return new State();
-    }
 
     @Override
-    public void extractRenderState(T entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    public void render(T entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
+    }
+
+    private void extract(T entity, State state, float partialTicks, Vec3 cameraPosition) {
         Minecraft minecraft = Minecraft.getInstance();
         Entity viewer = minecraft.getCameraEntity();
         state.nanoTime = System.nanoTime();
@@ -169,8 +174,7 @@ public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntity
         vector[2] = z;
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
         BlockPos pos = state.blockPos;
         if (!state.skip) {
             FacingQuads.Camera view = WorldRendering.camera(camera, pos);
@@ -190,13 +194,13 @@ public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntity
                 state.viewerTicks,
                 state.nanoTime
             );
-            collector.submitCustomGeometry(poseStack, TcRenderTypes.of(state.depthIgnore ? TcRenderTypes.Kind.ADDITIVE_NO_DEPTH : TcRenderTypes.Kind.ADDITIVE, NODES), (pose, buffer) -> NodeGeometry.render(params, new VertexQuadSink(pose, buffer), WorldRendering.NOOP));
+            ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(state.depthIgnore ? TcRenderTypes.Kind.ADDITIVE_NO_DEPTH : TcRenderTypes.Kind.ADDITIVE, NODES), (pose, buffer) -> NodeGeometry.render(params, new VertexQuadSink(pose, buffer), WorldRendering.NOOP));
             if (state.needsTranslucent) {
-                collector.submitCustomGeometry(poseStack, TcRenderTypes.of(state.depthIgnore ? TcRenderTypes.Kind.TRANSLUCENT_NO_DEPTH : TcRenderTypes.Kind.TRANSLUCENT, NODES), (pose, buffer) -> NodeGeometry.render(params, WorldRendering.NOOP, new VertexQuadSink(pose, buffer)));
+                ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(state.depthIgnore ? TcRenderTypes.Kind.TRANSLUCENT_NO_DEPTH : TcRenderTypes.Kind.TRANSLUCENT, NODES), (pose, buffer) -> NodeGeometry.render(params, WorldRendering.NOOP, new VertexQuadSink(pose, buffer)));
             }
             if (state.ring) {
                 int frame = (int) ((state.nanoTime / 40000000L + pos.getX()) % RING_FRAMES);
-                collector.submitCustomGeometry(poseStack, TcRenderTypes.additive(RING), (pose, buffer) -> {
+                ItemGeometry.submit(buffers, poseStack, TcRenderTypes.additive(RING), (pose, buffer) -> {
                     QuadSink sink = new VertexQuadSink(pose, buffer);
                     FacingQuads.frame(sink, view, 0.5F, 0.5F, 0.5F, 0.0F, 0.33F, RING_FRAMES, frame, NodeGeometry.argb(0xFFFFFF, 0.9F), RING_LIGHT);
                 });
@@ -205,7 +209,7 @@ public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntity
         Drain drain = state.drain;
         if (drain != null) {
             WorldRendering.submitFloatyLine(
-                collector,
+                buffers,
                 poseStack,
                 pos,
                 drain.startX(),
@@ -222,7 +226,7 @@ public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntity
     }
 
     @Override
-    public boolean shouldRenderOffScreen() {
+    public boolean shouldRenderOffScreen(T entity) {
         return true;
     }
 

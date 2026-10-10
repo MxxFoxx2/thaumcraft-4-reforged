@@ -9,7 +9,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import net.minecraft.world.entity.player.Player;
 import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
@@ -103,14 +103,14 @@ public final class ResearchNotifications {
         } else {
             ResearchItem item = ResearchCategories.getResearch(key);
             if (item != null && !item.isVirtual()) {
-                Minecraft.getInstance().gui.toastManager().addToast(new ResearchToast(item));
+                Minecraft.getInstance().getToasts().addToast(new ResearchToast(item));
                 ResearchBrowserScreen.lastX = item.column();
                 ResearchBrowserScreen.lastY = item.row();
                 ResearchBrowserScreen.highlight(key);
                 ResearchBrowserScreen.highlight(item.category());
             }
         }
-        if (Minecraft.getInstance().gui.screen() instanceof ResearchBrowserScreen browser) {
+        if (Minecraft.getInstance().screen instanceof ResearchBrowserScreen browser) {
             browser.updateResearch();
         }
     }

@@ -1,7 +1,8 @@
 package thaumcraft.client.aspect;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -26,10 +27,10 @@ public final class AspectSlotOverlay {
         if (!(event.getScreen() instanceof AbstractContainerScreen<?> screen)) {
             return;
         }
-        if (Minecraft.getInstance().hasShiftDown() == SHOW_TAGS) {
+        if (Screen.hasShiftDown() == SHOW_TAGS) {
             return;
         }
-        Slot slot = screen.getHoveredSlot();
+        Slot slot = screen.getSlotUnderMouse();
         if (slot == null || !slot.hasItem()) {
             return;
         }
@@ -41,8 +42,8 @@ public final class AspectSlotOverlay {
         if (aspects.size() == 0) {
             return;
         }
-        GuiGraphicsExtractor graphics = event.getGuiGraphics();
-        graphics.nextStratum();
+        GuiGraphics graphics = event.getGuiGraphics();
+        graphics.flush();
         int index = 0;
         for (Aspect aspect : aspects.getAspectsSortedAmount()) {
             int x = event.getMouseX() + 17 + index * 18 - 8;

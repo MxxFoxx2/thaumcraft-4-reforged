@@ -1,6 +1,6 @@
 package thaumcraft.client.fx;
 
-import net.minecraft.client.GraphicsPreset;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -76,7 +76,7 @@ public class BeamFx extends WorldFx {
         prevYaw = yaw;
         prevPitch = pitch;
         Minecraft minecraft = Minecraft.getInstance();
-        int visibleDistance = minecraft.options.graphicsPreset().get() == GraphicsPreset.FAST ? 25 : 50;
+        int visibleDistance = minecraft.options.graphicsMode().get() == GraphicsStatus.FAST ? 25 : 50;
         Entity viewer = minecraft.getCameraEntity();
         if (viewer != null && viewer.position().distanceTo(new Vec3(x, y, z)) > visibleDistance) {
             maxAge = 0;
@@ -186,7 +186,7 @@ public class BeamFx extends WorldFx {
             age,
             maxAge,
             prevSize,
-            level.getDefaultClockTime(),
+            level.getDayTime(),
             playerTicks,
             partialTick,
             red,

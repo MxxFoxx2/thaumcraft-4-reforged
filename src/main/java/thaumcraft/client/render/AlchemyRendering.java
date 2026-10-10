@@ -1,10 +1,9 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.function.Consumer;
-import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -38,16 +37,17 @@ public final class AlchemyRendering {
     private AlchemyRendering() {
     }
 
-    private static void model(SubmitNodeCollector collector, PoseStack poseStack, ResourceLocation texture, Consumer<EntityQuadSink> geometry, boolean translucent) {
-        collector.submitCustomGeometry(
+    private static void model(MultiBufferSource buffers, PoseStack poseStack, ResourceLocation texture, Consumer<EntityQuadSink> geometry, boolean translucent) {
+        ItemGeometry.submit(
+            buffers,
             poseStack,
             TcRenderTypes.of(translucent ? Kind.ENTITY_TRANSLUCENT : Kind.ENTITY_CUTOUT, texture),
             (pose, buffer) -> geometry.accept(new EntityQuadSink(pose, buffer))
         );
     }
 
-    private static void part(SubmitNodeCollector collector, PoseStack poseStack, ResourceLocation texture, ObjModel obj, int light, String... names) {
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, texture), (pose, buffer) -> {
+    private static void part(MultiBufferSource buffers, PoseStack poseStack, ResourceLocation texture, ObjModel obj, int light, String... names) {
+        ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, texture), (pose, buffer) -> {
             for (String name : names) {
                 obj.renderPart(name, pose, buffer, WHITE, light);
             }
@@ -63,13 +63,13 @@ public final class AlchemyRendering {
         }
     }
 
-    private static void atlasQuad(OrderedSubmitNodeCollector collector, PoseStack poseStack, ResourceLocation spriteId, float top, int argb, int light) {
+    private static void atlasQuad(MultiBufferSource buffers, PoseStack poseStack, ResourceLocation spriteId, float top, int argb, int light) {
         TextureAtlasSprite sprite = EssentiaRendering.blockSprite(spriteId);
         float maxU = sprite.getU1();
         float minV = sprite.getV0();
         float minU = sprite.getU0();
         float maxV = sprite.getV1();
-        ItemGeometry.solid(collector, poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> doubleSided(
+        ItemGeometry.solid(buffers, poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> doubleSided(
             sink,
             new float[][] {{0.0F, 1.0F, 0.0F}, {1.0F, 1.0F, 0.0F}, {1.0F, top, 0.0F}, {0.0F, top, 0.0F}},
             new float[][] {{maxU, maxV}, {minU, maxV}, {minU, minV}, {maxU, minV}},
@@ -78,9 +78,9 @@ public final class AlchemyRendering {
         ));
     }
 
-    public static void crucibleWater(SubmitNodeCollector collector, PoseStack poseStack, float height, int argb, int light) {
+    public static void crucibleWater(MultiBufferSource buffers, PoseStack poseStack, float height, int argb, int light) {
         TextureAtlasSprite sprite = EssentiaRendering.blockSprite(ResourceLocation.withDefaultNamespace("block/water_still"));
-        ItemGeometry.solid(collector, poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> doubleSided(
+        ItemGeometry.solid(buffers, poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> doubleSided(
             sink,
             new float[][] {{0.0F, height, 0.0F}, {0.0F, height, 1.0F}, {1.0F, height, 1.0F}, {1.0F, height, 0.0F}},
             new float[][] {{sprite.getU0(), sprite.getV0()}, {sprite.getU0(), sprite.getV1()}, {sprite.getU1(), sprite.getV1()}, {sprite.getU1(), sprite.getV0()}},
@@ -100,7 +100,7 @@ public final class AlchemyRendering {
     }
 
     public static void alembic(
-        SubmitNodeCollector collector,
+        MultiBufferSource buffers,
         PoseStack poseStack,
         int light,
         boolean placed,
@@ -118,17 +118,17 @@ public final class AlchemyRendering {
         if (placed) {
             rotateAlembic(poseStack, facing, Axis.ZP);
             if (aboveFurnace) {
-                part(collector, poseStack, ALEMBIC_TEXTURE, obj, light, "TubeMain", "Legs");
+                part(buffers, poseStack, ALEMBIC_TEXTURE, obj, light, "TubeMain", "Legs");
             } else if (aboveAlembic) {
-                part(collector, poseStack, ALEMBIC_TEXTURE, obj, light, "TubeMain", "TubeSmall");
+                part(buffers, poseStack, ALEMBIC_TEXTURE, obj, light, "TubeMain", "TubeSmall");
             } else {
-                part(collector, poseStack, ALEMBIC_TEXTURE, obj, light, "Legs");
+                part(buffers, poseStack, ALEMBIC_TEXTURE, obj, light, "Legs");
             }
         } else {
             poseStack.translate(0.0F, 0.0F, -0.4F);
-            part(collector, poseStack, ALEMBIC_TEXTURE, obj, light, "Legs");
+            part(buffers, poseStack, ALEMBIC_TEXTURE, obj, light, "Legs");
         }
-        part(collector, poseStack, ALEMBIC_TEXTURE, obj, light, "Pot", "Panel");
+        part(buffers, poseStack, ALEMBIC_TEXTURE, obj, light, "Pot", "Panel");
         poseStack.popPose();
         if (filter != null) {
             poseStack.pushPose();
@@ -137,14 +137,14 @@ public final class AlchemyRendering {
             poseStack.pushPose();
             poseStack.translate(0.0F, 0.468F, -0.409F);
             poseStack.scale(0.27F, 0.27F, 0.27F);
-            ItemGeometry.solid(collector.order(2), poseStack, LABEL, true, sink -> EssentiaJarRendering.quad(sink, -0.5F, -0.5F, 0.5F, 0.5F, WHITE, light));
+            ItemGeometry.solid(buffers, poseStack, LABEL, true, sink -> EssentiaJarRendering.quad(sink, -0.5F, -0.5F, 0.5F, 0.5F, WHITE, light));
             poseStack.popPose();
             poseStack.pushPose();
             poseStack.translate(0.0F, 0.468F, -0.41F);
             poseStack.scale(0.013F, 0.013F, 0.013F);
             poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
             int tint = FastColor.ARGB32.opaque(filter.getColor());
-            ItemGeometry.solid(collector.order(3), poseStack, filter.getImage(), true, sink -> EssentiaJarRendering.quad(sink, -8.0F, -8.0F, 8.0F, 8.0F, tint, light));
+            ItemGeometry.solid(buffers, poseStack, filter.getImage(), true, sink -> EssentiaJarRendering.quad(sink, -8.0F, -8.0F, 8.0F, 8.0F, tint, light));
             poseStack.popPose();
             poseStack.popPose();
         }
@@ -168,7 +168,7 @@ public final class AlchemyRendering {
                     default -> {
                     }
                 }
-                model(collector, poseStack, BORE_TEXTURE, sink -> {
+                model(buffers, poseStack, BORE_TEXTURE, sink -> {
                     ModelBoxGeometry.box(sink, 2.5F, 8.0F - 2.0F, -2.0F, 5, 4, 4, 106, 42, 128.0F, 64.0F, true, WHITE, light);
                     ModelBoxGeometry.box(sink, 7.0F, 8.0F - 2.5F, -2.5F, 1, 5, 5, 106, 51, 128.0F, 64.0F, true, WHITE, light);
                 }, false);
@@ -177,7 +177,7 @@ public final class AlchemyRendering {
         }
     }
 
-    public static void advancedFurnace(SubmitNodeCollector collector, PoseStack poseStack, int light, int heat, int vis, int maxVis, int maxPower) {
+    public static void advancedFurnace(MultiBufferSource buffers, PoseStack poseStack, int light, int heat, int vis, int maxVis, int maxPower) {
         ObjModel obj = ObjModel.get(FURNACE_MODEL);
         ResourceLocation baseTexture = Thaumcraft.id(heat <= 100 ? "textures/model/alch_furnace.png" : "textures/model/alch_furnace_on.png");
         ResourceLocation tankTexture = Thaumcraft.id(vis <= 0 ? "textures/model/alch_furnace_tank.png" : "textures/model/alch_furnace_tank_on.png");
@@ -186,11 +186,11 @@ public final class AlchemyRendering {
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
         poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
-        part(collector, poseStack, baseTexture, obj, light, "Base");
+        part(buffers, poseStack, baseTexture, obj, light, "Base");
         for (int index = 0; index < 4; index++) {
             poseStack.pushPose();
             poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
-            part(collector, poseStack, tankTexture, obj, light, "Tank");
+            part(buffers, poseStack, tankTexture, obj, light, "Tank");
             poseStack.popPose();
         }
         int goLight = WorldRendering.emissiveLight(190);
@@ -199,7 +199,7 @@ public final class AlchemyRendering {
             poseStack.pushPose();
             poseStack.translate(0.5F, -0.5F, 1.1F);
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
-            atlasQuad(collector.order(1), poseStack, goo, 0.0F, WHITE, goLight);
+            atlasQuad(buffers, poseStack, goo, 0.0F, WHITE, goLight);
             poseStack.popPose();
             float drop = 1.0F - (float) vis / maxVis;
             for (int index = 0; index < 4; index++) {
@@ -208,18 +208,18 @@ public final class AlchemyRendering {
                 poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
                 poseStack.translate(0.85F, -1.8F, -1.4F);
                 poseStack.scale(0.3F, 0.6F, 1.0F);
-                atlasQuad(collector.order(2), poseStack, frame, 0.0F, WHITE, frameLight);
+                atlasQuad(buffers, poseStack, frame, 0.0F, WHITE, frameLight);
                 poseStack.translate(0.0F, 0.0F, -0.01F);
-                atlasQuad(collector.order(3), poseStack, goo, drop, WHITE, goLight);
+                atlasQuad(buffers, poseStack, goo, drop, WHITE, goLight);
                 poseStack.popPose();
                 poseStack.pushPose();
                 poseStack.mulPose(Axis.ZN.rotationDegrees(90 * index));
                 poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
                 poseStack.translate(1.15F, 1.8F, -1.4F);
                 poseStack.scale(-0.3F, -0.6F, -1.0F);
-                atlasQuad(collector.order(2), poseStack, frame, 0.0F, WHITE, frameLight);
+                atlasQuad(buffers, poseStack, frame, 0.0F, WHITE, frameLight);
                 poseStack.translate(0.0F, 0.0F, 0.01F);
-                atlasQuad(collector.order(3), poseStack, goo, drop, WHITE, goLight);
+                atlasQuad(buffers, poseStack, goo, drop, WHITE, goLight);
                 poseStack.popPose();
             }
         }
@@ -234,10 +234,10 @@ public final class AlchemyRendering {
                 poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
                 poseStack.translate(-0.5F, 0.0F, -1.0F);
                 poseStack.pushPose();
-                atlasQuad(collector.order(2), poseStack, fire, 1.0F - Math.min(1.0F, (float) heat / maxPower), WHITE, WorldRendering.emissiveLight(220));
+                atlasQuad(buffers, poseStack, fire, 1.0F - Math.min(1.0F, (float) heat / maxPower), WHITE, WorldRendering.emissiveLight(220));
                 poseStack.popPose();
                 poseStack.translate(0.0F, 0.0F, 0.05F);
-                atlasQuad(collector.order(3), poseStack, frame, 0.0F, WHITE, frameLight);
+                atlasQuad(buffers, poseStack, frame, 0.0F, WHITE, frameLight);
                 poseStack.popPose();
             }
             poseStack.popPose();
@@ -245,13 +245,13 @@ public final class AlchemyRendering {
         poseStack.popPose();
     }
 
-    public static void thaumatorium(SubmitNodeCollector collector, PoseStack poseStack, int light, Direction facing) {
+    public static void thaumatorium(MultiBufferSource buffers, PoseStack poseStack, int light, Direction facing) {
         ObjModel obj = ObjModel.get(THAUMATORIUM_MODEL);
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
         poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
         rotateAlembic(poseStack, facing, Axis.ZP);
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, THAUMATORIUM_TEXTURE), (pose, buffer) -> obj.renderAll(pose, buffer, WHITE, light));
+        ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, THAUMATORIUM_TEXTURE), (pose, buffer) -> obj.renderAll(pose, buffer, WHITE, light));
         poseStack.popPose();
     }
 
@@ -267,7 +267,7 @@ public final class AlchemyRendering {
         poseStack.scale(0.75F, 0.75F, 0.75F);
     }
 
-    public static void bellows(SubmitNodeCollector collector, PoseStack poseStack, int light, Direction orientation, float inflation) {
+    public static void bellows(MultiBufferSource buffers, PoseStack poseStack, int light, Direction orientation, float inflation) {
         float tscale = 0.125F + inflation * 0.875F;
         poseStack.pushPose();
         poseStack.translate(0.5F, -0.5F, 0.5F);
@@ -289,35 +289,35 @@ public final class AlchemyRendering {
         poseStack.translate(0.0F, 1.0F, 0.0F);
         poseStack.pushPose();
         poseStack.scale(0.5F, (inflation + 0.1F) / 2.0F, 0.5F);
-        model(collector, poseStack, BELLOWS_TEXTURE, sink ->
+        model(buffers, poseStack, BELLOWS_TEXTURE, sink ->
             ModelBoxGeometry.box(sink, -10.0F, -12.03333F + 0.5F, -10.0F, 20, 24, 20, 48, 0, 128.0F, 64.0F, true, WHITE, light), true);
         poseStack.popPose();
         poseStack.translate(0.0F, -1.0F, 0.0F);
         poseStack.pushPose();
         poseStack.translate(0.0F, -tscale / 2.0F + 0.5F, 0.0F);
-        model(collector, poseStack, BELLOWS_TEXTURE, sink ->
+        model(buffers, poseStack, BELLOWS_TEXTURE, sink ->
             ModelBoxGeometry.box(sink, -6.0F, 8.0F, -6.0F, 12, 2, 12, 0, 0, 128.0F, 64.0F, true, WHITE, light), false);
         poseStack.popPose();
         poseStack.pushPose();
         poseStack.translate(0.0F, tscale / 2.0F - 0.5F, 0.0F);
-        model(collector, poseStack, BELLOWS_TEXTURE, sink ->
+        model(buffers, poseStack, BELLOWS_TEXTURE, sink ->
             ModelBoxGeometry.box(sink, -6.0F, 22.0F, -6.0F, 12, 2, 12, 0, 0, 128.0F, 64.0F, true, WHITE, light), false);
         poseStack.popPose();
-        model(collector, poseStack, BELLOWS_TEXTURE, sink -> {
+        model(buffers, poseStack, BELLOWS_TEXTURE, sink -> {
             ModelBoxGeometry.box(sink, -6.0F, 16.0F - 1.0F, -6.0F, 12, 2, 12, 0, 0, 128.0F, 64.0F, true, WHITE, light);
             ModelBoxGeometry.box(sink, -2.0F, 16.0F - 2.0F, 6.0F, 4, 4, 2, 0, 36, 128.0F, 64.0F, true, WHITE, light);
         }, false);
         poseStack.popPose();
     }
 
-    public static void fluxScrubber(SubmitNodeCollector collector, PoseStack poseStack, int light, Direction facing, float ticks) {
+    public static void fluxScrubber(MultiBufferSource buffers, PoseStack poseStack, int light, Direction facing, float ticks) {
         ObjModel obj = ObjModel.get(CAP_MODEL);
         poseStack.pushPose();
         EssentiaRendering.orientation(poseStack, facing);
-        part(collector, poseStack, SCRUBBER_TEXTURE, obj, light, "Cap");
+        part(buffers, poseStack, SCRUBBER_TEXTURE, obj, light, "Cap");
         float bob = Mth.sin(ticks / 8.0F) * 0.075F + 0.075F;
         poseStack.translate(0.0F, 0.0F, -bob);
-        part(collector, poseStack, SCRUBBER_TEXTURE, obj, light, "Tip");
+        part(buffers, poseStack, SCRUBBER_TEXTURE, obj, light, "Tip");
         poseStack.popPose();
     }
 }

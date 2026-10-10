@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.item.TooltipFlag;
 import javax.annotation.Nullable;
 import thaumcraft.research.ResearchManager;
@@ -20,8 +21,11 @@ public class PrimalCharmItem extends Item {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
-        super.inventoryTick(stack, level, owner, slot);
+    public void inventoryTick(ItemStack stack, Level level, Entity owner, int slotId, boolean isSelected) {
+        if (level.isClientSide()) {
+            return;
+        }
+        super.inventoryTick(stack, level, owner, slotId, isSelected);
         if (owner instanceof ServerPlayer player
             && level.getRandom().nextInt(20000) == 42
             && !ResearchManager.isComplete(player, "FOCUSPRIMAL")

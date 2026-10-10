@@ -425,7 +425,7 @@ public final class ModBlocks {
         properties -> properties
             .mapColor(MapColor.COLOR_PURPLE)
             .replaceable()
-            .noCollision()
+            .noCollission()
             .noOcclusion()
             .strength(100.0F)
             .noLootTable()
@@ -433,7 +433,7 @@ public final class ModBlocks {
             .lightLevel(state -> state.getValue(FluxBlock.LEVEL) * 7 / 8)
             .pushReaction(PushReaction.DESTROY)
             .isSuffocating((state, level, pos) -> false)
-            .isViewBlocking((state, level, pos, box) -> false)
+            .isViewBlocking((state, level, pos) -> false)
     ));
     public static final DeferredBlock<FluxGooBlock> FLUX_GOO = withItem(RegistryHelper.registerBlock(BLOCKS, 
         "flux_goo",
@@ -441,7 +441,7 @@ public final class ModBlocks {
         properties -> properties
             .mapColor(MapColor.COLOR_PURPLE)
             .replaceable()
-            .noCollision()
+            .noCollission()
             .noOcclusion()
             .strength(100.0F)
             .noLootTable()
@@ -511,7 +511,7 @@ public final class ModBlocks {
                 CandleBlock::new,
                 properties -> properties
                     .mapColor(MapColor.WOOL)
-                    .noCollision()
+                    .noCollission()
                     .noOcclusion()
                     .strength(0.1F)
                     .sound(SoundType.WOOL)
@@ -593,7 +593,7 @@ public final class ModBlocks {
     private static BlockBehaviour.Properties airy(BlockBehaviour.Properties properties) {
         return properties
             .mapColor(MapColor.NONE)
-            .noCollision()
+            .noCollission()
             .noOcclusion()
             .strength(2.0F, 200.0F)
             .sound(SoundType.WOOL)
@@ -602,7 +602,7 @@ public final class ModBlocks {
             .pushReaction(PushReaction.BLOCK)
             .isValidSpawn((state, level, pos, type) -> false)
             .isSuffocating((state, level, pos) -> false)
-            .isViewBlocking((state, level, pos, box) -> false);
+            .isViewBlocking((state, level, pos) -> false);
     }
 
     private static BlockBehaviour.Properties amber(BlockBehaviour.Properties properties) {
@@ -629,7 +629,7 @@ public final class ModBlocks {
             .sound(SoundType.GRASS)
             .noOcclusion()
             .isSuffocating((state, level, pos) -> false)
-            .isViewBlocking((state, level, pos, box) -> false)
+            .isViewBlocking((state, level, pos) -> false)
             .pushReaction(PushReaction.DESTROY)
             .isRedstoneConductor((state, level, pos) -> false);
     }
@@ -637,7 +637,7 @@ public final class ModBlocks {
     private static BlockBehaviour.Properties plant(BlockBehaviour.Properties properties) {
         return properties
             .mapColor(MapColor.PLANT)
-            .noCollision()
+            .noCollission()
             .instabreak()
             .sound(SoundType.GRASS)
             .offsetType(BlockBehaviour.OffsetType.NONE)

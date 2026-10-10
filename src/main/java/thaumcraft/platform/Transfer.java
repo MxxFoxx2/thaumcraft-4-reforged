@@ -110,7 +110,7 @@ public final class Transfer {
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, exposure.type().get(), (entity, side) -> {
             Object container = exposure.provider().apply(entity, side);
             if (container instanceof WorldlyContainer worldly && side != null) {
-                return SidedInvWrapper.create(worldly, side);
+                return new SidedInvWrapper(worldly, side);
             }
             return container instanceof Container plain ? new InvWrapper(plain) : null;
         });

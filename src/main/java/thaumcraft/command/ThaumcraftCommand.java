@@ -81,7 +81,7 @@ public final class ThaumcraftCommand {
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         dispatcher.register(
             Commands.literal(Thaumcraft.MODID)
-                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(
                     Commands.literal("fx")
                         .then(
@@ -507,7 +507,7 @@ public final class ThaumcraftCommand {
     }
 
     private static int aspectsItem(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1);
+        ItemStack stack = ItemArgument.getItem(context, "item").createItemStack(1, false);
         return print(context, AspectHelper.getBonusTags(stack, AspectHelper.getObjectTags(stack)));
     }
 

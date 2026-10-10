@@ -191,7 +191,7 @@ public final class TcLoot {
 
     private static void addPotions(List<List<Entry>> result) {
         for (Item container : new Item[] {Items.POTION, Items.SPLASH_POTION}) {
-            BuiltInRegistries.POTION.listElements().forEach(holder -> {
+            BuiltInRegistries.POTION.holders().forEach(holder -> {
                 if (holder.value().getEffects().isEmpty()) {
                     return;
                 }

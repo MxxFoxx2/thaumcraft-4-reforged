@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Prediction;
@@ -39,7 +39,7 @@ public class BaublesMenu extends AbstractCraftingMenu {
     public static final int HOTBAR_START = 40;
     public static final int HOTBAR_END = 49;
 
-    private static final Map<EquipmentSlot, Identifier> EMPTY_ARMOR_ICONS = Map.of(
+    private static final Map<EquipmentSlot, ResourceLocation> EMPTY_ARMOR_ICONS = Map.of(
         EquipmentSlot.FEET, InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS,
         EquipmentSlot.LEGS, InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS,
         EquipmentSlot.CHEST, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,

@@ -6,7 +6,7 @@ import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -126,11 +126,11 @@ public final class TcLoot {
     }
 
     private static Optional<Item> lookup(String path) {
-        Identifier modded = Thaumcraft.id(path);
+        ResourceLocation modded = Thaumcraft.id(path);
         if (BuiltInRegistries.ITEM.containsKey(modded)) {
             return BuiltInRegistries.ITEM.getOptional(modded);
         }
-        return BuiltInRegistries.ITEM.getOptional(Identifier.withDefaultNamespace(path));
+        return BuiltInRegistries.ITEM.getOptional(ResourceLocation.withDefaultNamespace(path));
     }
 
     private static synchronized List<Entry> table(int tier) {
@@ -195,7 +195,7 @@ public final class TcLoot {
                 if (holder.value().getEffects().isEmpty()) {
                     return;
                 }
-                String path = holder.unwrapKey().map(key -> key.identifier().getPath()).orElse("");
+                String path = holder.unwrapKey().map(key -> key.location().getPath()).orElse("");
                 int weight = path.startsWith("long_") ? 3 : path.startsWith("strong_") ? 2 : 1;
                 for (List<Entry> table : result) {
                     table.add(new PotionEntry(container, holder, weight));

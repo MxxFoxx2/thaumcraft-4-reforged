@@ -12,8 +12,8 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -23,7 +23,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
@@ -66,46 +66,46 @@ public final class ThaumometerHandRenderer {
             poseStack.translate(-swingSqrt * 0.4F, Mth.sin(Mth.sqrt(swing) * Mth.PI * 2.0F) * 0.2F, -Mth.sin(swing * Mth.PI) * 0.2F);
         }
         poseStack.translate(0.7F * 0.8F, -0.65F * 0.8F - hidden * 0.6F, -0.9F * 0.8F);
-        poseStack.rotateDegrees(Axis.YP, 45.0F);
-        poseStack.rotateDegrees(Axis.YP, -Mth.sin(swing * swing * Mth.PI) * 20.0F);
-        poseStack.rotateDegrees(Axis.ZP, -swingSqrt * 20.0F);
-        poseStack.rotateDegrees(Axis.XP, -swingSqrt * 80.0F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-Mth.sin(swing * swing * Mth.PI) * 20.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(-swingSqrt * 20.0F));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-swingSqrt * 80.0F));
         poseStack.scale(0.4F, 0.4F, 0.4F);
         poseStack.translate(-0.5F, -0.5F, -0.5F);
 
         poseStack.pushPose();
         poseStack.translate(1.0F, 0.75F, -1.0F);
-        poseStack.rotateDegrees(Axis.YN, 135.0F);
+        poseStack.mulPose(Axis.YN.rotationDegrees(135.0F));
         float xBob = Mth.lerp(partialTick, player.xBobO, player.xBob);
         float yBob = Mth.lerp(partialTick, player.yBobO, player.yBob);
-        poseStack.rotateDegrees(Axis.XP, (player.getViewXRot(partialTick) - xBob) * 0.1F);
-        poseStack.rotateDegrees(Axis.YP, (player.getViewYRot(partialTick) - yBob) * 0.1F);
+        poseStack.mulPose(Axis.XP.rotationDegrees((player.getViewXRot(partialTick) - xBob) * 0.1F));
+        poseStack.mulPose(Axis.YP.rotationDegrees((player.getViewYRot(partialTick) - yBob) * 0.1F));
         poseStack.translate(-0.7F * 0.8F, 0.65F * 0.8F + hidden * 1.5F, 0.9F * 0.8F);
-        poseStack.rotateDegrees(Axis.YP, 90.0F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
         poseStack.translate(0.0F, 0.0F, -0.9F * 0.8F);
-        poseStack.rotateDegrees(Axis.YP, 90.0F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 
         AvatarRenderState avatar = event.getPlayerState().avatarRenderState;
         if (avatar != null) {
             poseStack.pushPose();
             poseStack.scale(5.0F, 5.0F, 5.0F);
             AvatarRenderer<?> renderer = (AvatarRenderer<?>) minecraft.getEntityRenderDispatcher().getRenderer(avatar);
-            Identifier skin = avatar.skin.body().texturePath();
+            ResourceLocation skin = avatar.skin.body().texturePath();
             for (int index = 0; index < 2; index++) {
                 int side = index * 2 - 1;
                 poseStack.pushPose();
                 poseStack.translate(0.0F, -0.6F, 1.1F * side);
-                poseStack.rotateDegrees(Axis.XP, -45 * side);
-                poseStack.rotateDegrees(Axis.ZP, -90.0F);
-                poseStack.rotateDegrees(Axis.ZP, 59.0F);
-                poseStack.rotateDegrees(Axis.YP, -65 * side);
+                poseStack.mulPose(Axis.XP.rotationDegrees(-45 * side));
+                poseStack.mulPose(Axis.ZP.rotationDegrees(-90.0F));
+                poseStack.mulPose(Axis.ZP.rotationDegrees(59.0F));
+                poseStack.mulPose(Axis.YP.rotationDegrees(-65 * side));
                 renderer.renderRightHand(poseStack, collector, light, skin, avatar.showRightSleeve);
                 poseStack.popPose();
             }
             poseStack.popPose();
         }
 
-        poseStack.rotateDegrees(Axis.ZP, 90.0F);
+        poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
         poseStack.translate(0.4F, -0.4F, 0.0F);
         poseStack.scale(2.0F, 2.0F, 2.0F);
 
@@ -196,7 +196,7 @@ public final class ThaumometerHandRenderer {
     }
 
     private static void drawTag(Font font, PoseStack poseStack, SubmitNodeCollector collector, int x, int y, Aspect aspect, int amount, int light) {
-        int color = ARGB.color(255, aspect.getColor());
+        int color = FastColor.ARGB32.color(255, aspect.getColor());
         collector.submitCustomGeometry(poseStack, TcRenderTypes.additive(aspect.getImage()), (pose, buffer) -> {
             vertex(buffer, pose, x, y + 16.0F, 0.0F, 1.0F, color, light);
             vertex(buffer, pose, x + 16.0F, y + 16.0F, 1.0F, 1.0F, color, light);

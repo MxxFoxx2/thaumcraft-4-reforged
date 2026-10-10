@@ -8,8 +8,8 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
-import net.minecraft.util.ARGB;
+import javax.annotation.Nullable;
+import net.minecraft.util.FastColor;
 import thaumcraft.essentia.FilterTubeBlockEntity;
 
 public class TubeFilterRenderer implements BlockEntityRenderer<FilterTubeBlockEntity, TubeFilterRenderer.State> {
@@ -28,7 +28,7 @@ public class TubeFilterRenderer implements BlockEntityRenderer<FilterTubeBlockEn
     @Override
     public void extractRenderState(FilterTubeBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
-        state.color = entity.getAspectFilter() == null ? 0xFFFFFFFF : ARGB.opaque(entity.getAspectFilter().getColor());
+        state.color = entity.getAspectFilter() == null ? 0xFFFFFFFF : FastColor.ARGB32.opaque(entity.getAspectFilter().getColor());
     }
 
     @Override

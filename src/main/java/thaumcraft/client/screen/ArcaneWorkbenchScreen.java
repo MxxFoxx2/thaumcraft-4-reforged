@@ -3,7 +3,7 @@ package thaumcraft.client.screen;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +19,7 @@ import thaumcraft.wand.WandItem;
 import thaumcraft.wand.Wands;
 
 public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkbenchMenu> {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/gui/gui_arcaneworkbench.png");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/gui_arcaneworkbench.png");
     private static final int[][] ASPECT_LOCATIONS = {{72, 21}, {24, 43}, {24, 102}, {72, 124}, {120, 102}, {120, 43}};
     private static final int INSUFFICIENT_COLOR = 15625838;
 

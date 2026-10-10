@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.network.AspectDiscoveryPayload;
@@ -188,11 +188,11 @@ public final class ResearchManager {
         return createClue(player, BuiltInRegistries.ITEM.getKey(stack.getItem()), true, aspects);
     }
 
-    public static boolean createClue(ServerPlayer player, Identifier entityType, @Nullable AspectList aspects) {
+    public static boolean createClue(ServerPlayer player, ResourceLocation entityType, @Nullable AspectList aspects) {
         return createClue(player, entityType, false, aspects);
     }
 
-    private static boolean createClue(ServerPlayer player, Identifier clue, boolean item, @Nullable AspectList aspects) {
+    private static boolean createClue(ServerPlayer player, ResourceLocation clue, boolean item, @Nullable AspectList aspects) {
         List<String> keys = new ArrayList<>();
         for (ResearchItem research : ResearchCategories.allResearch()) {
             boolean valid = research.tags() != null

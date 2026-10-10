@@ -1,21 +1,21 @@
 package thaumcraft.wand;
 
-import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.resources.ResourceLocation;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 
 public record WandRod(
     String tag,
     String textureTag,
     int capacity,
-    Identifier item,
+    ResourceLocation item,
     int craftCost,
     @Nullable RodUpdate onUpdate,
     boolean glowing,
     boolean staff,
     boolean runes
 ) {
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return Thaumcraft.id("textures/model/wand_rod_" + textureTag + ".png");
     }
 

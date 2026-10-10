@@ -2,8 +2,8 @@ package thaumcraft.research;
 
 import java.util.Arrays;
 import java.util.List;
-import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.resources.ResourceLocation;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.crafting.TcStack;
@@ -15,7 +15,7 @@ public class ResearchItem {
     private final int displayColumn;
     private final int displayRow;
     private final @Nullable TcStack iconItem;
-    private final @Nullable Identifier iconTexture;
+    private final @Nullable ResourceLocation iconTexture;
     private List<String> parents = List.of();
     private List<String> parentsHidden = List.of();
     private List<String> siblings = List.of();
@@ -30,8 +30,8 @@ public class ResearchItem {
     private boolean lost;
     private boolean autoUnlock;
     private int warp;
-    private List<Identifier> itemTriggers = List.of();
-    private List<Identifier> entityTriggers = List.of();
+    private List<ResourceLocation> itemTriggers = List.of();
+    private List<ResourceLocation> entityTriggers = List.of();
     private List<Aspect> aspectTriggers = List.of();
     private List<ResearchPage> pages = List.of();
 
@@ -50,11 +50,11 @@ public class ResearchItem {
         this(key, category, tags, column, row, complexity, icon, null);
     }
 
-    public ResearchItem(String key, String category, AspectList tags, int column, int row, int complexity, Identifier icon) {
+    public ResearchItem(String key, String category, AspectList tags, int column, int row, int complexity, ResourceLocation icon) {
         this(key, category, tags, column, row, complexity, null, icon);
     }
 
-    private ResearchItem(String key, String category, AspectList tags, int column, int row, int complexity, @Nullable TcStack iconItem, @Nullable Identifier iconTexture) {
+    private ResearchItem(String key, String category, AspectList tags, int column, int row, int complexity, @Nullable TcStack iconItem, @Nullable ResourceLocation iconTexture) {
         this.key = key;
         this.category = category;
         this.tags = tags;
@@ -184,7 +184,7 @@ public class ResearchItem {
         return iconItem;
     }
 
-    public @Nullable Identifier iconTexture() {
+    public @Nullable ResourceLocation iconTexture() {
         return iconTexture;
     }
 
@@ -244,11 +244,11 @@ public class ResearchItem {
         return autoUnlock;
     }
 
-    public List<Identifier> itemTriggers() {
+    public List<ResourceLocation> itemTriggers() {
         return itemTriggers;
     }
 
-    public List<Identifier> entityTriggers() {
+    public List<ResourceLocation> entityTriggers() {
         return entityTriggers;
     }
 
@@ -280,7 +280,7 @@ public class ResearchItem {
         return primary;
     }
 
-    private static List<Identifier> ids(String[] values) {
-        return Arrays.stream(values).map(Identifier::parse).toList();
+    private static List<ResourceLocation> ids(String[] values) {
+        return Arrays.stream(values).map(ResourceLocation::parse).toList();
     }
 }

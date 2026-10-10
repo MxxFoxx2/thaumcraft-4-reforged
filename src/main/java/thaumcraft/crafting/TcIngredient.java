@@ -5,7 +5,7 @@ import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +28,7 @@ public sealed interface TcIngredient {
     }
 
     static TcIngredient tag(String id) {
-        return new Tag(TagKey.create(Registries.ITEM, Identifier.parse(id)));
+        return new Tag(TagKey.create(Registries.ITEM, ResourceLocation.parse(id)));
     }
 
     static TcIngredient anyOf(TcIngredient... options) {

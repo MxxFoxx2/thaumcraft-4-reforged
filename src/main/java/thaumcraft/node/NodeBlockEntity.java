@@ -23,14 +23,14 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
+import thaumcraft.compat.ValueInput;
+import thaumcraft.compat.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectHelper;
@@ -96,7 +96,7 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
     }
 
     private String generateId() {
-        String dimension = level == null ? "unknown" : level.dimension().identifier().toString();
+        String dimension = level == null ? "unknown" : level.dimension().location().toString();
         id = dimension + ":" + worldPosition.getX() + ":" + worldPosition.getY() + ":" + worldPosition.getZ();
         return id;
     }
@@ -326,7 +326,7 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
     }
 
     public void checkLock(Level checkLevel) {
-        if ((count <= 1 || count % 50 == 0) && worldPosition.getY() > checkLevel.getMinY() && isAiryNode()) {
+        if ((count <= 1 || count % 50 == 0) && worldPosition.getY() > checkLevel.getMinBuildHeight() && isAiryNode()) {
             byte oldLock = nodeLock;
             nodeLock = 0;
             BlockPos below = worldPosition.below();
@@ -352,7 +352,7 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
             if (entity.isAlive() && !entity.isInvulnerable() && tickLevel instanceof ServerLevel serverLevel) {
                 double distance = getDistanceTo(entity.getX(), entity.getY(), entity.getZ());
                 if (distance < 2.0) {
-                    entity.hurtServer(serverLevel, serverLevel.damageSources().fellOutOfWorld(), 1.0F);
+                    entity.hurt(serverLevel.damageSources().fellOutOfWorld(), 1.0F);
                     if (!entity.isAlive()) {
                         change = feedOnKill(serverLevel, entity, change);
                     }

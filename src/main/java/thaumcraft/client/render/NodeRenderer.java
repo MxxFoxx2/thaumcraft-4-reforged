@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +20,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
@@ -34,8 +34,8 @@ import thaumcraft.node.NodeModifier;
 import thaumcraft.node.NodeType;
 
 public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntityRenderer<T, NodeRenderer.State> {
-    private static final Identifier NODES = Thaumcraft.id("textures/misc/nodes.png");
-    private static final Identifier RING = Thaumcraft.id("textures/item/lightningringv.png");
+    private static final ResourceLocation NODES = Thaumcraft.id("textures/misc/nodes.png");
+    private static final ResourceLocation RING = Thaumcraft.id("textures/item/lightningringv.png");
     private static final int RING_FRAMES = 16;
     private static final int RING_LIGHT = 220;
 

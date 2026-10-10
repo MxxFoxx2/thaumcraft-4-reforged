@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.infusion.PedestalBlockEntity;
 
 public class ArcanePedestalRenderer implements BlockEntityRenderer<PedestalBlockEntity, ArcanePedestalRenderer.State> {
@@ -63,7 +63,7 @@ public class ArcanePedestalRenderer implements BlockEntityRenderer<PedestalBlock
         }
         poseStack.pushPose();
         poseStack.translate(0.5F, 1.15F + state.bob, 0.5F);
-        poseStack.rotateDegrees(Axis.YP, state.ticks % 360.0F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(state.ticks % 360.0F));
         poseStack.scale(state.scale, state.scale, state.scale);
         state.item.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
         poseStack.popPose();

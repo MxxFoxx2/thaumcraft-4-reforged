@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.block.ResearchTableBlock;
 import thaumcraft.blockentity.ResearchTableBlockEntity;
 import thaumcraft.item.ResearchNotesItem;
@@ -65,9 +65,9 @@ public class ResearchTableRenderer implements BlockEntityRenderer<ResearchTableB
         if (!state.scribe.isEmpty()) {
             poseStack.pushPose();
             poseStack.translate(0.5F, 1.01F, 0.5F);
-            poseStack.rotateDegrees(Axis.YP, state.rotation);
+            poseStack.mulPose(Axis.YP.rotationDegrees(state.rotation));
             poseStack.translate(-0.28F, 0.0F, -0.28F);
-            poseStack.rotateDegrees(Axis.XP, -90.0F);
+            poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
             poseStack.scale(0.3F, 0.3F, 0.3F);
             state.scribe.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
             poseStack.popPose();
@@ -75,10 +75,10 @@ public class ResearchTableRenderer implements BlockEntityRenderer<ResearchTableB
         if (!state.note.isEmpty()) {
             poseStack.pushPose();
             poseStack.translate(0.5F, 1.02F, 0.5F);
-            poseStack.rotateDegrees(Axis.YP, state.rotation);
+            poseStack.mulPose(Axis.YP.rotationDegrees(state.rotation));
             poseStack.translate(0.1F, 0.0F, -0.35F);
-            poseStack.rotateDegrees(Axis.YP, 15.0F);
-            poseStack.rotateDegrees(Axis.XP, -90.0F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(15.0F));
+            poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
             poseStack.scale(0.5F, 0.5F, 0.5F);
             state.note.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
             poseStack.popPose();

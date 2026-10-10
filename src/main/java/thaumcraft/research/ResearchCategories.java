@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.resources.ResourceLocation;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 
 public final class ResearchCategories {
@@ -16,7 +16,7 @@ public final class ResearchCategories {
     private ResearchCategories() {
     }
 
-    public static ResearchCategory registerCategory(String key, Identifier icon, Identifier background) {
+    public static ResearchCategory registerCategory(String key, ResourceLocation icon, ResourceLocation background) {
         return CATEGORIES.computeIfAbsent(key, ignored -> new ResearchCategory(key, icon, background));
     }
 

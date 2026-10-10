@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -24,7 +24,7 @@ import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 
 public final class AspectHelper {
@@ -41,31 +41,31 @@ public final class AspectHelper {
         BlockTags.INCORRECT_FOR_NETHERITE_TOOL, 4
     );
 
-    private static final Map<Identifier, Aspect> ENCHANTMENT_ASPECTS = Map.ofEntries(
-        Map.entry(Identifier.withDefaultNamespace("aqua_affinity"), Aspect.WATER),
-        Map.entry(Identifier.withDefaultNamespace("bane_of_arthropods"), Aspect.BEAST),
-        Map.entry(Identifier.withDefaultNamespace("blast_protection"), Aspect.ARMOR),
-        Map.entry(Identifier.withDefaultNamespace("efficiency"), Aspect.TOOL),
-        Map.entry(Identifier.withDefaultNamespace("feather_falling"), Aspect.FLIGHT),
-        Map.entry(Identifier.withDefaultNamespace("fire_aspect"), Aspect.FIRE),
-        Map.entry(Identifier.withDefaultNamespace("fire_protection"), Aspect.ARMOR),
-        Map.entry(Identifier.withDefaultNamespace("flame"), Aspect.FIRE),
-        Map.entry(Identifier.withDefaultNamespace("fortune"), Aspect.GREED),
-        Map.entry(Identifier.withDefaultNamespace("infinity"), Aspect.CRAFT),
-        Map.entry(Identifier.withDefaultNamespace("knockback"), Aspect.AIR),
-        Map.entry(Identifier.withDefaultNamespace("looting"), Aspect.GREED),
-        Map.entry(Identifier.withDefaultNamespace("power"), Aspect.WEAPON),
-        Map.entry(Identifier.withDefaultNamespace("projectile_protection"), Aspect.ARMOR),
-        Map.entry(Identifier.withDefaultNamespace("protection"), Aspect.ARMOR),
-        Map.entry(Identifier.withDefaultNamespace("punch"), Aspect.AIR),
-        Map.entry(Identifier.withDefaultNamespace("respiration"), Aspect.AIR),
-        Map.entry(Identifier.withDefaultNamespace("sharpness"), Aspect.WEAPON),
-        Map.entry(Identifier.withDefaultNamespace("silk_touch"), Aspect.EXCHANGE),
-        Map.entry(Identifier.withDefaultNamespace("thorns"), Aspect.WEAPON),
-        Map.entry(Identifier.withDefaultNamespace("smite"), Aspect.ENTROPY),
-        Map.entry(Identifier.withDefaultNamespace("unbreaking"), Aspect.EARTH),
-        Map.entry(Identifier.withDefaultNamespace("luck_of_the_sea"), Aspect.GREED),
-        Map.entry(Identifier.withDefaultNamespace("lure"), Aspect.BEAST),
+    private static final Map<ResourceLocation, Aspect> ENCHANTMENT_ASPECTS = Map.ofEntries(
+        Map.entry(ResourceLocation.withDefaultNamespace("aqua_affinity"), Aspect.WATER),
+        Map.entry(ResourceLocation.withDefaultNamespace("bane_of_arthropods"), Aspect.BEAST),
+        Map.entry(ResourceLocation.withDefaultNamespace("blast_protection"), Aspect.ARMOR),
+        Map.entry(ResourceLocation.withDefaultNamespace("efficiency"), Aspect.TOOL),
+        Map.entry(ResourceLocation.withDefaultNamespace("feather_falling"), Aspect.FLIGHT),
+        Map.entry(ResourceLocation.withDefaultNamespace("fire_aspect"), Aspect.FIRE),
+        Map.entry(ResourceLocation.withDefaultNamespace("fire_protection"), Aspect.ARMOR),
+        Map.entry(ResourceLocation.withDefaultNamespace("flame"), Aspect.FIRE),
+        Map.entry(ResourceLocation.withDefaultNamespace("fortune"), Aspect.GREED),
+        Map.entry(ResourceLocation.withDefaultNamespace("infinity"), Aspect.CRAFT),
+        Map.entry(ResourceLocation.withDefaultNamespace("knockback"), Aspect.AIR),
+        Map.entry(ResourceLocation.withDefaultNamespace("looting"), Aspect.GREED),
+        Map.entry(ResourceLocation.withDefaultNamespace("power"), Aspect.WEAPON),
+        Map.entry(ResourceLocation.withDefaultNamespace("projectile_protection"), Aspect.ARMOR),
+        Map.entry(ResourceLocation.withDefaultNamespace("protection"), Aspect.ARMOR),
+        Map.entry(ResourceLocation.withDefaultNamespace("punch"), Aspect.AIR),
+        Map.entry(ResourceLocation.withDefaultNamespace("respiration"), Aspect.AIR),
+        Map.entry(ResourceLocation.withDefaultNamespace("sharpness"), Aspect.WEAPON),
+        Map.entry(ResourceLocation.withDefaultNamespace("silk_touch"), Aspect.EXCHANGE),
+        Map.entry(ResourceLocation.withDefaultNamespace("thorns"), Aspect.WEAPON),
+        Map.entry(ResourceLocation.withDefaultNamespace("smite"), Aspect.ENTROPY),
+        Map.entry(ResourceLocation.withDefaultNamespace("unbreaking"), Aspect.EARTH),
+        Map.entry(ResourceLocation.withDefaultNamespace("luck_of_the_sea"), Aspect.GREED),
+        Map.entry(ResourceLocation.withDefaultNamespace("lure"), Aspect.BEAST),
         Map.entry(Thaumcraft.id("haste"), Aspect.MOTION),
         Map.entry(Thaumcraft.id("repair"), Aspect.TOOL)
     );
@@ -261,30 +261,30 @@ public final class AspectHelper {
             Holder<MobEffect> type = effect.getEffect();
             if (type.is(MobEffects.BLINDNESS)) {
                 tags.merge(Aspect.DARKNESS, level * 3);
-            } else if (type.is(MobEffects.NAUSEA)) {
+            } else if (type.is(MobEffects.CONFUSION)) {
                 tags.merge(Aspect.ELDRITCH, level * 3);
-            } else if (type.is(MobEffects.STRENGTH)) {
+            } else if (type.is(MobEffects.DAMAGE_BOOST)) {
                 tags.merge(Aspect.WEAPON, level * 3);
-            } else if (type.is(MobEffects.MINING_FATIGUE)) {
+            } else if (type.is(MobEffects.DIG_SLOWDOWN)) {
                 tags.merge(Aspect.TRAP, level * 3);
-            } else if (type.is(MobEffects.HASTE)) {
+            } else if (type.is(MobEffects.DIG_SPEED)) {
                 tags.merge(Aspect.TOOL, level * 3);
             } else if (type.is(MobEffects.FIRE_RESISTANCE)) {
                 tags.merge(Aspect.ARMOR, level);
                 tags.merge(Aspect.FIRE, level * 2);
-            } else if (type.is(MobEffects.INSTANT_DAMAGE)) {
+            } else if (type.is(MobEffects.HARM)) {
                 tags.merge(Aspect.DEATH, level * 3);
-            } else if (type.is(MobEffects.INSTANT_HEALTH)) {
+            } else if (type.is(MobEffects.HEAL)) {
                 tags.merge(Aspect.HEAL, level * 3);
             } else if (type.is(MobEffects.HUNGER)) {
                 tags.merge(Aspect.DEATH, level * 3);
             } else if (type.is(MobEffects.INVISIBILITY)) {
                 tags.merge(Aspect.SENSES, level * 3);
-            } else if (type.is(MobEffects.JUMP_BOOST)) {
+            } else if (type.is(MobEffects.JUMP)) {
                 tags.merge(Aspect.FLIGHT, level * 3);
-            } else if (type.is(MobEffects.SLOWNESS)) {
+            } else if (type.is(MobEffects.MOVEMENT_SLOWDOWN)) {
                 tags.merge(Aspect.TRAP, level * 3);
-            } else if (type.is(MobEffects.SPEED)) {
+            } else if (type.is(MobEffects.MOVEMENT_SPEED)) {
                 tags.merge(Aspect.MOTION, level * 3);
             } else if (type.is(MobEffects.NIGHT_VISION)) {
                 tags.merge(Aspect.SENSES, level * 3);
@@ -292,7 +292,7 @@ public final class AspectHelper {
                 tags.merge(Aspect.POISON, level * 3);
             } else if (type.is(MobEffects.REGENERATION)) {
                 tags.merge(Aspect.HEAL, level * 3);
-            } else if (type.is(MobEffects.RESISTANCE)) {
+            } else if (type.is(MobEffects.DAMAGE_RESISTANCE)) {
                 tags.merge(Aspect.ARMOR, level * 3);
             } else if (type.is(MobEffects.WATER_BREATHING)) {
                 tags.merge(Aspect.AIR, level * 3);
@@ -304,7 +304,7 @@ public final class AspectHelper {
     }
 
     private static @Nullable Aspect enchantmentAspect(Holder<Enchantment> enchantment) {
-        return enchantment.unwrapKey().map(key -> ENCHANTMENT_ASPECTS.get(key.identifier())).orElse(null);
+        return enchantment.unwrapKey().map(key -> ENCHANTMENT_ASPECTS.get(key.location())).orElse(null);
     }
 
     private static double attributeTotal(ItemStack stack, Holder<Attribute> attribute, EquipmentSlotGroup slot) {

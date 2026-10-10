@@ -8,10 +8,10 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.client.geom.ModelBoxGeometry;
@@ -23,22 +23,22 @@ import thaumcraft.client.platform.TcRenderTypes.Kind;
 import thaumcraft.client.render.model.ObjModel;
 
 public final class AlchemyRendering {
-    private static final Identifier ALEMBIC_MODEL = Thaumcraft.id("models/obj/alembic.obj");
-    private static final Identifier ALEMBIC_TEXTURE = Thaumcraft.id("textures/model/alembic.png");
-    private static final Identifier LABEL = Thaumcraft.id("textures/model/label.png");
-    private static final Identifier BORE_TEXTURE = Thaumcraft.id("textures/model/bore.png");
-    private static final Identifier FURNACE_MODEL = Thaumcraft.id("models/obj/adv_alch_furnace.obj");
-    private static final Identifier THAUMATORIUM_MODEL = Thaumcraft.id("models/obj/thaumatorium.obj");
-    private static final Identifier THAUMATORIUM_TEXTURE = Thaumcraft.id("textures/model/thaumatorium.png");
-    private static final Identifier BELLOWS_TEXTURE = Thaumcraft.id("textures/model/bellows.png");
-    private static final Identifier CAP_MODEL = Thaumcraft.id("models/obj/obelisk_cap.obj");
-    private static final Identifier SCRUBBER_TEXTURE = Thaumcraft.id("textures/model/fluxscrubber.png");
+    private static final ResourceLocation ALEMBIC_MODEL = Thaumcraft.id("models/obj/alembic.obj");
+    private static final ResourceLocation ALEMBIC_TEXTURE = Thaumcraft.id("textures/model/alembic.png");
+    private static final ResourceLocation LABEL = Thaumcraft.id("textures/model/label.png");
+    private static final ResourceLocation BORE_TEXTURE = Thaumcraft.id("textures/model/bore.png");
+    private static final ResourceLocation FURNACE_MODEL = Thaumcraft.id("models/obj/adv_alch_furnace.obj");
+    private static final ResourceLocation THAUMATORIUM_MODEL = Thaumcraft.id("models/obj/thaumatorium.obj");
+    private static final ResourceLocation THAUMATORIUM_TEXTURE = Thaumcraft.id("textures/model/thaumatorium.png");
+    private static final ResourceLocation BELLOWS_TEXTURE = Thaumcraft.id("textures/model/bellows.png");
+    private static final ResourceLocation CAP_MODEL = Thaumcraft.id("models/obj/obelisk_cap.obj");
+    private static final ResourceLocation SCRUBBER_TEXTURE = Thaumcraft.id("textures/model/fluxscrubber.png");
     private static final int WHITE = 0xFFFFFFFF;
 
     private AlchemyRendering() {
     }
 
-    private static void model(SubmitNodeCollector collector, PoseStack poseStack, Identifier texture, Consumer<EntityQuadSink> geometry, boolean translucent) {
+    private static void model(SubmitNodeCollector collector, PoseStack poseStack, ResourceLocation texture, Consumer<EntityQuadSink> geometry, boolean translucent) {
         collector.submitCustomGeometry(
             poseStack,
             TcRenderTypes.of(translucent ? Kind.ENTITY_TRANSLUCENT : Kind.ENTITY_CUTOUT, texture),
@@ -46,7 +46,7 @@ public final class AlchemyRendering {
         );
     }
 
-    private static void part(SubmitNodeCollector collector, PoseStack poseStack, Identifier texture, ObjModel obj, int light, String... names) {
+    private static void part(SubmitNodeCollector collector, PoseStack poseStack, ResourceLocation texture, ObjModel obj, int light, String... names) {
         collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, texture), (pose, buffer) -> {
             for (String name : names) {
                 obj.renderPart(name, pose, buffer, WHITE, light);
@@ -63,7 +63,7 @@ public final class AlchemyRendering {
         }
     }
 
-    private static void atlasQuad(OrderedSubmitNodeCollector collector, PoseStack poseStack, Identifier spriteId, float top, int argb, int light) {
+    private static void atlasQuad(OrderedSubmitNodeCollector collector, PoseStack poseStack, ResourceLocation spriteId, float top, int argb, int light) {
         TextureAtlasSprite sprite = EssentiaRendering.blockSprite(spriteId);
         float maxU = sprite.getU1();
         float minV = sprite.getV0();
@@ -79,7 +79,7 @@ public final class AlchemyRendering {
     }
 
     public static void crucibleWater(SubmitNodeCollector collector, PoseStack poseStack, float height, int argb, int light) {
-        TextureAtlasSprite sprite = EssentiaRendering.blockSprite(Identifier.withDefaultNamespace("block/water_still"));
+        TextureAtlasSprite sprite = EssentiaRendering.blockSprite(ResourceLocation.withDefaultNamespace("block/water_still"));
         ItemGeometry.solid(collector, poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> doubleSided(
             sink,
             new float[][] {{0.0F, height, 0.0F}, {0.0F, height, 1.0F}, {1.0F, height, 1.0F}, {1.0F, height, 0.0F}},
@@ -91,9 +91,9 @@ public final class AlchemyRendering {
 
     private static void rotateAlembic(PoseStack poseStack, Direction facing, Axis axis) {
         switch (facing) {
-            case NORTH -> poseStack.rotateDegrees(axis, 270.0F);
-            case SOUTH -> poseStack.rotateDegrees(axis, 90.0F);
-            case EAST -> poseStack.rotateDegrees(axis, 180.0F);
+            case NORTH -> poseStack.mulPose(axis.rotationDegrees(270.0F));
+            case SOUTH -> poseStack.mulPose(axis.rotationDegrees(90.0F));
+            case EAST -> poseStack.mulPose(axis.rotationDegrees(180.0F));
             default -> {
             }
         }
@@ -114,7 +114,7 @@ public final class AlchemyRendering {
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
         poseStack.pushPose();
-        poseStack.rotateDegrees(Axis.XN, 90.0F);
+        poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
         if (placed) {
             rotateAlembic(poseStack, facing, Axis.ZP);
             if (aboveFurnace) {
@@ -132,7 +132,7 @@ public final class AlchemyRendering {
         poseStack.popPose();
         if (filter != null) {
             poseStack.pushPose();
-            poseStack.rotateDegrees(Axis.YP, 90.0F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             rotateAlembic(poseStack, facing, Axis.YP);
             poseStack.pushPose();
             poseStack.translate(0.0F, 0.468F, -0.409F);
@@ -142,8 +142,8 @@ public final class AlchemyRendering {
             poseStack.pushPose();
             poseStack.translate(0.0F, 0.468F, -0.41F);
             poseStack.scale(0.013F, 0.013F, 0.013F);
-            poseStack.rotateDegrees(Axis.ZP, 180.0F);
-            int tint = ARGB.opaque(filter.getColor());
+            poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
+            int tint = FastColor.ARGB32.opaque(filter.getColor());
             ItemGeometry.solid(collector.order(3), poseStack, filter.getImage(), true, sink -> EssentiaJarRendering.quad(sink, -8.0F, -8.0F, 8.0F, 8.0F, tint, light));
             poseStack.popPose();
             poseStack.popPose();
@@ -156,15 +156,15 @@ public final class AlchemyRendering {
                 switch (direction) {
                     case DOWN -> {
                         poseStack.translate(-0.5F, 0.5F, 0.0F);
-                        poseStack.rotateDegrees(Axis.ZN, 90.0F);
+                        poseStack.mulPose(Axis.ZN.rotationDegrees(90.0F));
                     }
                     case UP -> {
                         poseStack.translate(0.5F, 0.5F, 0.0F);
-                        poseStack.rotateDegrees(Axis.ZP, 90.0F);
+                        poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
                     }
-                    case NORTH -> poseStack.rotateDegrees(Axis.YP, 90.0F);
-                    case SOUTH -> poseStack.rotateDegrees(Axis.YP, 270.0F);
-                    case WEST -> poseStack.rotateDegrees(Axis.YP, 180.0F);
+                    case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+                    case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(270.0F));
+                    case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
                     default -> {
                     }
                 }
@@ -179,17 +179,17 @@ public final class AlchemyRendering {
 
     public static void advancedFurnace(SubmitNodeCollector collector, PoseStack poseStack, int light, int heat, int vis, int maxVis, int maxPower) {
         ObjModel obj = ObjModel.get(FURNACE_MODEL);
-        Identifier baseTexture = Thaumcraft.id(heat <= 100 ? "textures/model/alch_furnace.png" : "textures/model/alch_furnace_on.png");
-        Identifier tankTexture = Thaumcraft.id(vis <= 0 ? "textures/model/alch_furnace_tank.png" : "textures/model/alch_furnace_tank_on.png");
-        Identifier frame = Thaumcraft.id("block/alchemyblockadv");
-        Identifier goo = Thaumcraft.id("block/fluxgoo");
+        ResourceLocation baseTexture = Thaumcraft.id(heat <= 100 ? "textures/model/alch_furnace.png" : "textures/model/alch_furnace_on.png");
+        ResourceLocation tankTexture = Thaumcraft.id(vis <= 0 ? "textures/model/alch_furnace_tank.png" : "textures/model/alch_furnace_tank_on.png");
+        ResourceLocation frame = Thaumcraft.id("block/alchemyblockadv");
+        ResourceLocation goo = Thaumcraft.id("block/fluxgoo");
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
-        poseStack.rotateDegrees(Axis.XN, 90.0F);
+        poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
         part(collector, poseStack, baseTexture, obj, light, "Base");
         for (int index = 0; index < 4; index++) {
             poseStack.pushPose();
-            poseStack.rotateDegrees(Axis.ZP, 90 * index);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
             part(collector, poseStack, tankTexture, obj, light, "Tank");
             poseStack.popPose();
         }
@@ -198,14 +198,14 @@ public final class AlchemyRendering {
         if (vis > 0) {
             poseStack.pushPose();
             poseStack.translate(0.5F, -0.5F, 1.1F);
-            poseStack.rotateDegrees(Axis.YP, 180.0F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
             atlasQuad(collector.order(1), poseStack, goo, 0.0F, WHITE, goLight);
             poseStack.popPose();
             float drop = 1.0F - (float) vis / maxVis;
             for (int index = 0; index < 4; index++) {
                 poseStack.pushPose();
-                poseStack.rotateDegrees(Axis.ZP, 90 * index);
-                poseStack.rotateDegrees(Axis.XN, 90.0F);
+                poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
+                poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
                 poseStack.translate(0.85F, -1.8F, -1.4F);
                 poseStack.scale(0.3F, 0.6F, 1.0F);
                 atlasQuad(collector.order(2), poseStack, frame, 0.0F, WHITE, frameLight);
@@ -213,8 +213,8 @@ public final class AlchemyRendering {
                 atlasQuad(collector.order(3), poseStack, goo, drop, WHITE, goLight);
                 poseStack.popPose();
                 poseStack.pushPose();
-                poseStack.rotateDegrees(Axis.ZN, 90 * index);
-                poseStack.rotateDegrees(Axis.XP, 90.0F);
+                poseStack.mulPose(Axis.ZN.rotationDegrees(90 * index));
+                poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
                 poseStack.translate(1.15F, 1.8F, -1.4F);
                 poseStack.scale(-0.3F, -0.6F, -1.0F);
                 atlasQuad(collector.order(2), poseStack, frame, 0.0F, WHITE, frameLight);
@@ -224,14 +224,14 @@ public final class AlchemyRendering {
             }
         }
         if (heat > 100) {
-            Identifier fire = Identifier.withDefaultNamespace("block/fire_0");
+            ResourceLocation fire = ResourceLocation.withDefaultNamespace("block/fire_0");
             poseStack.pushPose();
             poseStack.translate(0.0F, 0.0F, 1.0F);
             for (int index = 0; index < 4; index++) {
                 poseStack.pushPose();
-                poseStack.rotateDegrees(Axis.ZP, 90 * index);
-                poseStack.rotateDegrees(Axis.XP, 135.0F);
-                poseStack.rotateDegrees(Axis.ZP, 180.0F);
+                poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
+                poseStack.mulPose(Axis.XP.rotationDegrees(135.0F));
+                poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
                 poseStack.translate(-0.5F, 0.0F, -1.0F);
                 poseStack.pushPose();
                 atlasQuad(collector.order(2), poseStack, fire, 1.0F - Math.min(1.0F, (float) heat / maxPower), WHITE, WorldRendering.emissiveLight(220));
@@ -249,7 +249,7 @@ public final class AlchemyRendering {
         ObjModel obj = ObjModel.get(THAUMATORIUM_MODEL);
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
-        poseStack.rotateDegrees(Axis.XN, 90.0F);
+        poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
         rotateAlembic(poseStack, facing, Axis.ZP);
         collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, THAUMATORIUM_TEXTURE), (pose, buffer) -> obj.renderAll(pose, buffer, WHITE, light));
         poseStack.popPose();
@@ -258,9 +258,9 @@ public final class AlchemyRendering {
     public static void thaumatoriumItemTransform(PoseStack poseStack, Direction facing) {
         poseStack.translate(0.5F + facing.getStepX() / 1.99F, 1.325F, 0.5F + facing.getStepZ() / 1.99F);
         switch (facing) {
-            case NORTH -> poseStack.rotateDegrees(Axis.YP, 180.0F);
-            case WEST -> poseStack.rotateDegrees(Axis.YP, 270.0F);
-            case EAST -> poseStack.rotateDegrees(Axis.YP, 90.0F);
+            case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+            case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(270.0F));
+            case EAST -> poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             default -> {
             }
         }
@@ -274,15 +274,15 @@ public final class AlchemyRendering {
         switch (orientation) {
             case DOWN -> {
                 poseStack.translate(0.0F, 1.0F, -1.0F);
-                poseStack.rotateDegrees(Axis.XP, 90.0F);
+                poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
             }
             case UP -> {
                 poseStack.translate(0.0F, 1.0F, 1.0F);
-                poseStack.rotateDegrees(Axis.XP, 270.0F);
+                poseStack.mulPose(Axis.XP.rotationDegrees(270.0F));
             }
-            case NORTH -> poseStack.rotateDegrees(Axis.YP, 180.0F);
-            case WEST -> poseStack.rotateDegrees(Axis.YP, 270.0F);
-            case EAST -> poseStack.rotateDegrees(Axis.YP, 90.0F);
+            case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+            case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(270.0F));
+            case EAST -> poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
             default -> {
             }
         }

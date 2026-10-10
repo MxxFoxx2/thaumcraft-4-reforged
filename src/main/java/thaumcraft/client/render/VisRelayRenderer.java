@@ -10,12 +10,12 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.geom.PowerBeamGeometry;
 import thaumcraft.client.platform.TcRenderTypes;
@@ -24,7 +24,7 @@ import thaumcraft.vis.VisNet;
 import thaumcraft.vis.VisRelayBlockEntity;
 
 public class VisRelayRenderer implements BlockEntityRenderer<VisRelayBlockEntity, VisRelayRenderer.State> {
-    private static final Identifier BEAM = Thaumcraft.id("textures/misc/beam1.png");
+    private static final ResourceLocation BEAM = Thaumcraft.id("textures/misc/beam1.png");
 
     public static class State extends BlockEntityRenderState {
         Direction orientation = Direction.UP;

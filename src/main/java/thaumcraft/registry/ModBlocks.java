@@ -162,7 +162,7 @@ public final class ModBlocks {
             .sound(SoundType.GRASS)
             .randomTicks()
             .noOcclusion()
-            .pushReaction(PushReaction.POPPED)
+            .pushReaction(PushReaction.DESTROY)
             .lightLevel(state -> state.getValue(ManaPodBlock.AGE))
     );
     public static final DeferredItem<ManaBeanItem> MANA_BEAN = ModItems.ITEMS.registerItem("mana_bean", ManaBeanItem::new, ManaBeanItem::properties);
@@ -431,7 +431,7 @@ public final class ModBlocks {
             .noLootTable()
             .randomTicks()
             .lightLevel(state -> state.getValue(FluxBlock.LEVEL) * 7 / 8)
-            .pushReaction(PushReaction.POPPED)
+            .pushReaction(PushReaction.DESTROY)
             .isSuffocating((state, level, pos) -> false)
             .isViewBlocking((state, level, pos, box) -> false)
     ));
@@ -448,7 +448,7 @@ public final class ModBlocks {
             .randomTicks()
             .lightLevel(state -> state.getValue(FluxBlock.LEVEL) * 7 / 8)
             .sound(SoundType.SLIME_BLOCK)
-            .pushReaction(PushReaction.POPPED)
+            .pushReaction(PushReaction.DESTROY)
     ));
     public static final DeferredBlock<FluxScrubberBlock> FLUX_SCRUBBER = withItem(BLOCKS.registerBlock(
         "flux_scrubber",
@@ -516,7 +516,7 @@ public final class ModBlocks {
                     .strength(0.1F)
                     .sound(SoundType.WOOL)
                     .lightLevel(state -> 14)
-                    .pushReaction(PushReaction.POPPED)
+                    .pushReaction(PushReaction.DESTROY)
             )));
         }
         return candles;
@@ -599,7 +599,7 @@ public final class ModBlocks {
             .sound(SoundType.WOOL)
             .lightLevel(state -> 8)
             .randomTicks()
-            .pushReaction(PushReaction.IMMOVEABLE)
+            .pushReaction(PushReaction.BLOCK)
             .isValidSpawn((state, level, pos, type) -> false)
             .isSuffocating((state, level, pos) -> false)
             .isViewBlocking((state, level, pos, box) -> false);
@@ -630,7 +630,7 @@ public final class ModBlocks {
             .noOcclusion()
             .isSuffocating((state, level, pos) -> false)
             .isViewBlocking((state, level, pos, box) -> false)
-            .pushReaction(PushReaction.POPPED)
+            .pushReaction(PushReaction.DESTROY)
             .isRedstoneConductor((state, level, pos) -> false);
     }
 
@@ -641,7 +641,7 @@ public final class ModBlocks {
             .instabreak()
             .sound(SoundType.GRASS)
             .offsetType(BlockBehaviour.OffsetType.NONE)
-            .pushReaction(PushReaction.POPPED);
+            .pushReaction(PushReaction.DESTROY);
     }
 
     public static void register(IEventBus bus) {

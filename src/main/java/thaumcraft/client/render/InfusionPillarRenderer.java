@@ -8,17 +8,17 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.client.render.model.ObjModel;
 import thaumcraft.infusion.InfusionPillarBlockEntity;
 
 public class InfusionPillarRenderer implements BlockEntityRenderer<InfusionPillarBlockEntity, InfusionPillarRenderer.State> {
-    private static final Identifier MODEL = Thaumcraft.id("models/obj/pillar.obj");
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/model/pillar.png");
+    private static final ResourceLocation MODEL = Thaumcraft.id("models/obj/pillar.obj");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/model/pillar.png");
 
     public static class State extends BlockEntityRenderState {
         int orientation;
@@ -43,13 +43,13 @@ public class InfusionPillarRenderer implements BlockEntityRenderer<InfusionPilla
         ObjModel model = ObjModel.get(MODEL);
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
-        poseStack.rotateDegrees(Axis.XP, -90.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
         if (state.orientation == 3) {
-            poseStack.rotateDegrees(Axis.ZP, 90.0F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
         } else if (state.orientation == 4) {
-            poseStack.rotateDegrees(Axis.ZP, 270.0F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(270.0F));
         } else if (state.orientation == 5) {
-            poseStack.rotateDegrees(Axis.ZP, 180.0F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
         }
         int light = state.lightCoords;
         collector.submitCustomGeometry(

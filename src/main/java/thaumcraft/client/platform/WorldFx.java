@@ -1,6 +1,6 @@
 package thaumcraft.client.platform;
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.client.geom.QuadSink;
@@ -48,7 +48,7 @@ public abstract class WorldFx {
         return (float) (Mth.lerp(partialTick, prevZ, z) - camera.z);
     }
 
-    public abstract Identifier texture();
+    public abstract ResourceLocation texture();
 
     public abstract int blendMode();
 

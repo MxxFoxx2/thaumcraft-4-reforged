@@ -2,41 +2,41 @@ package thaumcraft.crafting;
 
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.AspectKeys;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.wand.WandKeys;
 import thaumcraft.wand.WandParts;
 
-public record TcStack(Identifier item, int count, @Nullable AspectList aspects, Map<String, String> data) {
-    public static final TcStack NONE = new TcStack(Identifier.parse("minecraft:air"), 0, null, Map.of());
+public record TcStack(ResourceLocation item, int count, @Nullable AspectList aspects, Map<String, String> data) {
+    public static final TcStack NONE = new TcStack(ResourceLocation.parse("minecraft:air"), 0, null, Map.of());
 
     public TcStack {
         data = Map.copyOf(data);
     }
 
-    public TcStack(Identifier item, int count, @Nullable AspectList aspects) {
+    public TcStack(ResourceLocation item, int count, @Nullable AspectList aspects) {
         this(item, count, aspects, Map.of());
     }
 
     public static TcStack of(String item) {
-        return new TcStack(Identifier.parse(item), 1, null);
+        return new TcStack(ResourceLocation.parse(item), 1, null);
     }
 
     public static TcStack of(String item, int count) {
-        return new TcStack(Identifier.parse(item), count, null);
+        return new TcStack(ResourceLocation.parse(item), count, null);
     }
 
     public static TcStack withAspects(String item, int count, AspectList aspects) {
-        return new TcStack(Identifier.parse(item), count, aspects);
+        return new TcStack(ResourceLocation.parse(item), count, aspects);
     }
 
     public static TcStack withData(String item, int count, Map<String, String> data) {
-        return new TcStack(Identifier.parse(item), count, null, data);
+        return new TcStack(ResourceLocation.parse(item), count, null, data);
     }
 
     public @Nullable Item resolve() {

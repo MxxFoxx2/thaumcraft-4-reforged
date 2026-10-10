@@ -8,8 +8,8 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.data.AtlasIds;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import thaumcraft.Thaumcraft;
@@ -23,25 +23,25 @@ import thaumcraft.client.platform.TcRenderTypes.Kind;
 import thaumcraft.client.render.model.ObjModel;
 
 public final class EssentiaRendering {
-    public static final Identifier ANIMATED_GLOW = Thaumcraft.id("block/animatedglow");
-    private static final Identifier VALVE_TEXTURE = Thaumcraft.id("textures/model/valve.png");
-    private static final Identifier CENTRIFUGE_TEXTURE = Thaumcraft.id("textures/model/centrifuge.png");
-    private static final Identifier CRYSTALLIZER_TEXTURE = Thaumcraft.id("textures/model/crystalizer.png");
-    private static final Identifier CRYSTALLIZER_MODEL = Thaumcraft.id("models/obj/crystalizer.obj");
-    private static final Identifier RELAY_TEXTURE = Thaumcraft.id("textures/model/vis_relay.png");
-    private static final Identifier RELAY_MODEL = Thaumcraft.id("models/obj/vis_relay.obj");
-    private static final Identifier RESERVOIR_TEXTURE = Thaumcraft.id("textures/model/reservoir.png");
-    private static final Identifier RESERVOIR_MODEL = Thaumcraft.id("models/obj/reservoir.obj");
+    public static final ResourceLocation ANIMATED_GLOW = Thaumcraft.id("block/animatedglow");
+    private static final ResourceLocation VALVE_TEXTURE = Thaumcraft.id("textures/model/valve.png");
+    private static final ResourceLocation CENTRIFUGE_TEXTURE = Thaumcraft.id("textures/model/centrifuge.png");
+    private static final ResourceLocation CRYSTALLIZER_TEXTURE = Thaumcraft.id("textures/model/crystalizer.png");
+    private static final ResourceLocation CRYSTALLIZER_MODEL = Thaumcraft.id("models/obj/crystalizer.obj");
+    private static final ResourceLocation RELAY_TEXTURE = Thaumcraft.id("textures/model/vis_relay.png");
+    private static final ResourceLocation RELAY_MODEL = Thaumcraft.id("models/obj/vis_relay.obj");
+    private static final ResourceLocation RESERVOIR_TEXTURE = Thaumcraft.id("textures/model/reservoir.png");
+    private static final ResourceLocation RESERVOIR_MODEL = Thaumcraft.id("models/obj/reservoir.obj");
     private static final int WHITE = 0xFFFFFFFF;
 
     private EssentiaRendering() {
     }
 
-    public static TextureAtlasSprite blockSprite(Identifier id) {
+    public static TextureAtlasSprite blockSprite(ResourceLocation id) {
         return Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS).getSprite(id);
     }
 
-    public static BoxGeometry.UvRect rect(Identifier id) {
+    public static BoxGeometry.UvRect rect(ResourceLocation id) {
         TextureAtlasSprite sprite = blockSprite(id);
         return new BoxGeometry.UvRect(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
     }
@@ -58,11 +58,11 @@ public final class EssentiaRendering {
     public static void orientation(PoseStack poseStack, Direction facing) {
         poseStack.translate(0.5F, 0.5F, 0.5F);
         switch (facing) {
-            case DOWN -> poseStack.rotateDegrees(Axis.XP, -90.0F);
-            case UP -> poseStack.rotateDegrees(Axis.XP, 90.0F);
-            case SOUTH -> poseStack.rotateDegrees(Axis.YP, 180.0F);
-            case WEST -> poseStack.rotateDegrees(Axis.YP, 90.0F);
-            case EAST -> poseStack.rotateDegrees(Axis.YP, -90.0F);
+            case DOWN -> poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+            case UP -> poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+            case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+            case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+            case EAST -> poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
             default -> {
             }
         }
@@ -72,10 +72,10 @@ public final class EssentiaRendering {
     public static void tubeOrientation(PoseStack poseStack, Direction facing) {
         poseStack.translate(0.5F, 0.5F, 0.5F);
         if (facing.getStepY() == 0) {
-            poseStack.rotateDegrees(Axis.YP, 90.0F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
         } else {
-            poseStack.rotateDegrees(Axis.XN, 90.0F);
-            poseStack.rotateDegrees(Axis.XP, 90.0F * facing.getStepY());
+            poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F * facing.getStepY()));
         }
         poseStack.rotate(new Quaternionf().rotationAxis((float) Math.PI / 2.0F, facing.getStepX(), facing.getStepY(), facing.getStepZ()));
     }
@@ -91,11 +91,11 @@ public final class EssentiaRendering {
     public static void valve(SubmitNodeCollector collector, PoseStack poseStack, Direction facing, float rotation, int light) {
         poseStack.pushPose();
         tubeOrientation(poseStack, facing);
-        poseStack.rotateDegrees(Axis.YP, -rotation * 1.5F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-rotation * 1.5F));
         poseStack.translate(0.0F, -(rotation / 360.0F) * 0.12F, 0.0F);
         valveRod(collector, poseStack, WHITE, light);
         poseStack.pushPose();
-        poseStack.rotateDegrees(Axis.XP, 90.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.translate(-0.25F, -0.25F, -0.25F);
         poseStack.scale(0.5F, 0.5F, 0.5F);
         TextureAtlasSprite sprite = blockSprite(Thaumcraft.id("block/pipe_valve"));
@@ -161,7 +161,7 @@ public final class EssentiaRendering {
             ModelBoxGeometry.box(sink, -4.0F, -8.0F, -4.0F, 8, 4, 8, 20, 16, 64.0F, 32.0F, true, WHITE, light);
             ModelBoxGeometry.box(sink, -4.0F, 4.0F, -4.0F, 8, 4, 8, 20, 16, 64.0F, 32.0F, true, WHITE, light);
         });
-        poseStack.rotateDegrees(Axis.YP, rotation);
+        poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
         collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, CENTRIFUGE_TEXTURE), (pose, buffer) -> {
             EntityQuadSink sink = new EntityQuadSink(pose, buffer);
             ModelBoxGeometry.box(sink, -4.0F, -1.0F, -1.0F, 8, 2, 2, 16, 0, 64.0F, 32.0F, true, WHITE, light);
@@ -194,9 +194,9 @@ public final class EssentiaRendering {
             poseStack.scale(0.75F, 0.75F, 0.75F);
             float glow = Mth.sin((ticks + index * 10) / 2.0F) * 0.05F + 0.95F;
             int crystalLight = WorldRendering.emissiveLight(50 + (int) (150.0F * glow));
-            poseStack.rotateDegrees(Axis.ZP, 90 * index);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
             poseStack.translate(0.34F, 0.0F, 1.2125F);
-            poseStack.rotateDegrees(Axis.ZP, spin);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(spin));
             collector.submitCustomGeometry(
                 poseStack,
                 TcRenderTypes.of(Kind.ENTITY_TRANSLUCENT, RELAY_TEXTURE),
@@ -217,7 +217,7 @@ public final class EssentiaRendering {
 
     public static void reservoirLiquid(SubmitNodeCollector collector, PoseStack poseStack, float level, float red, float green, float blue) {
         BoxGeometry.UvRect rect = rect(ANIMATED_GLOW);
-        int color = ARGB.colorFromFloat(0.9F, red, green, blue);
+        int color = FastColor.ARGB32.colorFromFloat(0.9F, red, green, blue);
         float top = 0.1875F + 0.625F * level;
         int light = liquidLight(0);
         ItemGeometry.solid(

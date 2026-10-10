@@ -45,7 +45,7 @@ public final class HilltopStonesGenerator {
                 boolean stop = false;
                 List<BlockPos> column = new ArrayList<>();
                 for (int y = 1; y < 5; y++) {
-                    if (j - y >= level.getMinY()) {
+                    if (j - y >= level.getMinBuildHeight()) {
                         BlockState below = LegacyGen.get(level, x, j - y, z);
                         if (below.is(Blocks.SNOW) || below.is(BlockTags.SMALL_FLOWERS) || below.is(Blocks.SHORT_GRASS) || below.is(Blocks.FERN) || below.isAir()) {
                             LegacyGen.set(level, x, j - y, z, replace);

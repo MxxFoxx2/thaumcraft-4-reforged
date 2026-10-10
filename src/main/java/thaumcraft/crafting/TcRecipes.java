@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public final class TcRecipes {
     private static final Map<String, TcRecipe> RECIPES = new LinkedHashMap<>();

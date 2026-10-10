@@ -1,7 +1,7 @@
 package thaumcraft.research;
 
 import java.util.List;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.crafting.TcStack;
 
@@ -12,7 +12,7 @@ public sealed interface ResearchPage {
     record ConcealedText(String research, String text) implements ResearchPage {
     }
 
-    record Image(Identifier image, String caption) implements ResearchPage {
+    record Image(ResourceLocation image, String caption) implements ResearchPage {
     }
 
     record Aspects(AspectList aspects) implements ResearchPage {
@@ -48,7 +48,7 @@ public sealed interface ResearchPage {
     }
 
     static ResearchPage image(String image, String caption) {
-        return new Image(Identifier.parse(image), caption);
+        return new Image(ResourceLocation.parse(image), caption);
     }
 
     static ResearchPage aspects(AspectList aspects) {

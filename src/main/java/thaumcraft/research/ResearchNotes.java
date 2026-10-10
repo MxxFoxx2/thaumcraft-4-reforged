@@ -51,7 +51,7 @@ public final class ResearchNotes {
     }
 
     public static boolean consumeInk(Player player, boolean doit) {
-        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+        for (ItemStack stack : player.getInventory().items) {
             if (stack.getItem() instanceof ScribingToolsItem && stack.getDamageValue() < stack.getMaxDamage()) {
                 if (doit) {
                     stack.setDamageValue(stack.getDamageValue() + 1);
@@ -63,7 +63,7 @@ public final class ResearchNotes {
     }
 
     public static int findNoteSlot(Player player, String key) {
-        List<ItemStack> items = player.getInventory().getNonEquipmentItems();
+        List<ItemStack> items = player.getInventory().items;
         for (int slot = 0; slot < items.size(); slot++) {
             ItemStack stack = items.get(slot);
             if (stack.is(ModItems.RESEARCH_NOTES.get()) || stack.is(ModItems.DISCOVERY.get())) {
@@ -77,7 +77,7 @@ public final class ResearchNotes {
     }
 
     public static int findItem(Player player, net.minecraft.world.item.Item item) {
-        List<ItemStack> items = player.getInventory().getNonEquipmentItems();
+        List<ItemStack> items = player.getInventory().items;
         for (int slot = 0; slot < items.size(); slot++) {
             if (items.get(slot).is(item)) {
                 return slot;

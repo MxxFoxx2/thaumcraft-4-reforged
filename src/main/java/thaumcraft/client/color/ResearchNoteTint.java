@@ -3,10 +3,10 @@ package thaumcraft.client.color;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.research.ResearchNote;
 import thaumcraft.research.ResearchNoteKeys;
 
@@ -17,7 +17,7 @@ public record ResearchNoteTint() implements ItemTintSource {
     @Override
     public int calculate(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity owner) {
         ResearchNote note = ResearchNoteKeys.NOTE.get(stack);
-        return ARGB.opaque(note == null ? DEFAULT_COLOR : note.color());
+        return FastColor.ARGB32.opaque(note == null ? DEFAULT_COLOR : note.color());
     }
 
     @Override

@@ -5,10 +5,10 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.Level;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.geom.FacingQuads;
 import thaumcraft.client.geom.FloatyLineGeometry;
@@ -19,7 +19,7 @@ import thaumcraft.client.platform.VertexQuadSink;
 public final class WorldRendering {
     public static final QuadSink NOOP = (x, y, z, u, v, argb, light) -> {
     };
-    public static final Identifier WISPY = Thaumcraft.id("textures/misc/wispy.png");
+    public static final ResourceLocation WISPY = Thaumcraft.id("textures/misc/wispy.png");
 
     private WorldRendering() {
     }

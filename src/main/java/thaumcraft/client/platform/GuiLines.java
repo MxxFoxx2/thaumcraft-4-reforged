@@ -8,10 +8,10 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fc;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public final class GuiLines {
     private static final float LINE_WIDTH = 3.0F;
@@ -95,8 +95,8 @@ public final class GuiLines {
                 int next = index + 1;
                 int startColor = colors[index];
                 int endColor = colors[next];
-                int startClear = ARGB.color(0, startColor);
-                int endClear = ARGB.color(0, endColor);
+                int startClear = FastColor.ARGB32.color(0, startColor);
+                int endClear = FastColor.ARGB32.color(0, endColor);
                 band(consumer, index, next, outer, inner, startClear, endClear, startColor, endColor, normalX, normalY);
                 band(consumer, index, next, inner, -inner, startColor, endColor, startColor, endColor, normalX, normalY);
                 band(consumer, index, next, -inner, -outer, startColor, endColor, startClear, endClear, normalX, normalY);

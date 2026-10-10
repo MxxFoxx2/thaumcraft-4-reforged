@@ -2,19 +2,19 @@ package thaumcraft.client.fx;
 
 import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.geom.BeamGeometry;
 import thaumcraft.client.geom.QuadSink;
 import thaumcraft.client.platform.WorldFx;
 
 public class BeamFx extends WorldFx {
-    private static final Identifier[] TEXTURES = {
+    private static final ResourceLocation[] TEXTURES = {
         Thaumcraft.id("textures/misc/beam.png"),
         Thaumcraft.id("textures/misc/beam1.png"),
         Thaumcraft.id("textures/misc/beam2.png"),
@@ -158,7 +158,7 @@ public class BeamFx extends WorldFx {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return TEXTURES[type];
     }
 

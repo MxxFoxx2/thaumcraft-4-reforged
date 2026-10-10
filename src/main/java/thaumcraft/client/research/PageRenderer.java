@@ -13,11 +13,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectHelper;
@@ -29,7 +29,7 @@ import thaumcraft.research.ResearchItem;
 import thaumcraft.research.ScanKind;
 
 final class PageRenderer {
-    static final Identifier OVERLAY = Thaumcraft.id("textures/gui/gui_researchbook_overlay.png");
+    static final ResourceLocation OVERLAY = Thaumcraft.id("textures/gui/gui_researchbook_overlay.png");
     static final int TITLE_COLOR = 0xFF505050;
 
     final Minecraft minecraft;
@@ -58,7 +58,7 @@ final class PageRenderer {
 
     private void collectAspectItems() {
         for (String key : Knowledge.get(minecraft.player).scannedSet(ScanKind.OBJECT)) {
-            Identifier id = Identifier.tryParse(key);
+            ResourceLocation id = ResourceLocation.tryParse(key);
             Item item = id == null ? null : BuiltInRegistries.ITEM.getOptional(id).orElse(null);
             if (item == null) {
                 continue;
@@ -99,7 +99,7 @@ final class PageRenderer {
         graphics.pose().pushMatrix();
         graphics.pose().translate(x, y);
         graphics.pose().scale(2.0F, 2.0F);
-        GuiBlit.blit(graphics, OVERLAY, drawX, drawY, width, height, u, v, width, height, 256, 256, ARGB.white(alpha));
+        GuiBlit.blit(graphics, OVERLAY, drawX, drawY, width, height, u, v, width, height, 256, 256, FastColor.ARGB32.white(alpha));
         graphics.pose().popMatrix();
     }
 

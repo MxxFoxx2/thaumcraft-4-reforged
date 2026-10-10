@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.blockentity.WandPedestalBlockEntity;
 
 public class WandPedestalRenderer implements BlockEntityRenderer<WandPedestalBlockEntity, WandPedestalRenderer.State> {
@@ -70,7 +70,7 @@ public class WandPedestalRenderer implements BlockEntityRenderer<WandPedestalBlo
         }
         poseStack.pushPose();
         poseStack.translate(0.5F, 1.15F + state.bob, 0.5F);
-        poseStack.rotateDegrees(Axis.YP, state.ticks % 360.0F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(state.ticks % 360.0F));
         state.item.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
         poseStack.popPose();
         if (state.draining) {

@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import java.util.function.Consumer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -26,7 +26,7 @@ public final class ThaumcraftRegions {
     }
 
     private static ResourceKey<Biome> key(String name) {
-        return ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Thaumcraft.MODID, name));
+        return ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, name));
     }
 
     private static final class ReplacingRegion extends Region {
@@ -35,7 +35,7 @@ public final class ThaumcraftRegions {
 
         @SafeVarargs
         private ReplacingRegion(String name, int weight, ResourceKey<Biome> replacement, ResourceKey<Biome>... originals) {
-            super(Identifier.fromNamespaceAndPath(Thaumcraft.MODID, name), RegionType.OVERWORLD, weight);
+            super(ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, name), RegionType.OVERWORLD, weight);
             this.originals = originals;
             this.replacement = replacement;
         }

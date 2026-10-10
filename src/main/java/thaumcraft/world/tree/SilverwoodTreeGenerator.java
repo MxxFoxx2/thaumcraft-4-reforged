@@ -64,7 +64,7 @@ public class SilverwoodTreeGenerator {
         int y = origin.getY();
         int z = origin.getZ();
         int height = random.nextInt(randomTreeHeight) + minTreeHeight;
-        if (y < level.getMinY() + 1 || y + height + 1 > level.getMaxY() + 1) {
+        if (y < level.getMinBuildHeight() + 1 || y + height + 1 > level.getMaxY() + 1) {
             return false;
         }
         for (int layerY = y; layerY <= y + 1 + height; layerY++) {

@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import thaumcraft.Thaumcraft;
 
 public final class ObjModel {
-    private static final Map<Identifier, ObjModel> CACHE = new HashMap<>();
+    private static final Map<ResourceLocation, ObjModel> CACHE = new HashMap<>();
 
     private final Map<String, List<float[][]>> groups;
 
@@ -22,7 +22,7 @@ public final class ObjModel {
         this.groups = groups;
     }
 
-    public static ObjModel get(Identifier location) {
+    public static ObjModel get(ResourceLocation location) {
         return CACHE.computeIfAbsent(location, ObjModel::load);
     }
 
@@ -30,7 +30,7 @@ public final class ObjModel {
         CACHE.clear();
     }
 
-    public static ObjModel load(Identifier location) {
+    public static ObjModel load(ResourceLocation location) {
         List<float[]> positions = new ArrayList<>();
         List<float[]> uvs = new ArrayList<>();
         List<float[]> normals = new ArrayList<>();

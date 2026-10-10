@@ -4,16 +4,16 @@ import java.text.DecimalFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.client.platform.GuiBlit;
 
 public final class AspectRenderer {
-    public static final Identifier BACK = Thaumcraft.id("textures/aspects/_back.png");
-    public static final Identifier UNKNOWN = Thaumcraft.id("textures/aspects/_unknown.png");
-    public static final Identifier PARTICLES = Thaumcraft.id("textures/misc/particles.png");
+    public static final ResourceLocation BACK = Thaumcraft.id("textures/aspects/_back.png");
+    public static final ResourceLocation UNKNOWN = Thaumcraft.id("textures/aspects/_unknown.png");
+    public static final ResourceLocation PARTICLES = Thaumcraft.id("textures/misc/particles.png");
 
     private static final DecimalFormat AMOUNT_FORMAT = new DecimalFormat("#######.##");
 
@@ -31,9 +31,9 @@ public final class AspectRenderer {
     public static void drawTag(GuiGraphicsExtractor graphics, int x, int y, Aspect aspect, float amount, int bonus, float alpha, boolean blackAndWhite) {
         int color;
         if (blackAndWhite) {
-            color = ARGB.colorFromFloat(alpha * 0.8F, 0.1F, 0.1F, 0.1F);
+            color = FastColor.ARGB32.colorFromFloat(alpha * 0.8F, 0.1F, 0.1F, 0.1F);
         } else {
-            color = ARGB.color(Math.round(alpha * 255.0F), aspect.getColor());
+            color = FastColor.ARGB32.color(Math.round(alpha * 255.0F), aspect.getColor());
         }
         GuiBlit.blit(graphics, aspect.getImage(), x, y, 16, 16, 0, 0, 32, 32, 32, 32, color);
         Minecraft minecraft = Minecraft.getInstance();

@@ -39,9 +39,9 @@ import net.minecraft.world.level.block.piston.MovingPistonBlock;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
-import org.jspecify.annotations.Nullable;
+import thaumcraft.compat.ValueInput;
+import thaumcraft.compat.ValueOutput;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.item.ResearchNotesItem;
@@ -306,7 +306,7 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
             && random.nextInt(20) == 0) {
             bonusAspects.merge(Aspect.ENTROPY, 1);
         }
-        int height = worldPosition.getY() - serverLevel.getMinY();
+        int height = worldPosition.getY() - serverLevel.getMinBuildHeight();
         if (height > serverLevel.getHeight() * 0.5F && random.nextInt(20) == 0) {
             bonusAspects.merge(Aspect.AIR, 1);
         }

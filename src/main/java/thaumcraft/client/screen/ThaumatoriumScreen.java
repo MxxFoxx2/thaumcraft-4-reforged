@@ -7,9 +7,9 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +24,7 @@ import thaumcraft.menu.ThaumatoriumMenu;
 import thaumcraft.registry.ModSounds;
 
 public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu> {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/gui/gui_thaumatorium.png");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/gui_thaumatorium.png");
 
     private int index;
     private int lastSize;
@@ -115,7 +115,7 @@ public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu
                 sheet(graphics, leftPos + 104, topPos + 8, 48, 48, 176, 96);
             }
             float alpha = 0.6F + Mth.sin(minecraft.player.tickCount / 5.0F) * 0.4F + 0.4F;
-            sheet(graphics, leftPos + 88, topPos + 16, 24, 24, 176, 56, ARGB.colorFromFloat(Math.min(1.0F, alpha), 1.0F, 1.0F, 1.0F));
+            sheet(graphics, leftPos + 88, topPos + 16, 24, 24, 176, 56, FastColor.ARGB32.colorFromFloat(Math.min(1.0F, alpha), 1.0F, 1.0F, 1.0F));
         }
         drawAspects(graphics, recipe);
         drawOutput(graphics, recipe, mouseX, mouseY);
@@ -140,7 +140,7 @@ public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu
                     sheet(graphics, leftPos + 41 + 16 * position, topPos + 57, 14, 6, 176, 8);
                     int filled = (int) ((float) thaumatorium().getEssentia().getAmount(aspect) / aspects.getAmount(aspect) * 12.0F);
                     if (filled > 0) {
-                        sheet(graphics, leftPos + 42 + 16 * position, topPos + 58, filled, 4, 176, 0, ARGB.opaque(aspect.getColor()));
+                        sheet(graphics, leftPos + 42 + 16 * position, topPos + 58, filled, 4, 176, 0, FastColor.ARGB32.opaque(aspect.getColor()));
                     }
                     position++;
                 }
@@ -171,7 +171,7 @@ public class ThaumatoriumScreen extends AbstractContainerScreen<ThaumatoriumMenu
         boolean selectable = selected().size() < maxRecipes() || selected().contains(recipe.key());
         if (selectable) {
             float alpha = 0.3F + Mth.sin(minecraft.player.tickCount / 4.0F) * 0.3F + 0.3F;
-            graphics.fill(x, y, x + 16, y + 16, ARGB.colorFromFloat(Math.clamp(1.0F - alpha, 0.0F, 1.0F) * 0.6F, 0.0F, 0.0F, 0.0F));
+            graphics.fill(x, y, x + 16, y + 16, FastColor.ARGB32.colorFromFloat(Math.clamp(1.0F - alpha, 0.0F, 1.0F) * 0.6F, 0.0F, 0.0F, 0.0F));
         }
         if (mouseX >= x && mouseY >= y && mouseX < x + 16 && mouseY < y + 16) {
             graphics.setTooltipForNextFrame(font, output, mouseX, mouseY);

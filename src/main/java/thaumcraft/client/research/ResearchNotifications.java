@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.network.AspectDiscoveryPayload;
 import thaumcraft.network.AspectPoolPayload;
@@ -30,7 +30,7 @@ public final class ResearchNotifications {
     private static List<AspectNotification> aspectNotifications = new ArrayList<>();
     private static long lastSound;
 
-    public record Notification(String text, @Nullable Identifier image, long expire, long created, int color) {
+    public record Notification(String text, @Nullable ResourceLocation image, long expire, long created, int color) {
     }
 
     public record AspectNotification(Aspect aspect, float startX, float startY, long created, long expire) {
@@ -51,7 +51,7 @@ public final class ResearchNotifications {
         addNotification(text, aspect.getImage(), aspect.getColor());
     }
 
-    public static void addNotification(String text, @Nullable Identifier image, int color) {
+    public static void addNotification(String text, @Nullable ResourceLocation image, int color) {
         long time = now();
         long timeBonus = notifications.isEmpty() ? NOTIFICATION_DELAY / 2 : 0L;
         notifications.add(new Notification(text, image, time + NOTIFICATION_DELAY + timeBonus, time + NOTIFICATION_DELAY / 4, color));

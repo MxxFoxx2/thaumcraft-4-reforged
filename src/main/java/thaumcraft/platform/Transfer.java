@@ -26,7 +26,7 @@ import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
 import net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public final class Transfer {
     private static final List<Exposure<?>> ITEMS = new ArrayList<>();

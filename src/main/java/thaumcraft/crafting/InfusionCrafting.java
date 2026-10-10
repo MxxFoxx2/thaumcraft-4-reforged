@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -14,7 +14,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.infusion.InfusionKeys;
@@ -118,7 +118,7 @@ public final class InfusionCrafting {
         return !result.data().isEmpty() && !(result.data().containsKey("cap") && result.data().containsKey("rod"));
     }
 
-    public static @Nullable Holder<Enchantment> enchantment(Level level, Identifier id) {
+    public static @Nullable Holder<Enchantment> enchantment(Level level, ResourceLocation id) {
         return level.registryAccess()
             .lookupOrThrow(Registries.ENCHANTMENT)
             .get(ResourceKey.create(Registries.ENCHANTMENT, id))

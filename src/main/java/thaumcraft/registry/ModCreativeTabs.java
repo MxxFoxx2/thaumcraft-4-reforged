@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -93,7 +93,7 @@ public final class ModCreativeTabs {
         if (metal == null) {
             return true;
         }
-        TagKey<Item> ingots = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/" + metal));
+        TagKey<Item> ingots = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "ingots/" + metal));
         return parameters.holders()
             .lookup(Registries.ITEM)
             .flatMap(lookup -> lookup.get(ingots))

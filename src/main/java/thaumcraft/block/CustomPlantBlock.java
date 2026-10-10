@@ -14,12 +14,12 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.VegetationBlock;
+import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class CustomPlantBlock extends VegetationBlock {
+public class CustomPlantBlock extends BushBlock {
     public enum Kind {
         SHIMMERLEAF(PlantSoil.PLAINS),
         CINDERPEARL(PlantSoil.DESERT),
@@ -63,7 +63,7 @@ public class CustomPlantBlock extends VegetationBlock {
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
         if (kind == Kind.VISHROOM && !level.isClientSide() && entity instanceof LivingEntity living) {
-            living.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
+            living.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
         }
         super.entityInside(state, level, pos, entity, effectApplier, isPrecise);
     }

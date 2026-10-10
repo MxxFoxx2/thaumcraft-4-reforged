@@ -9,9 +9,9 @@ import java.util.Map;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 
 public enum Aspect implements StringRepresentable {
@@ -79,7 +79,7 @@ public enum Aspect implements StringRepresentable {
     private final @Nullable String chatcolor;
     private final Aspect @Nullable [] components;
     private final int blend;
-    private final Identifier image;
+    private final ResourceLocation image;
 
     Aspect(String tag, int color, String chatcolor, int blend) {
         this(tag, color, chatcolor, null, blend);
@@ -118,7 +118,7 @@ public enum Aspect implements StringRepresentable {
         return blend;
     }
 
-    public Identifier getImage() {
+    public ResourceLocation getImage() {
         return image;
     }
 

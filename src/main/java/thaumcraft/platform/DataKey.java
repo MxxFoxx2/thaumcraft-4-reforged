@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public final class DataKey<T> {
     private final Supplier<AttachmentType<T>> type;

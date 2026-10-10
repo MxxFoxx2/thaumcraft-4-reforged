@@ -5,7 +5,7 @@ import java.util.List;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 
 @FunctionalInterface
 public interface RecipeAspectSource {

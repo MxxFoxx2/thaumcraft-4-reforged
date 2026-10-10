@@ -1,7 +1,7 @@
 package thaumcraft.client.fx;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import thaumcraft.client.geom.QuadSink;
@@ -25,7 +25,7 @@ public class BoreParticleFx extends BoreSparkleFx {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return ParticleSprites.atlas(sprite);
     }
 

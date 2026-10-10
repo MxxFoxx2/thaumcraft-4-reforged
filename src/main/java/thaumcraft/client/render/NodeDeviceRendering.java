@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.platform.TcRenderTypes;
@@ -12,16 +12,16 @@ import thaumcraft.client.platform.TcRenderTypes.Kind;
 import thaumcraft.client.render.model.ObjModel;
 
 public final class NodeDeviceRendering {
-    private static final Identifier DEVICE_MODEL = Thaumcraft.id("models/obj/node_stabilizer.obj");
-    private static final Identifier RELAY_MODEL = Thaumcraft.id("models/obj/vis_relay.obj");
-    private static final Identifier STABILIZER = Thaumcraft.id("textures/model/node_stabilizer.png");
-    private static final Identifier STABILIZER_OVER = Thaumcraft.id("textures/model/node_stabilizer_over.png");
-    private static final Identifier CONVERTER = Thaumcraft.id("textures/model/node_converter.png");
-    private static final Identifier CONVERTER_OVER = Thaumcraft.id("textures/model/node_converter_over.png");
-    private static final Identifier RELAY = Thaumcraft.id("textures/model/vis_relay.png");
+    private static final ResourceLocation DEVICE_MODEL = Thaumcraft.id("models/obj/node_stabilizer.obj");
+    private static final ResourceLocation RELAY_MODEL = Thaumcraft.id("models/obj/vis_relay.obj");
+    private static final ResourceLocation STABILIZER = Thaumcraft.id("textures/model/node_stabilizer.png");
+    private static final ResourceLocation STABILIZER_OVER = Thaumcraft.id("textures/model/node_stabilizer_over.png");
+    private static final ResourceLocation CONVERTER = Thaumcraft.id("textures/model/node_converter.png");
+    private static final ResourceLocation CONVERTER_OVER = Thaumcraft.id("textures/model/node_converter_over.png");
+    private static final ResourceLocation RELAY = Thaumcraft.id("textures/model/vis_relay.png");
     private static final int WHITE = 0xFFFFFFFF;
 
-    private record Part(Kind kind, Identifier texture) {
+    private record Part(Kind kind, ResourceLocation texture) {
     }
 
     private NodeDeviceRendering() {
@@ -44,12 +44,12 @@ public final class NodeDeviceRendering {
         Part over = new Part(Kind.ENTITY_CUTOUT, STABILIZER_OVER);
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
-        poseStack.rotateDegrees(Axis.XP, -90.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
         part(collector, poseStack, base, model, "lock", WHITE, light);
         for (int index = 0; index < 4; index++) {
             poseStack.pushPose();
-            poseStack.rotateDegrees(Axis.ZP, 90 * index);
-            poseStack.rotateDegrees(Axis.YP, 45.0F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
+            poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
             poseStack.translate(0.0F, 0.0F, count / 100.0F);
             part(collector, poseStack, base, model, "piston", WHITE, light);
             int tint = lock == 2 ? color(1.0F, 0.2F, 0.2F) : WHITE;
@@ -72,7 +72,7 @@ public final class NodeDeviceRendering {
         float travel = Math.min(50, count) / 137.0F;
         poseStack.pushPose();
         poseStack.translate(0.5F, 1.0F, 0.5F);
-        poseStack.rotateDegrees(Axis.XP, 90.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         part(collector, poseStack, base, model, "lock", WHITE, light);
         int lockLight = light;
         if (animated) {
@@ -82,8 +82,8 @@ public final class NodeDeviceRendering {
         part(collector, poseStack, over, model, "lock", tint, lockLight);
         for (int index = 0; index < 4; index++) {
             poseStack.pushPose();
-            poseStack.rotateDegrees(Axis.ZP, 90 * index);
-            poseStack.rotateDegrees(Axis.YP, 45.0F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
+            poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
             poseStack.translate(0.0F, 0.0F, travel);
             part(collector, poseStack, base, model, "piston", WHITE, light);
             int overLight = light;
@@ -103,16 +103,16 @@ public final class NodeDeviceRendering {
         Part glass = new Part(Kind.ENTITY_TRANSLUCENT, RELAY);
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
-        poseStack.rotateDegrees(Axis.XP, -90.0F);
-        poseStack.rotateDegrees(Axis.XP, 180.0F);
-        poseStack.rotateDegrees(Axis.ZP, 45.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+        poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(45.0F));
         part(collector, poseStack, solid, model, "RingFloat", WHITE, light);
         poseStack.pushPose();
-        poseStack.rotateDegrees(Axis.XP, 180.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
         poseStack.translate(0.0F, 0.0F, 0.5F);
         for (int index = 0; index < 4; index++) {
             part(collector, poseStack, solid, model, "Support", WHITE, light);
-            poseStack.rotateDegrees(Axis.ZP, 90.0F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
         }
         poseStack.popPose();
         int tint = WHITE;
@@ -132,16 +132,16 @@ public final class NodeDeviceRendering {
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
         switch (orientation) {
-            case DOWN -> poseStack.rotateDegrees(Axis.XP, -90.0F);
-            case UP -> poseStack.rotateDegrees(Axis.XP, 90.0F);
-            case SOUTH -> poseStack.rotateDegrees(Axis.YP, 180.0F);
-            case WEST -> poseStack.rotateDegrees(Axis.YP, 90.0F);
-            case EAST -> poseStack.rotateDegrees(Axis.YP, -90.0F);
+            case DOWN -> poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+            case UP -> poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+            case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+            case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+            case EAST -> poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
             default -> {
             }
         }
-        poseStack.rotateDegrees(Axis.XP, 180.0F);
-        poseStack.rotateDegrees(Axis.ZP, 45.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(45.0F));
         poseStack.pushPose();
         poseStack.scale(0.75F, 0.75F, 0.75F);
         poseStack.translate(0.0F, 0.0F, -0.16F);

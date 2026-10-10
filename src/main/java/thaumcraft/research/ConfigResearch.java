@@ -1,7 +1,7 @@
 package thaumcraft.research;
 
 import java.util.List;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.crafting.InfusionRecipe;
@@ -25,12 +25,12 @@ public final class ConfigResearch {
     }
 
     private static void initCategories() {
-        ResearchCategories.registerCategory("BASICS", Identifier.parse("thaumcraft:textures/item/thaumonomiconcheat.png"), Identifier.parse("thaumcraft:textures/gui/gui_researchback.png"));
-        ResearchCategories.registerCategory("THAUMATURGY", Identifier.parse("thaumcraft:textures/misc/r_thaumaturgy.png"), Identifier.parse("thaumcraft:textures/gui/gui_researchback.png"));
-        ResearchCategories.registerCategory("ALCHEMY", Identifier.parse("thaumcraft:textures/misc/r_crucible.png"), Identifier.parse("thaumcraft:textures/gui/gui_researchback.png"));
-        ResearchCategories.registerCategory("ARTIFICE", Identifier.parse("thaumcraft:textures/misc/r_artifice.png"), Identifier.parse("thaumcraft:textures/gui/gui_researchback.png"));
-        ResearchCategories.registerCategory("GOLEMANCY", Identifier.parse("thaumcraft:textures/misc/r_golemancy.png"), Identifier.parse("thaumcraft:textures/gui/gui_researchback.png"));
-        ResearchCategories.registerCategory("ELDRITCH", Identifier.parse("thaumcraft:textures/misc/r_eldritch.png"), Identifier.parse("thaumcraft:textures/gui/gui_researchbackeldritch.png"));
+        ResearchCategories.registerCategory("BASICS", ResourceLocation.parse("thaumcraft:textures/item/thaumonomiconcheat.png"), ResourceLocation.parse("thaumcraft:textures/gui/gui_researchback.png"));
+        ResearchCategories.registerCategory("THAUMATURGY", ResourceLocation.parse("thaumcraft:textures/misc/r_thaumaturgy.png"), ResourceLocation.parse("thaumcraft:textures/gui/gui_researchback.png"));
+        ResearchCategories.registerCategory("ALCHEMY", ResourceLocation.parse("thaumcraft:textures/misc/r_crucible.png"), ResourceLocation.parse("thaumcraft:textures/gui/gui_researchback.png"));
+        ResearchCategories.registerCategory("ARTIFICE", ResourceLocation.parse("thaumcraft:textures/misc/r_artifice.png"), ResourceLocation.parse("thaumcraft:textures/gui/gui_researchback.png"));
+        ResearchCategories.registerCategory("GOLEMANCY", ResourceLocation.parse("thaumcraft:textures/misc/r_golemancy.png"), ResourceLocation.parse("thaumcraft:textures/gui/gui_researchback.png"));
+        ResearchCategories.registerCategory("ELDRITCH", ResourceLocation.parse("thaumcraft:textures/misc/r_eldritch.png"), ResourceLocation.parse("thaumcraft:textures/gui/gui_researchbackeldritch.png"));
     }
 
     private static void initBasics() {
@@ -39,7 +39,7 @@ public final class ConfigResearch {
     }
 
     private static void initBasics1() {
-        new ResearchItem("ASPECTS", "BASICS", new AspectList(), 0, 0, 0, Identifier.parse("thaumcraft:textures/misc/r_aspects.png"))
+        new ResearchItem("ASPECTS", "BASICS", new AspectList(), 0, 0, 0, ResourceLocation.parse("thaumcraft:textures/misc/r_aspects.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.ASPECTS.1"),
                 ResearchPage.text("tc.research_page.ASPECTS.2"),
@@ -49,7 +49,7 @@ public final class ConfigResearch {
             .setRound()
             .setAutoUnlock()
             .registerResearchItem();
-        new ResearchItem("PECH", "BASICS", new AspectList(), -4, -4, 0, Identifier.parse("thaumcraft:textures/misc/r_pech.png"))
+        new ResearchItem("PECH", "BASICS", new AspectList(), -4, -4, 0, ResourceLocation.parse("thaumcraft:textures/misc/r_pech.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.PECH.1"),
                 ResearchPage.text("tc.research_page.PECH.2")
@@ -58,7 +58,7 @@ public final class ConfigResearch {
             .setRound()
             .setAutoUnlock()
             .registerResearchItem();
-        new ResearchItem("NODES", "BASICS", new AspectList(), -2, 0, 0, Identifier.parse("thaumcraft:textures/misc/r_nodes.png"))
+        new ResearchItem("NODES", "BASICS", new AspectList(), -2, 0, 0, ResourceLocation.parse("thaumcraft:textures/misc/r_nodes.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.NODES.1"),
                 ResearchPage.text("tc.research_page.NODES.2"),
@@ -68,7 +68,7 @@ public final class ConfigResearch {
             .setRound()
             .setAutoUnlock()
             .registerResearchItem();
-        new ResearchItem("WARP", "BASICS", new AspectList(), 0, 2, 0, Identifier.parse("thaumcraft:textures/misc/r_warp.png"))
+        new ResearchItem("WARP", "BASICS", new AspectList(), 0, 2, 0, ResourceLocation.parse("thaumcraft:textures/misc/r_warp.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.WARP.1"),
                 ResearchPage.text("tc.research_page.WARP.2"),
@@ -148,7 +148,7 @@ public final class ConfigResearch {
             .setRound()
             .setAutoUnlock()
             .registerResearchItem();
-        new ResearchItem("ENCHANT", "BASICS", new AspectList(), -4, -2, 0, Identifier.parse("thaumcraft:textures/misc/r_enchant.png"))
+        new ResearchItem("ENCHANT", "BASICS", new AspectList(), -4, -2, 0, ResourceLocation.parse("thaumcraft:textures/misc/r_enchant.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.ENCHANT.1"),
                 ResearchPage.text("tc.research_page.ENCHANT.2")
@@ -157,14 +157,14 @@ public final class ConfigResearch {
             .setRound()
             .setAutoUnlock()
             .registerResearchItem();
-        new ResearchItem("NODETAPPER1", "BASICS", new AspectList().add(Aspect.AURA, 3).add(Aspect.MAGIC, 3).add(Aspect.MOTION, 3).add(Aspect.EXCHANGE, 3), -4, 1, 2, Identifier.parse("thaumcraft:textures/misc/r_nodetap1.png"))
+        new ResearchItem("NODETAPPER1", "BASICS", new AspectList().add(Aspect.AURA, 3).add(Aspect.MAGIC, 3).add(Aspect.MOTION, 3).add(Aspect.EXCHANGE, 3), -4, 1, 2, ResourceLocation.parse("thaumcraft:textures/misc/r_nodetap1.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.NODETAPPER1.1")
             )
             .setParents("NODES")
             .setRound()
             .registerResearchItem();
-        new ResearchItem("NODEPRESERVE", "BASICS", new AspectList().add(Aspect.AURA, 3).add(Aspect.GREED, 3).add(Aspect.SENSES, 3), -6, 2, 2, Identifier.parse("thaumcraft:textures/misc/r_nodepreserve.png"))
+        new ResearchItem("NODEPRESERVE", "BASICS", new AspectList().add(Aspect.AURA, 3).add(Aspect.GREED, 3).add(Aspect.SENSES, 3), -6, 2, 2, ResourceLocation.parse("thaumcraft:textures/misc/r_nodepreserve.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.NODEPRESERVE")
             )
@@ -183,7 +183,7 @@ public final class ConfigResearch {
             .setParents("NODEPRESERVE")
             .setConcealed()
             .registerResearchItem();
-        new ResearchItem("NODETAPPER2", "BASICS", new AspectList().add(Aspect.AURA, 6).add(Aspect.MAGIC, 3).add(Aspect.MOTION, 3).add(Aspect.EXCHANGE, 3), -3, 3, 2, Identifier.parse("thaumcraft:textures/misc/r_nodetap2.png"))
+        new ResearchItem("NODETAPPER2", "BASICS", new AspectList().add(Aspect.AURA, 6).add(Aspect.MAGIC, 3).add(Aspect.MOTION, 3).add(Aspect.EXCHANGE, 3), -3, 3, 2, ResourceLocation.parse("thaumcraft:textures/misc/r_nodetap2.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.NODETAPPER2.1")
             )
@@ -191,7 +191,7 @@ public final class ConfigResearch {
             .setSpecial()
             .setRound()
             .registerResearchItem();
-        new ResearchItem("RESEARCHER1", "BASICS", new AspectList().add(Aspect.MIND, 3).add(Aspect.SENSES, 3).add(Aspect.ORDER, 3), 4, 1, 1, Identifier.parse("thaumcraft:textures/misc/r_researcher1.png"))
+        new ResearchItem("RESEARCHER1", "BASICS", new AspectList().add(Aspect.MIND, 3).add(Aspect.SENSES, 3).add(Aspect.ORDER, 3), 4, 1, 1, ResourceLocation.parse("thaumcraft:textures/misc/r_researcher1.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.RESEARCHER1.1")
             )
@@ -207,7 +207,7 @@ public final class ConfigResearch {
             .setRound()
             .setParents("RESEARCHER1")
             .registerResearchItem();
-        new ResearchItem("RESEARCHER2", "BASICS", new AspectList().add(Aspect.MIND, 6).add(Aspect.ORDER, 3).add(Aspect.SENSES, 3).add(Aspect.MAGIC, 3), 3, 3, 2, Identifier.parse("thaumcraft:textures/misc/r_researcher2.png"))
+        new ResearchItem("RESEARCHER2", "BASICS", new AspectList().add(Aspect.MIND, 6).add(Aspect.ORDER, 3).add(Aspect.SENSES, 3).add(Aspect.MAGIC, 3), 3, 3, 2, ResourceLocation.parse("thaumcraft:textures/misc/r_researcher2.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.RESEARCHER2.1")
             )
@@ -216,7 +216,7 @@ public final class ConfigResearch {
             .setParents("RESEARCHER1")
             .setWarp(1)
             .registerResearchItem();
-        new ResearchItem("RESEARCHDUPE", "BASICS", new AspectList().add(Aspect.MIND, 6).add(Aspect.EXCHANGE, 3).add(Aspect.SENSES, 3).add(Aspect.GREED, 3).add(Aspect.CRAFT, 3), 4, 5, 3, Identifier.parse("thaumcraft:textures/misc/r_resdupe.png"))
+        new ResearchItem("RESEARCHDUPE", "BASICS", new AspectList().add(Aspect.MIND, 6).add(Aspect.EXCHANGE, 3).add(Aspect.SENSES, 3).add(Aspect.GREED, 3).add(Aspect.CRAFT, 3), 4, 5, 3, ResourceLocation.parse("thaumcraft:textures/misc/r_resdupe.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.RESEARCHDUPE.1")
             )
@@ -611,7 +611,7 @@ public final class ConfigResearch {
             .setParentsHidden("INFUSION", "FOCUSFIRE")
             .setParents("VISPOWER")
             .registerResearchItem();
-        new ResearchItem("VAMPBAT", "THAUMATURGY", new AspectList().add(Aspect.HUNGER, 5).add(Aspect.LIFE, 5).add(Aspect.MAGIC, 5), 4, -8, 1, Identifier.parse("thaumcraft:textures/foci/vampirebats.png"))
+        new ResearchItem("VAMPBAT", "THAUMATURGY", new AspectList().add(Aspect.HUNGER, 5).add(Aspect.LIFE, 5).add(Aspect.MAGIC, 5), 4, -8, 1, ResourceLocation.parse("thaumcraft:textures/foci/vampirebats.png"))
             .setPages(
                 ResearchPage.text("focus.upgrade.vampirebats.text")
             )
@@ -665,7 +665,7 @@ public final class ConfigResearch {
             )
             .setParents("CRUCIBLE")
             .registerResearchItem();
-        new ResearchItem("ALCHEMICALDUPLICATION", "ALCHEMY", new AspectList().add(Aspect.MAGIC, 3).add(Aspect.GREED, 3).add(Aspect.CRAFT, 3), -4, 0, 1, Identifier.parse("thaumcraft:textures/misc/r_alchmult.png"))
+        new ResearchItem("ALCHEMICALDUPLICATION", "ALCHEMY", new AspectList().add(Aspect.MAGIC, 3).add(Aspect.GREED, 3).add(Aspect.CRAFT, 3), -4, 0, 1, ResourceLocation.parse("thaumcraft:textures/misc/r_alchmult.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.ALCHEMICALDUPLICATION.1"),
                 ResearchPage.crucible("AltGunpowder"),
@@ -678,7 +678,7 @@ public final class ConfigResearch {
             .setSecondary()
             .setParents("TALLOW")
             .registerResearchItem();
-        new ResearchItem("ALCHEMICALMANUFACTURE", "ALCHEMY", new AspectList().add(Aspect.MAGIC, 3).add(Aspect.EXCHANGE, 3).add(Aspect.CRAFT, 3), -5, -2, 1, Identifier.parse("thaumcraft:textures/misc/r_alchman.png"))
+        new ResearchItem("ALCHEMICALMANUFACTURE", "ALCHEMY", new AspectList().add(Aspect.MAGIC, 3).add(Aspect.EXCHANGE, 3).add(Aspect.CRAFT, 3), -5, -2, 1, ResourceLocation.parse("thaumcraft:textures/misc/r_alchman.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.ALCHEMICALMANUFACTURE.1"),
                 ResearchPage.crucible("AltWeb"),
@@ -689,7 +689,7 @@ public final class ConfigResearch {
             .setSecondary()
             .setParents("ALCHEMICALDUPLICATION")
             .registerResearchItem();
-        new ResearchItem("ENTROPICPROCESSING", "ALCHEMY", new AspectList().add(Aspect.MAGIC, 1).add(Aspect.ENTROPY, 3).add(Aspect.CRAFT, 1), -6, 1, 1, Identifier.parse("thaumcraft:textures/misc/r_alchent.png"))
+        new ResearchItem("ENTROPICPROCESSING", "ALCHEMY", new AspectList().add(Aspect.MAGIC, 1).add(Aspect.ENTROPY, 3).add(Aspect.CRAFT, 1), -6, 1, 1, ResourceLocation.parse("thaumcraft:textures/misc/r_alchent.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.ENTROPICPROCESSING.1"),
                 ResearchPage.crucible("AltCrackedBrick"),
@@ -970,7 +970,7 @@ public final class ConfigResearch {
             .setParents("TUBEFILTER")
             .setConcealed()
             .registerResearchItem();
-        new ResearchItem("THAUMATORIUM", "ALCHEMY", new AspectList().add(Aspect.WATER, 3).add(Aspect.MAGIC, 6).add(Aspect.EXCHANGE, 3).add(Aspect.CRAFT, 3), 10, -2, 3, Identifier.parse("thaumcraft:textures/block/alchemyblock.png"))
+        new ResearchItem("THAUMATORIUM", "ALCHEMY", new AspectList().add(Aspect.WATER, 3).add(Aspect.MAGIC, 6).add(Aspect.EXCHANGE, 3).add(Aspect.CRAFT, 3), 10, -2, 3, ResourceLocation.parse("thaumcraft:textures/block/alchemyblock.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.THAUMATORIUM.1"),
                 ResearchPage.compound("Thaumatorium"),
@@ -1117,7 +1117,7 @@ public final class ConfigResearch {
             .setConcealed()
             .setParents("NITOR")
             .registerResearchItem();
-        new ResearchItem("INFERNALFURNACE", "ARTIFICE", new AspectList().add(Aspect.FIRE, 6).add(Aspect.METAL, 3).add(Aspect.CRAFT, 3).add(Aspect.AURA, 3), -4, -1, 2, Identifier.parse("thaumcraft:textures/misc/r_infernalfurnace.png"))
+        new ResearchItem("INFERNALFURNACE", "ARTIFICE", new AspectList().add(Aspect.FIRE, 6).add(Aspect.METAL, 3).add(Aspect.CRAFT, 3).add(Aspect.AURA, 3), -4, -1, 2, ResourceLocation.parse("thaumcraft:textures/misc/r_infernalfurnace.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.INFERNALFURNACE.1"),
                 ResearchPage.compound("InfernalFurnace"),
@@ -1236,7 +1236,7 @@ public final class ConfigResearch {
         TcRecipes.register(new InfusionRecipe("ConfigResearch.RunicAugment2", "RUNICAUGMENTATION", TcStack.of("thaumcraft:robe_chestplate"), 6, new AspectList().add(Aspect.ARMOR, 64).add(Aspect.MAGIC, 64).add(Aspect.ENERGY, 128), TcIngredient.item("thaumcraft:robe_chestplate"), List.of(TcIngredient.item("minecraft:diamond"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"))));
         TcRecipes.register(new InfusionRecipe("ConfigResearch.RunicAugment3", "RUNICAUGMENTATION", TcStack.of("thaumcraft:robe_chestplate"), 6, new AspectList().add(Aspect.ARMOR, 128).add(Aspect.MAGIC, 128).add(Aspect.ENERGY, 256), TcIngredient.item("thaumcraft:robe_chestplate"), List.of(TcIngredient.item("minecraft:diamond"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"))));
         TcRecipes.register(new InfusionRecipe("ConfigResearch.RunicAugment4", "RUNICAUGMENTATION", TcStack.of("thaumcraft:robe_chestplate"), 7, new AspectList().add(Aspect.ARMOR, 256).add(Aspect.MAGIC, 256).add(Aspect.ENERGY, 512), TcIngredient.item("thaumcraft:robe_chestplate"), List.of(TcIngredient.item("minecraft:diamond"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"), TcIngredient.item("thaumcraft:salis_mundus"))));
-        new ResearchItem("RUNICAUGMENTATION", "ARTIFICE", new AspectList().add(Aspect.MAGIC, 3).add(Aspect.ARMOR, 3).add(Aspect.EXCHANGE, 4).add(Aspect.GREED, 4), 6, 4, 1, Identifier.parse("thaumcraft:textures/misc/r_runicupg.png"))
+        new ResearchItem("RUNICAUGMENTATION", "ARTIFICE", new AspectList().add(Aspect.MAGIC, 3).add(Aspect.ARMOR, 3).add(Aspect.EXCHANGE, 4).add(Aspect.GREED, 4), 6, 4, 1, ResourceLocation.parse("thaumcraft:textures/misc/r_runicupg.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.RUNICAUGMENTATION.1"),
                 ResearchPage.infusion("ConfigResearch.RunicAugment0", "ConfigResearch.RunicAugment1", "ConfigResearch.RunicAugment2", "ConfigResearch.RunicAugment3", "ConfigResearch.RunicAugment4"),
@@ -1430,7 +1430,7 @@ public final class ConfigResearch {
             .setEntityTriggers("thaumcraft:brainy_zombie", "thaumcraft:giant_brainy_zombie")
             .setWarp(3)
             .registerResearchItem();
-        new ResearchItem("INFUSIONENCHANTMENT", "ARTIFICE", new AspectList().add(Aspect.MAGIC, 6).add(Aspect.MIND, 3).add(Aspect.WEAPON, 3).add(Aspect.ARMOR, 3).add(Aspect.TOOL, 3), -6, 11, 3, Identifier.parse("thaumcraft:textures/misc/r_enchant.png"))
+        new ResearchItem("INFUSIONENCHANTMENT", "ARTIFICE", new AspectList().add(Aspect.MAGIC, 6).add(Aspect.MIND, 3).add(Aspect.WEAPON, 3).add(Aspect.ARMOR, 3).add(Aspect.TOOL, 3), -6, 11, 3, ResourceLocation.parse("thaumcraft:textures/misc/r_enchant.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.INFUSIONENCHANTMENT.1"),
                 ResearchPage.text("tc.research_page.INFUSIONENCHANTMENT.2"),
@@ -1485,7 +1485,7 @@ public final class ConfigResearch {
             .setConcealed()
             .setSecondary()
             .registerResearchItem();
-        new ResearchItem("MASKGRINNINGDEVIL", "ARTIFICE", new AspectList().add(Aspect.HEAL, 5).add(Aspect.MIND, 5).add(Aspect.ARMOR, 3), -10, 8, 2, Identifier.parse("thaumcraft:textures/misc/r_mask0.png"))
+        new ResearchItem("MASKGRINNINGDEVIL", "ARTIFICE", new AspectList().add(Aspect.HEAL, 5).add(Aspect.MIND, 5).add(Aspect.ARMOR, 3), -10, 8, 2, ResourceLocation.parse("thaumcraft:textures/misc/r_mask0.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.MASKGRINNINGDEVIL.1"),
                 ResearchPage.infusion("MaskGrinningDevil")
@@ -1497,7 +1497,7 @@ public final class ConfigResearch {
     }
 
     private static void initArtifice5() {
-        new ResearchItem("MASKANGRYGHOST", "ARTIFICE", new AspectList().add(Aspect.ENTROPY, 5).add(Aspect.DEATH, 5).add(Aspect.ARMOR, 3), -10, 9, 2, Identifier.parse("thaumcraft:textures/misc/r_mask1.png"))
+        new ResearchItem("MASKANGRYGHOST", "ARTIFICE", new AspectList().add(Aspect.ENTROPY, 5).add(Aspect.DEATH, 5).add(Aspect.ARMOR, 3), -10, 9, 2, ResourceLocation.parse("thaumcraft:textures/misc/r_mask1.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.MASKANGRYGHOST.1"),
                 ResearchPage.infusion("MaskAngryGhost")
@@ -1507,7 +1507,7 @@ public final class ConfigResearch {
             .setSecondary()
             .setWarp(1)
             .registerResearchItem();
-        new ResearchItem("MASKSIPPINGFIEND", "ARTIFICE", new AspectList().add(Aspect.UNDEAD, 5).add(Aspect.LIFE, 5).add(Aspect.ARMOR, 3), -10, 10, 2, Identifier.parse("thaumcraft:textures/misc/r_mask2.png"))
+        new ResearchItem("MASKSIPPINGFIEND", "ARTIFICE", new AspectList().add(Aspect.UNDEAD, 5).add(Aspect.LIFE, 5).add(Aspect.ARMOR, 3), -10, 10, 2, ResourceLocation.parse("thaumcraft:textures/misc/r_mask2.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.MASKSIPPINGFIEND.1"),
                 ResearchPage.infusion("MaskSippingFiend")
@@ -1912,7 +1912,7 @@ public final class ConfigResearch {
     }
 
     private static void initEldritch1() {
-        new ResearchItem("ELDRITCHMINOR", "ELDRITCH", new AspectList(), 1, 0, 0, Identifier.parse("thaumcraft:textures/misc/r_eldritchminor.png"))
+        new ResearchItem("ELDRITCHMINOR", "ELDRITCH", new AspectList(), 1, 0, 0, ResourceLocation.parse("thaumcraft:textures/misc/r_eldritchminor.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.ELDRITCHMINOR.1"),
                 ResearchPage.crucible("VoidSeed")
@@ -1921,7 +1921,7 @@ public final class ConfigResearch {
             .setRound()
             .setSpecial()
             .registerResearchItem();
-        new ResearchItem("ELDRITCHMAJOR", "ELDRITCH", new AspectList(), -1, 0, 0, Identifier.parse("thaumcraft:textures/misc/r_eldritchmajor.png"))
+        new ResearchItem("ELDRITCHMAJOR", "ELDRITCH", new AspectList(), -1, 0, 0, ResourceLocation.parse("thaumcraft:textures/misc/r_eldritchmajor.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.ELDRITCHMAJOR.1"),
                 ResearchPage.text("tc.research_page.ELDRITCHMAJOR.2")
@@ -1943,7 +1943,7 @@ public final class ConfigResearch {
             .setSpecial()
             .setWarp(6)
             .registerResearchItem();
-        new ResearchItem("ENTEROUTER", "ELDRITCH", new AspectList(), -3, 4, 1, Identifier.parse("thaumcraft:textures/misc/r_outer.png"))
+        new ResearchItem("ENTEROUTER", "ELDRITCH", new AspectList(), -3, 4, 1, ResourceLocation.parse("thaumcraft:textures/misc/r_outer.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.ENTEROUTER.1")
             )
@@ -1952,7 +1952,7 @@ public final class ConfigResearch {
             .setRound()
             .setParents("OCULUS")
             .registerResearchItem();
-        new ResearchItem("OUTERREV", "ELDRITCH", new AspectList().add(Aspect.ELDRITCH, 4).add(Aspect.MIND, 4), -5, 3, 1, Identifier.parse("thaumcraft:textures/misc/r_outerrev.png"))
+        new ResearchItem("OUTERREV", "ELDRITCH", new AspectList().add(Aspect.ELDRITCH, 4).add(Aspect.MIND, 4), -5, 3, 1, ResourceLocation.parse("thaumcraft:textures/misc/r_outerrev.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.OUTERREV.1")
             )
@@ -1973,7 +1973,7 @@ public final class ConfigResearch {
             .setSpecial()
             .setParents("ELDRITCHMINOR")
             .registerResearchItem();
-        new ResearchItem("PRIMNODE", "ELDRITCH", new AspectList().add(Aspect.AURA, 1).add(Aspect.MAGIC, 1).add(Aspect.ORDER, 1).add(Aspect.ENTROPY, 1), 0, 6, 1, Identifier.parse("thaumcraft:textures/misc/r_nodes_2.png"))
+        new ResearchItem("PRIMNODE", "ELDRITCH", new AspectList().add(Aspect.AURA, 1).add(Aspect.MAGIC, 1).add(Aspect.ORDER, 1).add(Aspect.ENTROPY, 1), 0, 6, 1, ResourceLocation.parse("thaumcraft:textures/misc/r_nodes_2.png"))
             .setPages(
                 ResearchPage.text("tc.research_page.PRIMNODE.1")
             )

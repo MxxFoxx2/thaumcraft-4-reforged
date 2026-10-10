@@ -3,7 +3,7 @@ package thaumcraft.client.color;
 import java.util.List;
 import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.color.block.BlockTintSources;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -41,6 +41,6 @@ public final class BlockTints {
     }
 
     private static BlockTintSource constant(int color) {
-        return BlockTintSources.constant(ARGB.opaque(color));
+        return BlockTintSources.constant(FastColor.ARGB32.opaque(color));
     }
 }

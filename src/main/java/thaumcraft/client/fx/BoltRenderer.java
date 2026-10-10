@@ -6,7 +6,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -24,8 +24,8 @@ import thaumcraft.client.platform.VertexQuadSink;
 @EventBusSubscriber(modid = Thaumcraft.MODID, value = Dist.CLIENT)
 public final class BoltRenderer {
     private static final ContextKey<Frame> DATA_KEY = new ContextKey<>(Thaumcraft.id("lightning_bolts"));
-    private static final Identifier LARGE = Thaumcraft.id("textures/misc/p_large.png");
-    private static final Identifier SMALL = Thaumcraft.id("textures/misc/p_small.png");
+    private static final ResourceLocation LARGE = Thaumcraft.id("textures/misc/p_large.png");
+    private static final ResourceLocation SMALL = Thaumcraft.id("textures/misc/p_small.png");
     private static final float[][] OUTER_COLORS = {
         {0.6F, 0.3F, 0.6F},
         {0.6F, 0.6F, 0.1F},
@@ -104,7 +104,7 @@ public final class BoltRenderer {
         }
     }
 
-    private static void submitPass(SubmitNodeCollector collector, PoseStack poseStack, Identifier texture, boolean translucent, Snapshot snapshot, float partialTick, Vec3 cameraPos, Vec3 look, float[] color, int pass) {
+    private static void submitPass(SubmitNodeCollector collector, PoseStack poseStack, ResourceLocation texture, boolean translucent, Snapshot snapshot, float partialTick, Vec3 cameraPos, Vec3 look, float[] color, int pass) {
         collector.submitCustomGeometry(
             poseStack,
             TcRenderTypes.of(translucent ? TcRenderTypes.Kind.TRANSLUCENT : TcRenderTypes.Kind.ADDITIVE, texture),

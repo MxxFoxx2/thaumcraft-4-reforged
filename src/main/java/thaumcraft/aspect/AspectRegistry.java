@@ -25,7 +25,7 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.storage.TagValueOutput;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public final class AspectRegistry {
     private static final int HISTORY_LIMIT = 100;

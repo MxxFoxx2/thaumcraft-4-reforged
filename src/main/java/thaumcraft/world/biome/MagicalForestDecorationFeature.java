@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -28,7 +28,7 @@ public record MagicalForestDecorationFeature() implements Feature {
     public static final MapCodec<MagicalForestDecorationFeature> CODEC = MapCodec.unit(MagicalForestDecorationFeature::new);
     public static final ResourceKey<Biome> BIOME = ResourceKey.create(
         Registries.BIOME,
-        Identifier.fromNamespaceAndPath(Thaumcraft.MODID, "magical_forest")
+        ResourceLocation.fromNamespaceAndPath(Thaumcraft.MODID, "magical_forest")
     );
 
     @Override
@@ -96,14 +96,14 @@ public record MagicalForestDecorationFeature() implements Feature {
 
     private static void placeBlob(WorldGenLevel level, Random random, BlockPos start) {
         BlockPos.MutableBlockPos pos = start.mutable();
-        while (pos.getY() > level.getMinY() + 3) {
+        while (pos.getY() > level.getMinBuildHeight() + 3) {
             BlockState below = level.getBlockState(pos.below());
             if (below.is(BlockTags.DIRT) || below.is(BlockTags.BASE_STONE_OVERWORLD)) {
                 break;
             }
             pos.move(0, -1, 0);
         }
-        if (pos.getY() <= level.getMinY() + 3) {
+        if (pos.getY() <= level.getMinBuildHeight() + 3) {
             return;
         }
         BlockState mossy = Blocks.MOSSY_COBBLESTONE.defaultBlockState();
@@ -127,7 +127,7 @@ public record MagicalForestDecorationFeature() implements Feature {
 
     private static void placeMushroom(WorldGenLevel level, ChunkGenerator chunkGenerator, RandomSource randomSource, Random random, BlockPos pos) {
         String name = random.nextBoolean() ? "huge_red_mushroom" : "huge_brown_mushroom";
-        ResourceKey<Feature> key = ResourceKey.create(Registries.FEATURE, Identifier.withDefaultNamespace(name));
+        ResourceKey<Feature> key = ResourceKey.create(Registries.FEATURE, ResourceLocation.withDefaultNamespace(name));
         level.registryAccess().lookupOrThrow(Registries.FEATURE).get(key).ifPresent(reference -> reference.value().place(level, chunkGenerator, randomSource, pos));
     }
 

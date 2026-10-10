@@ -9,15 +9,15 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.platform.GuiBlit;
 
 final class BookText {
-    static final Identifier BOOK = Thaumcraft.id("textures/gui/gui_researchbook.png");
+    static final ResourceLocation BOOK = Thaumcraft.id("textures/gui/gui_researchbook.png");
 
-    private static final Style UNIFORM = Style.EMPTY.withFont(new FontDescription.Resource(Identifier.withDefaultNamespace("uniform")));
+    private static final Style UNIFORM = Style.EMPTY.withFont(new FontDescription.Resource(ResourceLocation.withDefaultNamespace("uniform")));
     private static final Pattern MARKER = Pattern.compile("^@(\\d+)@$");
     private static final Pattern INSERT = Pattern.compile("<LINE/?>|<IMG>(.*?)</IMG>");
 
@@ -42,7 +42,7 @@ final class BookText {
         }
     }
 
-    record Picture(Identifier texture, int u, int v, int width, int regionHeight, float scale) implements Line {
+    record Picture(ResourceLocation texture, int u, int v, int width, int regionHeight, float scale) implements Line {
         @Override
         public int height() {
             return (int) Math.floor(regionHeight * scale);
@@ -109,7 +109,7 @@ final class BookText {
             return null;
         }
         String path = parts[1].replace("textures/items/", "textures/item/").replace("textures/blocks/", "textures/block/");
-        Identifier texture = Identifier.tryParse(parts[0] + ":" + path);
+        ResourceLocation texture = ResourceLocation.tryParse(parts[0] + ":" + path);
         if (texture == null) {
             return null;
         }

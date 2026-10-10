@@ -11,9 +11,9 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Inventory;
@@ -31,7 +31,6 @@ import thaumcraft.menu.ResearchTableMenu;
 import thaumcraft.network.AspectCombinePayload;
 import thaumcraft.network.AspectPlacePayload;
 import thaumcraft.registry.ModSounds;
-import thaumcraft.registry.ModSounds;
 import thaumcraft.research.HexGrid;
 import thaumcraft.research.Knowledge;
 import thaumcraft.research.PlayerKnowledge;
@@ -41,11 +40,11 @@ import thaumcraft.research.ResearchManager;
 import thaumcraft.research.ResearchNote;
 
 public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMenu> {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/gui/guiresearchtable2.png");
-    private static final Identifier HEX = Thaumcraft.id("textures/gui/hex1.png");
-    private static final Identifier HEX_HIGHLIGHT = Thaumcraft.id("textures/gui/hex2.png");
-    private static final Identifier PARCHMENT = Thaumcraft.id("textures/misc/parchment3.png");
-    private static final Identifier SCRIPT = Thaumcraft.id("textures/misc/script.png");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/guiresearchtable2.png");
+    private static final ResourceLocation HEX = Thaumcraft.id("textures/gui/hex1.png");
+    private static final ResourceLocation HEX_HIGHLIGHT = Thaumcraft.id("textures/gui/hex2.png");
+    private static final ResourceLocation PARCHMENT = Thaumcraft.id("textures/misc/parchment3.png");
+    private static final ResourceLocation SCRIPT = Thaumcraft.id("textures/misc/script.png");
     private static final int HEX_SIZE = 9;
     private static final int GRID_X = 169;
     private static final int GRID_Y = 83;
@@ -99,7 +98,7 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         return offsetX >= 0 && offsetY >= 0 && offsetX < width && offsetY < height;
     }
 
-    private void blit(GuiGraphicsExtractor graphics, Identifier texture, int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, int color) {
+    private void blit(GuiGraphicsExtractor graphics, ResourceLocation texture, int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, int color) {
         GuiBlit.blit(graphics, texture, x, y, width, height, u, v, width, height, textureWidth, textureHeight, color);
     }
 
@@ -161,12 +160,12 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         float red = 0.7F + Mth.sin((float) ((count + x) / 10.0)) * 0.15F + 0.15F;
         float green = 0.7F + Mth.sin((float) ((count + x + y) / 11.0)) * 0.15F + 0.15F;
         float blue = 0.7F + Mth.sin((float) ((count + y) / 12.0)) * 0.15F + 0.15F;
-        drawOrb(graphics, x, y, ARGB.colorFromFloat(1.0F, Math.min(red, 1.0F), Math.min(green, 1.0F), Math.min(blue, 1.0F)));
+        drawOrb(graphics, x, y, FastColor.ARGB32.colorFromFloat(1.0F, Math.min(red, 1.0F), Math.min(green, 1.0F), Math.min(blue, 1.0F)));
     }
 
     private void drawOrb(GuiGraphicsExtractor graphics, double x, double y, int color) {
         int part = minecraft.player.tickCount % 8;
-        blit(graphics, AspectRenderer.PARTICLES, (int) x, (int) y, 16, 16, 128 + part * 16, 128, 256, 256, ARGB.opaque(color));
+        blit(graphics, AspectRenderer.PARTICLES, (int) x, (int) y, 16, 16, 128 + part * 16, 128, 256, 256, FastColor.ARGB32.opaque(color));
     }
 
     @Override
@@ -222,7 +221,7 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
 
     private void drawLine(GuiGraphicsExtractor graphics, double x, double y, double x2, double y2) {
         float alpha = Mth.clamp(0.3F + Mth.sin((float) (minecraft.player.tickCount + x)) * 0.3F + 0.3F, 0.0F, 1.0F);
-        int color = ARGB.colorFromFloat(alpha, 0.0F, 0.6F, 0.8F);
+        int color = FastColor.ARGB32.colorFromFloat(alpha, 0.0F, 0.6F, 0.8F);
         GuiLines.strip(graphics, new float[] {(float) x, (float) x2}, new float[] {(float) y, (float) y2}, new int[] {color, color}, true);
     }
 
@@ -230,7 +229,7 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         graphics.pose().pushMatrix();
         graphics.pose().translate((float) x, (float) y);
         graphics.pose().rotate((float) -Math.PI / 2.0F);
-        GuiBlit.blit(graphics, SCRIPT, -5, -5, 10, 10, rune * 16, 0, 16, 16, 256, 16, ARGB.colorFromFloat(alpha, 0.0F, 0.0F, 0.0F));
+        GuiBlit.blit(graphics, SCRIPT, -5, -5, 10, 10, rune * 16, 0, 16, 16, 256, 16, FastColor.ARGB32.colorFromFloat(alpha, 0.0F, 0.0F, 0.0F));
         graphics.pose().popMatrix();
     }
 

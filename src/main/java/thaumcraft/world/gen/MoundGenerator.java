@@ -10,10 +10,9 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -43,7 +42,7 @@ public final class MoundGenerator {
             name = text.substring(0, bracket);
             properties = text.substring(bracket + 1, text.length() - 1);
         }
-        Block block = BuiltInRegistries.BLOCK.getValue(Identifier.parse(name));
+        Block block = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(name));
         BlockState state = block.defaultBlockState();
         if (properties != null) {
             for (String pair : properties.split(",")) {
@@ -107,8 +106,8 @@ public final class MoundGenerator {
         loot(level, new BlockPos(i + 10, j + 1, k + 9), BuiltInLootTables.SIMPLE_DUNGEON, random);
         LegacyGen.set(level, i + 4, j + 5, k + 4, Blocks.SPAWNER.defaultBlockState());
         LegacyGen.set(level, i + 4, j + 5, k + 14, Blocks.SPAWNER.defaultBlockState());
-        spawner(level, new BlockPos(i + 4, j + 5, k + 4), EntityTypes.SKELETON);
-        spawner(level, new BlockPos(i + 4, j + 5, k + 14), EntityTypes.ZOMBIE);
+        spawner(level, new BlockPos(i + 4, j + 5, k + 4), EntityType.SKELETON);
+        spawner(level, new BlockPos(i + 4, j + 5, k + 14), EntityType.ZOMBIE);
         return true;
     }
 

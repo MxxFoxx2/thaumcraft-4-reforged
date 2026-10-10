@@ -21,7 +21,7 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.arcane.ArcaneWorkbenchBlockEntity;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.crafting.ArcaneCrafting;

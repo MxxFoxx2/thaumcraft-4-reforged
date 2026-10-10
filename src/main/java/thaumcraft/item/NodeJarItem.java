@@ -3,7 +3,7 @@ package thaumcraft.item;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.AspectKeys;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.node.NodeModifier;

@@ -23,14 +23,14 @@ public class FluxGasBlock extends FluxBlock {
         if (level.isClientSide() || level.getRandom().nextInt(10) != 0 || !(entity instanceof LivingEntity living)) {
             return;
         }
-        if (EffectHooks.isTainted(living) || living.getType().getTags().anyMatch(EntityTypeTags.UNDEAD::equals) || living.hasEffect(MobEffects.NAUSEA)) {
+        if (EffectHooks.isTainted(living) || living.getType().getTags().anyMatch(EntityTypeTags.UNDEAD::equals) || living.hasEffect(MobEffects.CONFUSION)) {
             return;
         }
         int quantaIndex = state.getValue(LEVEL) - 1;
         if (level.getRandom().nextBoolean()) {
             EffectHooks.applyVisExhaust(living, 1200, quantaIndex / 3);
         } else {
-            living.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 80 + quantaIndex * 20, 0, false, true));
+            living.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 80 + quantaIndex * 20, 0, false, true));
         }
         if (quantaIndex > 0) {
             level.setBlock(pos, withLevel(quantaIndex), Block.UPDATE_ALL);

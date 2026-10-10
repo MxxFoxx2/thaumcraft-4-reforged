@@ -7,7 +7,7 @@ import java.util.Map;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.levelgen.structure.pools.LegacySinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
@@ -37,8 +37,8 @@ public final class VillageStructures {
         Registry<StructureTemplatePool> pools = event.getServer().registryAccess().lookupOrThrow(Registries.TEMPLATE_POOL);
         Registry<StructureProcessorList> processorLists = event.getServer().registryAccess().lookupOrThrow(Registries.PROCESSOR_LIST);
         BIOMES.forEach((biome, processorName) -> {
-            StructureTemplatePool pool = pools.getValueOrThrow(ResourceKey.create(Registries.TEMPLATE_POOL, Identifier.withDefaultNamespace("village/" + biome + "/houses")));
-            Holder<StructureProcessorList> processors = processorLists.getOrThrow(ResourceKey.create(Registries.PROCESSOR_LIST, Identifier.withDefaultNamespace(processorName)));
+            StructureTemplatePool pool = pools.getValueOrThrow(ResourceKey.create(Registries.TEMPLATE_POOL, ResourceLocation.withDefaultNamespace("village/" + biome + "/houses")));
+            Holder<StructureProcessorList> processors = processorLists.getOrThrow(ResourceKey.create(Registries.PROCESSOR_LIST, ResourceLocation.withDefaultNamespace(processorName)));
             HOUSES.forEach((house, weight) -> inject(pool, Thaumcraft.MODID + ":village/" + biome + "/" + house, processors, weight));
         });
     }

@@ -3,10 +3,10 @@ package thaumcraft.client.color;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.AspectKeys;
 import thaumcraft.aspect.AspectList;
 
@@ -19,7 +19,7 @@ public record AspectTint() implements ItemTintSource {
         if (aspects.isEmpty()) {
             return 0xFFFFFFFF;
         }
-        return ARGB.opaque(aspects.getAspects().get(0).getColor());
+        return FastColor.ARGB32.opaque(aspects.getAspects().get(0).getColor());
     }
 
     @Override

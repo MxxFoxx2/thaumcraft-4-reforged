@@ -15,14 +15,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.client.aspect.AspectRenderer;
@@ -41,9 +41,9 @@ import thaumcraft.research.ResearchManager;
 import thaumcraft.research.ResearchNotes;
 
 public class ResearchBrowserScreen extends Screen {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/gui/gui_research.png");
-    private static final Identifier NODES = Thaumcraft.id("textures/misc/nodes.png");
-    private static final Style GALACTIC = Style.EMPTY.withFont(new FontDescription.Resource(Identifier.withDefaultNamespace("alt")));
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/gui_research.png");
+    private static final ResourceLocation NODES = Thaumcraft.id("textures/misc/nodes.png");
+    private static final Style GALACTIC = Style.EMPTY.withFont(new FontDescription.Resource(ResourceLocation.withDefaultNamespace("alt")));
     private static final int PANE_WIDTH = 256;
     private static final int PANE_HEIGHT = 230;
     private static final int VIEW_WIDTH = 224;
@@ -197,7 +197,7 @@ public class ResearchBrowserScreen extends Screen {
     }
 
     private static int gray(float value) {
-        return ARGB.colorFromFloat(1.0F, value, value, value);
+        return FastColor.ARGB32.colorFromFloat(1.0F, value, value, value);
     }
 
     private Component styled(String key, boolean galactic) {
@@ -519,7 +519,7 @@ public class ResearchBrowserScreen extends Screen {
                         AspectRenderer.drawTag(graphics, x + index * 16, y + height + 8, aspect, item.tags().getAmount(aspect), 0, alpha, false);
                     } else {
                         enough = false;
-                        GuiBlit.blit(graphics, AspectRenderer.UNKNOWN, x + index * 16, y + height + 8, 16, 16, 0, 0, 32, 32, 32, 32, ARGB.colorFromFloat(0.5F, 0.5F, 0.5F, 0.5F));
+                        GuiBlit.blit(graphics, AspectRenderer.UNKNOWN, x + index * 16, y + height + 8, 16, 16, 0, 0, 32, 32, 32, 32, FastColor.ARGB32.colorFromFloat(0.5F, 0.5F, 0.5F, 0.5F));
                     }
                     index++;
                 }
@@ -572,7 +572,7 @@ public class ResearchBrowserScreen extends Screen {
             }
             pointsX[index] = x - stepX * index + offsetX;
             pointsY[index] = y - stepY * index + offsetY;
-            colors[index] = ARGB.colorFromFloat(opacity, r, g, b);
+            colors[index] = FastColor.ARGB32.colorFromFloat(opacity, r, g, b);
             if (horizontal) {
                 stepX *= 1.0F - 1.0F / (increments * 3.0F / 2.0F);
             } else {
@@ -586,7 +586,7 @@ public class ResearchBrowserScreen extends Screen {
         int frames = 32;
         int part = minecraft.player.tickCount % frames;
         int frame = frames - 1 - part;
-        GuiBlit.blit(graphics, NODES, x - 40, y - 40, 80, 80, frame * 64, 5 * 64, 64, 64, 2048, 2048, ARGB.color((int) (0.66F * 255.0F), 0x440055));
+        GuiBlit.blit(graphics, NODES, x - 40, y - 40, 80, 80, frame * 64, 5 * 64, 64, 64, 2048, 2048, FastColor.ARGB32.color((int) (0.66F * 255.0F), 0x440055));
     }
 
     @Override

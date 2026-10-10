@@ -3,14 +3,14 @@ package thaumcraft.client.screen;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.platform.GuiBlit;
 import thaumcraft.menu.AlchemicalFurnaceMenu;
 
 public class AlchemicalFurnaceScreen extends AbstractContainerScreen<AlchemicalFurnaceMenu> {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/gui/gui_alchemyfurnace.png");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/gui_alchemyfurnace.png");
 
     public AlchemicalFurnaceScreen(AlchemicalFurnaceMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 176, 166);

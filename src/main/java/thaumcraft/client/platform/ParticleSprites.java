@@ -4,13 +4,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.Material;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public final class ParticleSprites {
     private ParticleSprites() {
@@ -36,7 +36,7 @@ public final class ParticleSprites {
         return sprite.getV(fraction);
     }
 
-    public static Identifier atlas(TextureAtlasSprite sprite) {
+    public static ResourceLocation atlas(TextureAtlasSprite sprite) {
         return sprite.atlasLocation();
     }
 }

@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
-import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.resources.ResourceLocation;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
@@ -15,7 +15,7 @@ import thaumcraft.node.NodeModifier;
 import thaumcraft.node.NodeType;
 
 public final class NodeRendering {
-    public static final Identifier TEXTURE = Thaumcraft.id("textures/misc/nodes.png");
+    public static final ResourceLocation TEXTURE = Thaumcraft.id("textures/misc/nodes.png");
     private static final int FRAMES = 32;
     private static final int LIGHT = 220;
     private static final int BLEND_ADDITIVE = 1;
@@ -39,9 +39,9 @@ public final class NodeRendering {
         float ticks = clientTicks();
         submit(collector, poseStack, aspects, type, modifier, ticks);
         poseStack.pushPose();
-        poseStack.rotateDegrees(Axis.YP, 90.0F);
+        poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
         submit(collector, poseStack, aspects, type, modifier, ticks);
-        poseStack.rotateDegrees(Axis.XP, 90.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         submit(collector, poseStack, aspects, type, modifier, ticks);
         poseStack.popPose();
     }

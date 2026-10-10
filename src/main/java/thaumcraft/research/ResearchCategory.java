@@ -4,20 +4,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.resources.ResourceLocation;
+import javax.annotation.Nullable;
 
 public final class ResearchCategory {
     private final String key;
-    private final Identifier icon;
-    private final Identifier background;
+    private final ResourceLocation icon;
+    private final ResourceLocation background;
     private final Map<String, ResearchItem> research = new LinkedHashMap<>();
     private int minColumn;
     private int minRow;
     private int maxColumn;
     private int maxRow;
 
-    ResearchCategory(String key, Identifier icon, Identifier background) {
+    ResearchCategory(String key, ResourceLocation icon, ResourceLocation background) {
         this.key = key;
         this.icon = icon;
         this.background = background;
@@ -27,11 +27,11 @@ public final class ResearchCategory {
         return key;
     }
 
-    public Identifier icon() {
+    public ResourceLocation icon() {
         return icon;
     }
 
-    public Identifier background() {
+    public ResourceLocation background() {
         return background;
     }
 

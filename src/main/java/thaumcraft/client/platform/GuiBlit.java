@@ -2,7 +2,7 @@ package thaumcraft.client.platform;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public final class GuiBlit {
     private GuiBlit() {
@@ -10,7 +10,7 @@ public final class GuiBlit {
 
     public static void blit(
         GuiGraphicsExtractor graphics,
-        Identifier texture,
+        ResourceLocation texture,
         int x,
         int y,
         int width,

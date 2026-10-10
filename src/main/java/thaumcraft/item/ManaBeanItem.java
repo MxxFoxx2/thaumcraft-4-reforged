@@ -25,7 +25,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectKeys;
 import thaumcraft.aspect.AspectList;
@@ -37,17 +37,17 @@ import thaumcraft.research.ResearchManager;
 
 public class ManaBeanItem extends Item {
     private static final List<Holder<MobEffect>> POTION_EFFECTS = List.of(
-        MobEffects.SPEED,
-        MobEffects.SLOWNESS,
-        MobEffects.HASTE,
-        MobEffects.MINING_FATIGUE,
-        MobEffects.STRENGTH,
-        MobEffects.INSTANT_HEALTH,
-        MobEffects.INSTANT_DAMAGE,
-        MobEffects.JUMP_BOOST,
-        MobEffects.NAUSEA,
+        MobEffects.MOVEMENT_SPEED,
+        MobEffects.MOVEMENT_SLOWDOWN,
+        MobEffects.DIG_SPEED,
+        MobEffects.DIG_SLOWDOWN,
+        MobEffects.DAMAGE_BOOST,
+        MobEffects.HEAL,
+        MobEffects.HARM,
+        MobEffects.JUMP,
+        MobEffects.CONFUSION,
         MobEffects.REGENERATION,
-        MobEffects.RESISTANCE,
+        MobEffects.DAMAGE_RESISTANCE,
         MobEffects.FIRE_RESISTANCE,
         MobEffects.WATER_BREATHING,
         MobEffects.INVISIBILITY,

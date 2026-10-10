@@ -1,6 +1,6 @@
 package thaumcraft.client.fx;
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
@@ -11,7 +11,7 @@ import thaumcraft.client.geom.QuadSink;
 import thaumcraft.client.platform.WorldFx;
 
 public class VisSparkleFx extends WorldFx {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/misc/particles.png");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/misc/particles.png");
 
     private final double targetX;
     private final double targetY;
@@ -73,7 +73,7 @@ public class VisSparkleFx extends WorldFx {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return TEXTURE;
     }
 

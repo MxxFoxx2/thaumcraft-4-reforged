@@ -5,8 +5,8 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -19,7 +19,7 @@ import thaumcraft.client.platform.GuiBlit;
 
 @EventBusSubscriber(modid = Thaumcraft.MODID, value = Dist.CLIENT)
 public final class ResearchHud {
-    private static final Identifier THAUMONOMICON = Thaumcraft.id("textures/item/thaumonomicon.png");
+    private static final ResourceLocation THAUMONOMICON = Thaumcraft.id("textures/item/thaumonomicon.png");
 
     private ResearchHud() {
     }
@@ -65,11 +65,11 @@ public final class ResearchHud {
                 graphics.pose().pushMatrix();
                 graphics.pose().translate(width - size - 10, height - entry * 8 + shift);
                 graphics.pose().scale(0.5F, 0.5F);
-                graphics.text(font, notification.text(), -4, -8, ARGB.color(textAlpha, 0xFFFFFF), true);
+                graphics.text(font, notification.text(), -4, -8, FastColor.ARGB32.color(textAlpha, 0xFFFFFF), true);
                 graphics.pose().popMatrix();
             }
             if (notification.image() != null) {
-                int color = ARGB.color(Math.max(0, Math.min(255, alpha / 2)), notification.color());
+                int color = FastColor.ARGB32.color(Math.max(0, Math.min(255, alpha / 2)), notification.color());
                 graphics.pose().pushMatrix();
                 graphics.pose().translate(width - 9, height - entry * 8 + shift - 6.0F);
                 graphics.pose().scale(0.5F, 0.5F);
@@ -85,7 +85,7 @@ public final class ResearchHud {
                 graphics.pose().translate(width - 5 - 8.0F * scale - cube * size * 3.0F, height - entry * 8 + shift - 2.0F - 8.0F * scale);
                 graphics.pose().scale(scale, scale);
                 int particleU = 16 * ((tickCount + entry * 3) % 16);
-                GuiBlit.blit(graphics, AspectRenderer.PARTICLES, 0, 0, 16, 16, particleU, 80, 16, 16, 256, 256, ARGB.colorFromFloat(particleAlpha, 1.0F, 1.0F, 1.0F));
+                GuiBlit.blit(graphics, AspectRenderer.PARTICLES, 0, 0, 16, 16, particleU, 80, 16, 16, 256, 256, FastColor.ARGB32.colorFromFloat(particleAlpha, 1.0F, 1.0F, 1.0F));
                 graphics.pose().popMatrix();
             }
         }
@@ -116,12 +116,12 @@ public final class ResearchHud {
             graphics.pose().pushMatrix();
             graphics.pose().translate((float) x, (float) y);
             graphics.pose().scale(alpha, alpha);
-            int color = ARGB.color(Math.round(Math.max(0.0F, Math.min(1.0F, alpha * 0.66F)) * 255.0F), notification.aspect().getColor());
+            int color = FastColor.ARGB32.color(Math.round(Math.max(0.0F, Math.min(1.0F, alpha * 0.66F)) * 255.0F), notification.aspect().getColor());
             BrowserDraw.full(graphics, notification.aspect().getImage(), 0, 0, 19, 19, color);
             graphics.pose().popMatrix();
         }
         if (mainAlpha > 0.0F) {
-            BrowserDraw.full(graphics, THAUMONOMICON, width - 16, 0, 16, 16, ARGB.colorFromFloat(Math.min(1.0F, mainAlpha), 1.0F, 1.0F, 1.0F));
+            BrowserDraw.full(graphics, THAUMONOMICON, width - 16, 0, 16, 16, FastColor.ARGB32.colorFromFloat(Math.min(1.0F, mainAlpha), 1.0F, 1.0F, 1.0F));
         }
     }
 }

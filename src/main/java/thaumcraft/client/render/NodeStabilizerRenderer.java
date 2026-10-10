@@ -8,12 +8,12 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.geom.FacingQuads;
 import thaumcraft.client.geom.NodeGeometry;
@@ -22,7 +22,7 @@ import thaumcraft.client.platform.VertexQuadSink;
 import thaumcraft.node.NodeStabilizerBlockEntity;
 
 public class NodeStabilizerRenderer implements BlockEntityRenderer<NodeStabilizerBlockEntity, NodeStabilizerRenderer.State> {
-    private static final Identifier BUBBLE = Thaumcraft.id("textures/misc/node_bubble.png");
+    private static final ResourceLocation BUBBLE = Thaumcraft.id("textures/misc/node_bubble.png");
 
     public static class State extends BlockEntityRenderState {
         int count;

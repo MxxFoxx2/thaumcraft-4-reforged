@@ -3,7 +3,7 @@ package thaumcraft.essentia;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 
 public final class Essentia {
     private Essentia() {

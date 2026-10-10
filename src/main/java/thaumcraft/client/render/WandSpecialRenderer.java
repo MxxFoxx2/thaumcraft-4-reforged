@@ -6,12 +6,12 @@ import com.mojang.serialization.MapCodec;
 import java.util.function.Consumer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.geom.WandGeometry;
 import thaumcraft.client.platform.ItemGeometry;
@@ -36,7 +36,7 @@ public class WandSpecialRenderer implements SpecialModelRenderer<WandParts> {
                 if (staff) {
                     poseStack.scale(0.8F, 0.8F, 0.8F);
                 }
-                poseStack.rotateDegrees(Axis.ZP, 66.0F);
+                poseStack.mulPose(Axis.ZP.rotationDegrees(66.0F));
                 poseStack.translate(0.0F, 0.6F, 0.0F);
                 if (staff) {
                     poseStack.translate(-0.7F, 0.6F, 0.0F);
@@ -57,10 +57,10 @@ public class WandSpecialRenderer implements SpecialModelRenderer<WandParts> {
                 }
             }
         }
-        poseStack.rotateDegrees(Axis.XP, 180.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
     }
 
-    private static final Identifier SCRIPT = Thaumcraft.id("textures/misc/script.png");
+    private static final ResourceLocation SCRIPT = Thaumcraft.id("textures/misc/script.png");
     private static final int BLEND_ADDITIVE = 1;
 
     @Override

@@ -7,14 +7,14 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import thaumcraft.Thaumcraft;
 import thaumcraft.platform.baubles.BaublesMenu;
 
 public class BaublesScreen extends AbstractContainerScreen<BaublesMenu> {
-    public static final Identifier TEXTURE = Thaumcraft.id("textures/gui/baubles/expanded_inventory.png");
+    public static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/baubles/expanded_inventory.png");
 
     private final EffectsInInventory effects;
     private float mouseXPosition;

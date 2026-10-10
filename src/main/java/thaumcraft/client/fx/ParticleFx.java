@@ -2,7 +2,7 @@ package thaumcraft.client.fx;
 
 import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
@@ -12,7 +12,7 @@ import thaumcraft.client.geom.QuadSink;
 import thaumcraft.client.platform.WorldFx;
 
 public abstract class ParticleFx extends WorldFx {
-    public static final Identifier PARTICLES = Thaumcraft.id("textures/misc/particles.png");
+    public static final ResourceLocation PARTICLES = Thaumcraft.id("textures/misc/particles.png");
     public static final float CELL = 0.0624375F;
 
     protected final RandomSource random;
@@ -74,7 +74,7 @@ public abstract class ParticleFx extends WorldFx {
     }
 
     @Override
-    public Identifier texture() {
+    public ResourceLocation texture() {
         return PARTICLES;
     }
 

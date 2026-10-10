@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
@@ -18,7 +18,7 @@ import thaumcraft.menu.DeconstructionTableMenu;
 import thaumcraft.registry.ModSounds;
 
 public class DeconstructionTableScreen extends AbstractContainerScreen<DeconstructionTableMenu> {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/gui/gui_decontable.png");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/gui_decontable.png");
     private static final int ASPECT_X = 64;
     private static final int ASPECT_Y = 48;
 

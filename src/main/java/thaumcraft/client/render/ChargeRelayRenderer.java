@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.arcane.VisChargeRelayBlockEntity;
 import thaumcraft.vis.VisNet;
 import thaumcraft.vis.VisRelayBlockEntity;

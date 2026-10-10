@@ -1,7 +1,7 @@
 package thaumcraft.essentia;
 
 import net.minecraft.core.Direction;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 
 public interface EssentiaTransport {

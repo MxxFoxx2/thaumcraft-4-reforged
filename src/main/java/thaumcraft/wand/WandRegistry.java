@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.Nullable;
+import net.minecraft.resources.ResourceLocation;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 
@@ -23,7 +23,7 @@ public final class WandRegistry {
         "silver", 1.0F, List.of(Aspect.AIR, Aspect.EARTH, Aspect.FIRE, Aspect.WATER), 0.95F, "silver_wand_cap", 4, "silver"
     );
 
-    public static final WandRod ROD_WOOD = rod("wood", 25, Identifier.withDefaultNamespace("stick"), 1, null, false, false, false);
+    public static final WandRod ROD_WOOD = rod("wood", 25, ResourceLocation.withDefaultNamespace("stick"), 1, null, false, false, false);
     public static final WandRod ROD_GREATWOOD = rod("greatwood", 50, Thaumcraft.id("greatwood_rod"), 3, null, false, false, false);
     public static final WandRod ROD_OBSIDIAN = rod("obsidian", 75, Thaumcraft.id("obsidian_rod"), 6, RodUpdates.single(Aspect.EARTH), false, false, false);
     public static final WandRod ROD_BLAZE = rod("blaze", 75, Thaumcraft.id("blazing_rod"), 6, RodUpdates.single(Aspect.FIRE), true, false, false);
@@ -63,7 +63,7 @@ public final class WandRegistry {
     private static WandRod rod(
         String base,
         int capacity,
-        Identifier item,
+        ResourceLocation item,
         int craftCost,
         @Nullable RodUpdate update,
         boolean glowing,

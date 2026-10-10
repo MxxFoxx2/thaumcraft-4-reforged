@@ -1,7 +1,7 @@
 package thaumcraft.research;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -61,7 +61,7 @@ public final class RecipeSync {
             return 1;
         }
         if (TcRecipes.get(key) instanceof CraftingRecipeRef reference) {
-            Identifier id = reference.recipe();
+            ResourceLocation id = reference.recipe();
             if (server.getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, id)).isEmpty()) {
                 Thaumcraft.LOGGER.debug("Research {} recipe {} points to missing crafting recipe {}", research.key(), key, id);
                 return 1;

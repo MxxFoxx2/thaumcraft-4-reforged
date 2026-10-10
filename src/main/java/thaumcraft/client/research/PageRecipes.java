@@ -5,7 +5,7 @@ import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.context.ContextMap;
@@ -17,7 +17,7 @@ import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.item.enchantment.Enchantment;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.client.platform.GuiBlit;
@@ -225,7 +225,7 @@ final class PageRecipes {
         if (!(TcRecipes.get(page.recipe()) instanceof InfusionEnchantmentRecipe recipe)) {
             return;
         }
-        Identifier id = recipe.enchantment();
+        ResourceLocation id = recipe.enchantment();
         Holder<Enchantment> holder = renderer.minecraft.level == null ? null : renderer.minecraft.level.registryAccess()
             .lookupOrThrow(Registries.ENCHANTMENT)
             .get(ResourceKey.create(Registries.ENCHANTMENT, id))

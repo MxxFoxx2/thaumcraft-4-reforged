@@ -29,10 +29,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
+import thaumcraft.compat.ValueInput;
+import thaumcraft.compat.ValueOutput;
 import net.minecraft.world.phys.AABB;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectContainer;
 import thaumcraft.aspect.AspectList;
@@ -363,7 +363,7 @@ public class InfusionMatrixBlockEntity extends TcBlockEntity implements WandInte
             if (target.experienceLevel > 0) {
                 target.giveExperienceLevels(-1);
                 recipeXp--;
-                target.hurtServer(serverLevel, serverLevel.damageSources().magic(), random.nextInt(2));
+                target.hurt(serverLevel.damageSources().magic(), random.nextInt(2));
                 ModNetwork.sendToNear(
                     serverLevel,
                     null,
@@ -460,7 +460,7 @@ public class InfusionMatrixBlockEntity extends TcBlockEntity implements WandInte
                 )
             );
             DamageSource magic = serverLevel.damageSources().magic();
-            target.hurtServer(serverLevel, magic, 4 + serverLevel.getRandom().nextInt(4));
+            target.hurt(magic, 4 + serverLevel.getRandom().nextInt(4));
             if (!all) {
                 break;
             }

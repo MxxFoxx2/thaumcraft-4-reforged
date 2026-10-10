@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Vector3f;
@@ -20,9 +20,9 @@ import thaumcraft.client.platform.TcRenderTypes.Kind;
 import thaumcraft.client.render.model.ObjModel;
 
 public class ThaumometerItemRenderer implements NoDataSpecialModelRenderer {
-    private static final Identifier MODEL = Thaumcraft.id("models/obj/scanner.obj");
-    private static final Identifier SCANNER = Thaumcraft.id("textures/model/scanner.png");
-    private static final Identifier SCREEN = Thaumcraft.id("textures/model/scanscreen.png");
+    private static final ResourceLocation MODEL = Thaumcraft.id("models/obj/scanner.obj");
+    private static final ResourceLocation SCANNER = Thaumcraft.id("textures/model/scanner.png");
+    private static final ResourceLocation SCREEN = Thaumcraft.id("textures/model/scanscreen.png");
     private static final int WHITE = 0xFFFFFFFF;
 
     private final LegacyItemView view;
@@ -37,13 +37,13 @@ public class ThaumometerItemRenderer implements NoDataSpecialModelRenderer {
         switch (view) {
             case EQUIPPED -> {
                 poseStack.translate(1.6F, 0.3F, 2.0F);
-                poseStack.rotateDegrees(Axis.XN, 90.0F);
-                poseStack.rotateDegrees(Axis.ZN, 30.0F);
+                poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
+                poseStack.mulPose(Axis.ZN.rotationDegrees(30.0F));
             }
             case INVENTORY -> {
-                poseStack.rotateDegrees(Axis.XP, 60.0F);
-                poseStack.rotateDegrees(Axis.ZN, 30.0F);
-                poseStack.rotateDegrees(Axis.YN, 248.0F);
+                poseStack.mulPose(Axis.XP.rotationDegrees(60.0F));
+                poseStack.mulPose(Axis.ZN.rotationDegrees(30.0F));
+                poseStack.mulPose(Axis.YN.rotationDegrees(248.0F));
             }
             default -> {
             }
@@ -67,8 +67,8 @@ public class ThaumometerItemRenderer implements NoDataSpecialModelRenderer {
     public static void beginScreen(SubmitNodeCollector collector, PoseStack poseStack) {
         poseStack.pushPose();
         poseStack.translate(0.0F, 0.11F, 0.0F);
-        poseStack.rotateDegrees(Axis.XP, 90.0F);
-        poseStack.rotateDegrees(Axis.ZP, 90.0F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
         poseStack.scale(2.5F, 2.5F, 2.5F);
         int light = screenLight(0);
         collector.submitCustomGeometry(poseStack, TcRenderTypes.translucent(SCREEN), (pose, buffer) -> {

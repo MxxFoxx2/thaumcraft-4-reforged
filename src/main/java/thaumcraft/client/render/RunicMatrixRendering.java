@@ -3,7 +3,7 @@ package thaumcraft.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import thaumcraft.Thaumcraft;
@@ -14,8 +14,8 @@ import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.client.platform.VertexQuadSink;
 
 public final class RunicMatrixRendering {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/model/infuser.png");
-    private static final Identifier PARTICLES = Thaumcraft.id("textures/misc/particles.png");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/model/infuser.png");
+    private static final ResourceLocation PARTICLES = Thaumcraft.id("textures/misc/particles.png");
     private static final float WHITE_U = 118.5F / 256.0F;
     private static final float WHITE_V = 40.5F / 256.0F;
     private static final int WHITE = 0xFFFFFFFF;
@@ -26,13 +26,13 @@ public final class RunicMatrixRendering {
     private static void cube(PoseStack poseStack, int a, int b, int c, float b1, float b2, float b3) {
         poseStack.translate(b1 + (a == 0 ? -1 : 1) * 0.25F, b2 + (b == 0 ? -1 : 1) * 0.25F, b3 + (c == 0 ? -1 : 1) * 0.25F);
         if (a > 0) {
-            poseStack.rotateDegrees(Axis.XP, 90.0F);
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         }
         if (b > 0) {
-            poseStack.rotateDegrees(Axis.YP, 90.0F);
+            poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
         }
         if (c > 0) {
-            poseStack.rotateDegrees(Axis.ZP, 90.0F);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
         }
         poseStack.scale(0.45F, 0.45F, 0.45F);
     }
@@ -59,9 +59,9 @@ public final class RunicMatrixRendering {
             );
         }
         if (animated) {
-            poseStack.rotateDegrees(Axis.YP, ticks % 360.0F * startUp);
-            poseStack.rotateDegrees(Axis.XP, 35.0F * startUp);
-            poseStack.rotateDegrees(Axis.ZP, 45.0F * startUp);
+            poseStack.mulPose(Axis.YP.rotationDegrees(ticks % 360.0F * startUp));
+            poseStack.mulPose(Axis.XP.rotationDegrees(35.0F * startUp));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(45.0F * startUp));
         }
         float instability = Math.min(6.0F, 1.0F + instabilityValue * 0.66F * (Math.min(craftCount, 50) / 50.0F));
         for (int a = 0; a < 2; a++) {

@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.node.NodeModifier;
 import thaumcraft.node.NodeType;
 

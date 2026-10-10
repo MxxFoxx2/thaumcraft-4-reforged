@@ -31,8 +31,8 @@ public class TravelPavingStoneBlock extends Block {
                     );
                 }
             } else {
-                living.addEffect(new MobEffectInstance(MobEffects.SPEED, 40, 1));
-                living.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 40, 0));
+                living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 40, 1));
+                living.addEffect(new MobEffectInstance(MobEffects.JUMP, 40, 0));
             }
         }
         super.stepOn(level, pos, state, entity);

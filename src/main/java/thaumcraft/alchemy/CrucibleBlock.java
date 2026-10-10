@@ -29,7 +29,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.registry.ModBlockEntities;
 import thaumcraft.wand.Wands;
 
@@ -76,7 +76,7 @@ public class CrucibleBlock extends Block implements EntityBlock {
             return;
         }
         if (entity instanceof LivingEntity living && hot && level instanceof ServerLevel serverLevel) {
-            living.hurtServer(serverLevel, level.damageSources().inFire(), 1.0F);
+            living.hurt(level.damageSources().inFire(), 1.0F);
             level.playSound(null, pos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 0.4F, 2.0F + level.getRandom().nextFloat() * 0.4F);
         }
     }

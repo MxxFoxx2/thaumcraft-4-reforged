@@ -5,7 +5,7 @@ import java.util.Map;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +16,7 @@ import thaumcraft.wand.WandVis;
 import thaumcraft.wand.Wands;
 
 public final class WandHud {
-    private static final Identifier TEXTURE = Thaumcraft.id("textures/gui/hud.png");
+    private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/hud.png");
     private static final long SAMPLE_INTERVAL = 1000L;
     private static final Map<Integer, WandVis> OLD_VALUES = new HashMap<>();
     private static long nextSample;
@@ -35,7 +35,7 @@ public final class WandHud {
             return;
         }
         long time = Util.getMillis();
-        int slot = player.getInventory().getSelectedSlot();
+        int slot = player.getInventory().selected;
         WandVis current = Wands.getAllVisData(stack);
         WandVis old = OLD_VALUES.get(slot);
         if (old == null) {

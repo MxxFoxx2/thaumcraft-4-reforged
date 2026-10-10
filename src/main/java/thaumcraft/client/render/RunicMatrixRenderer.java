@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.infusion.InfusionMatrixBlockEntity;
 
 public class RunicMatrixRenderer implements BlockEntityRenderer<InfusionMatrixBlockEntity, RunicMatrixRenderer.State> {

@@ -11,7 +11,7 @@ import net.minecraft.gametest.framework.FunctionGameTestInstance;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.TestData;
 import net.minecraft.gametest.framework.TestEnvironmentDefinition;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.minecraft.network.Connection;
@@ -145,12 +145,12 @@ public final class ThaumcraftGameTests {
 
     private static void modernScanTargets(GameTestHelper helper) {
         for (String id : List.of("deepslate", "tuff_brick_wall", "waxed_oxidized_cut_copper_stairs", "lime_concrete", "echo_shard")) {
-            Item item = BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(id));
+            Item item = BuiltInRegistries.ITEM.getValue(ResourceLocation.withDefaultNamespace(id));
             ScanManager.Target target = ScanManager.resolveStack(new ItemStack(item));
             helper.assertTrue(target != null && target.aspects() != null && target.aspects().size() > 0, "no aspects for " + id);
         }
         for (String id : List.of("axolotl", "warden", "husk")) {
-            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace(id));
+            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(ResourceLocation.withDefaultNamespace(id));
             Entity entity = helper.spawn(type, new BlockPos(1, 2, 1));
             ScanManager.Target target = ScanManager.resolveEntity(entity);
             helper.assertTrue(target != null && target.aspects() != null && target.aspects().size() > 0, "no aspects for " + id);

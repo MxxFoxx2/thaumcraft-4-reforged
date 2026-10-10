@@ -12,7 +12,7 @@ import net.minecraft.data.AtlasIds;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.client.geom.BoxGeometry;

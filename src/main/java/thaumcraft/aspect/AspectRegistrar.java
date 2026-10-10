@@ -5,7 +5,7 @@ import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import thaumcraft.Thaumcraft;
@@ -57,7 +57,7 @@ public abstract class AspectRegistrar {
     }
 
     protected void entity(String target, AspectList aspects, Object... nbt) {
-        BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(target)).ifPresentOrElse(
+        BuiltInRegistries.ENTITY_TYPE.getOptional(ResourceLocation.parse(target)).ifPresentOrElse(
             type -> registry.registerEntity(type, aspects.copy(), nbt),
             () -> Thaumcraft.LOGGER.debug("Aspect entity target {} is not registered", target)
         );
@@ -66,13 +66,13 @@ public abstract class AspectRegistrar {
     private static List<Item> resolve(String target) {
         List<Item> items = new ArrayList<>();
         if (target.startsWith("#")) {
-            TagKey<Item> tag = TagKey.create(Registries.ITEM, Identifier.parse(target.substring(1)));
+            TagKey<Item> tag = TagKey.create(Registries.ITEM, ResourceLocation.parse(target.substring(1)));
             for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(tag)) {
                 items.add(holder.value());
             }
             return items;
         }
-        BuiltInRegistries.ITEM.getOptional(Identifier.parse(target)).ifPresentOrElse(
+        BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(target)).ifPresentOrElse(
             items::add,
             () -> Thaumcraft.LOGGER.debug("Aspect target {} is not registered", target)
         );

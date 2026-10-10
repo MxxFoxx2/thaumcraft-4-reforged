@@ -5,7 +5,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectHelper;
 import thaumcraft.aspect.AspectList;
@@ -35,7 +35,7 @@ public final class ScanManager {
     public static final double ENTITY_RANGE = 10.0;
     private static final double RANGE_TOLERANCE = 3.0;
 
-    public record Target(ScanKind kind, String key, @Nullable AspectList aspects, ItemStack clueStack, @Nullable Identifier clueEntity) {
+    public record Target(ScanKind kind, String key, @Nullable AspectList aspects, ItemStack clueStack, @Nullable ResourceLocation clueEntity) {
     }
 
     private ScanManager() {
@@ -107,7 +107,7 @@ public final class ScanManager {
         if (entity instanceof ItemEntity itemEntity) {
             return resolveStack(itemEntity.getItem());
         }
-        Identifier type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+        ResourceLocation type = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
         return new Target(ScanKind.ENTITY, entityKey(entity), entityAspects(entity), ItemStack.EMPTY, type);
     }
 

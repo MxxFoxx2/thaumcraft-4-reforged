@@ -1,43 +1,21 @@
 package thaumcraft.client.platform;
 
-import com.mojang.renderpearl.api.pipeline.BlendFunction;
-import com.mojang.renderpearl.api.pipeline.ColorTargetState;
-import com.mojang.renderpearl.api.pipeline.CompareOp;
-import com.mojang.renderpearl.api.pipeline.DepthStencilState;
-import com.mojang.renderpearl.api.pipeline.RenderPipeline;
-import net.minecraft.client.renderer.RenderPipelines;
-import thaumcraft.Thaumcraft;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.GuiGraphics;
 
 public final class ModRenderPipelines {
-    public static final RenderPipeline ADDITIVE_PARTICLE = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
-        .withLocation(Thaumcraft.id("pipeline/additive_particle"))
-        .withCull(false)
-        .withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
-        .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
-        .build();
-    public static final RenderPipeline TRANSLUCENT_PARTICLE = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
-        .withLocation(Thaumcraft.id("pipeline/translucent_particle"))
-        .withCull(false)
-        .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-        .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
-        .build();
-    public static final RenderPipeline ADDITIVE_NO_DEPTH = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
-        .withLocation(Thaumcraft.id("pipeline/additive_no_depth"))
-        .withCull(false)
-        .withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
-        .build();
-    public static final RenderPipeline TRANSLUCENT_NO_DEPTH = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
-        .withLocation(Thaumcraft.id("pipeline/translucent_no_depth"))
-        .withCull(false)
-        .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
-        .build();
-    public static final RenderPipeline GUI_ADDITIVE = RenderPipeline.builder(RenderPipelines.GUI_SNIPPET)
-        .withLocation(Thaumcraft.id("pipeline/gui_additive"))
-        .withColorTargetState(new ColorTargetState(BlendFunction.LIGHTNING))
-        .build();
-
     private ModRenderPipelines() {
+    }
+
+    public static void beginGuiAdditive(GuiGraphics graphics) {
+        graphics.flush();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+    }
+
+    public static void endGuiAdditive(GuiGraphics graphics) {
+        graphics.flush();
+        RenderSystem.defaultBlendFunc();
     }
 }

@@ -1,9 +1,9 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.resources.ResourceLocation;
 import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
@@ -30,24 +30,24 @@ public final class NodeRendering {
     }
 
     public static void submitCross(
-        OrderedSubmitNodeCollector collector,
+        MultiBufferSource buffers,
         PoseStack poseStack,
         AspectList aspects,
         NodeType type,
         @Nullable NodeModifier modifier
     ) {
         float ticks = clientTicks();
-        submit(collector, poseStack, aspects, type, modifier, ticks);
+        submit(buffers, poseStack, aspects, type, modifier, ticks);
         poseStack.pushPose();
         poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-        submit(collector, poseStack, aspects, type, modifier, ticks);
+        submit(buffers, poseStack, aspects, type, modifier, ticks);
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        submit(collector, poseStack, aspects, type, modifier, ticks);
+        submit(buffers, poseStack, aspects, type, modifier, ticks);
         poseStack.popPose();
     }
 
     public static void submit(
-        OrderedSubmitNodeCollector collector,
+        MultiBufferSource buffers,
         PoseStack poseStack,
         AspectList aspects,
         NodeType type,
@@ -77,7 +77,7 @@ public final class NodeRendering {
             float layerScale = 0.2F + wave * (amount / 50.0F);
             int argb = argb(layerAlpha / aspects.size(), aspect.getColor());
             ItemGeometry.blended(
-                collector,
+                buffers,
                 poseStack,
                 TEXTURE,
                 aspect.getBlend(),
@@ -111,7 +111,7 @@ public final class NodeRendering {
         float centerScale = scale;
         int argb = argb(alpha, 0xFFFFFF);
         ItemGeometry.blended(
-            collector,
+            buffers,
             poseStack,
             TEXTURE,
             blend,

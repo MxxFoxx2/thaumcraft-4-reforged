@@ -1,13 +1,13 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
+import net.minecraft.core.BlockPos;
+import thaumcraft.client.platform.ItemGeometry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -21,10 +21,12 @@ import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.client.platform.VertexQuadSink;
 import thaumcraft.node.NodeStabilizerBlockEntity;
 
-public class NodeStabilizerRenderer implements BlockEntityRenderer<NodeStabilizerBlockEntity, NodeStabilizerRenderer.State> {
+public class NodeStabilizerRenderer implements BlockEntityRenderer<NodeStabilizerBlockEntity> {
     private static final ResourceLocation BUBBLE = Thaumcraft.id("textures/misc/node_bubble.png");
 
-    public static class State extends BlockEntityRenderState {
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
         int count;
         int lock;
         int ambient;
@@ -34,14 +36,18 @@ public class NodeStabilizerRenderer implements BlockEntityRenderer<NodeStabilize
     public NodeStabilizerRenderer(BlockEntityRendererProvider.Context context) {
     }
 
-    @Override
-    public State createRenderState() {
-        return new State();
-    }
 
     @Override
-    public void extractRenderState(NodeStabilizerBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    public void render(NodeStabilizerBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
+    }
+
+    private void extract(NodeStabilizerBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition) {
         Entity viewer = Minecraft.getInstance().getCameraEntity();
         state.count = entity.getCount();
         state.lock = entity.getLock();
@@ -49,14 +55,14 @@ public class NodeStabilizerRenderer implements BlockEntityRenderer<NodeStabilize
         state.viewerTicks = viewer == null ? 0 : viewer.tickCount;
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-        NodeDeviceRendering.stabilizer(collector, poseStack, state.ambient, state.lock, state.count, state.viewerTicks, true);
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
+        NodeDeviceRendering.stabilizer(buffers, poseStack, state.ambient, state.lock, state.count, state.viewerTicks, true);
         if (state.count > 0) {
             float alpha = Mth.sin(state.viewerTicks / 8.0F) * 0.1F + 0.5F;
             int color = NodeGeometry.argb(state.lock == 1 ? 16777215 : 16729156, state.count / 37.0F * alpha);
             FacingQuads.Camera view = WorldRendering.camera(camera, state.blockPos);
-            collector.submitCustomGeometry(
+            ItemGeometry.submit(
+                buffers,
                 poseStack,
                 TcRenderTypes.additive(BUBBLE),
                 (pose, buffer) -> FacingQuads.frame(new VertexQuadSink(pose, buffer), view, 0.5F, 1.5F, 0.5F, 0.0F, 0.9F, 1, 0, color, 220)

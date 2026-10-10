@@ -4,21 +4,12 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import thaumcraft.Thaumcraft;
-import thaumcraft.client.platform.ModRenderPipelines;
 import thaumcraft.registry.ModBlockEntities;
 
 @EventBusSubscriber(modid = Thaumcraft.MODID, value = Dist.CLIENT)
 public final class WorldRenderers {
     private WorldRenderers() {
-    }
-
-    @SubscribeEvent
-    static void registerPipelines(RegisterRenderPipelinesEvent event) {
-        event.registerPipeline(ModRenderPipelines.ADDITIVE_NO_DEPTH);
-        event.registerPipeline(ModRenderPipelines.TRANSLUCENT_NO_DEPTH);
     }
 
     @SubscribeEvent
@@ -52,14 +43,5 @@ public final class WorldRenderers {
         event.registerBlockEntityRenderer(ModBlockEntities.PEDESTAL.get(), ArcanePedestalRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.INFUSION_PILLAR.get(), InfusionPillarRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.INFUSION_MATRIX.get(), RunicMatrixRenderer::new);
-    }
-
-    @SubscribeEvent
-    static void registerSpecialRenderers(RegisterSpecialModelRendererEvent event) {
-        event.register(Thaumcraft.id("node_stabilizer"), NodeDeviceSpecialRenderers.Stabilizer.Unbaked.MAP_CODEC);
-        event.register(Thaumcraft.id("node_transducer"), NodeDeviceSpecialRenderers.Transducer.Unbaked.MAP_CODEC);
-        event.register(Thaumcraft.id("vis_relay"), NodeDeviceSpecialRenderers.Relay.Unbaked.MAP_CODEC);
-        event.register(Thaumcraft.id("runic_matrix"), ArcaneSpecialRenderers.RunicMatrix.Unbaked.MAP_CODEC);
-        event.register(Thaumcraft.id("vis_charge_relay"), ArcaneSpecialRenderers.ChargeRelay.Unbaked.MAP_CODEC);
     }
 }

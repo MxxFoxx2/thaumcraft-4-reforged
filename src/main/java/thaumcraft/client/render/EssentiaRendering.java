@@ -1,13 +1,12 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
@@ -38,7 +37,7 @@ public final class EssentiaRendering {
     }
 
     public static TextureAtlasSprite blockSprite(ResourceLocation id) {
-        return Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS).getSprite(id);
+        return Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(id);
     }
 
     public static BoxGeometry.UvRect rect(ResourceLocation id) {
@@ -77,23 +76,24 @@ public final class EssentiaRendering {
             poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
             poseStack.mulPose(Axis.XP.rotationDegrees(90.0F * facing.getStepY()));
         }
-        poseStack.rotate(new Quaternionf().rotationAxis((float) Math.PI / 2.0F, facing.getStepX(), facing.getStepY(), facing.getStepZ()));
+        poseStack.mulPose(new Quaternionf().rotationAxis((float) Math.PI / 2.0F, facing.getStepX(), facing.getStepY(), facing.getStepZ()));
     }
 
-    public static void valveRod(SubmitNodeCollector collector, PoseStack poseStack, int argb, int light) {
-        collector.submitCustomGeometry(
+    public static void valveRod(MultiBufferSource buffers, PoseStack poseStack, int argb, int light) {
+        ItemGeometry.submit(
+            buffers,
             poseStack,
             TcRenderTypes.of(Kind.ENTITY_CUTOUT, VALVE_TEXTURE),
             (pose, buffer) -> ModelBoxGeometry.box(new EntityQuadSink(pose, buffer), -1.0F, 2.0F, -1.0F, 2, 2, 2, 0, 10, 64.0F, 32.0F, true, argb, light)
         );
     }
 
-    public static void valve(SubmitNodeCollector collector, PoseStack poseStack, Direction facing, float rotation, int light) {
+    public static void valve(MultiBufferSource buffers, PoseStack poseStack, Direction facing, float rotation, int light) {
         poseStack.pushPose();
         tubeOrientation(poseStack, facing);
         poseStack.mulPose(Axis.YP.rotationDegrees(-rotation * 1.5F));
         poseStack.translate(0.0F, -(rotation / 360.0F) * 0.12F, 0.0F);
-        valveRod(collector, poseStack, WHITE, light);
+        valveRod(buffers, poseStack, WHITE, light);
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
         poseStack.translate(-0.25F, -0.25F, -0.25F);
@@ -106,7 +106,7 @@ public final class EssentiaRendering {
         int width = sprite.contents().width();
         int height = sprite.contents().height();
         ItemGeometry.solid(
-            collector,
+            buffers,
             poseStack,
             TextureAtlas.LOCATION_BLOCKS,
             false,
@@ -116,36 +116,36 @@ public final class EssentiaRendering {
         poseStack.popPose();
     }
 
-    public static void oneway(SubmitNodeCollector collector, PoseStack poseStack, Direction facing, int light) {
+    public static void oneway(MultiBufferSource buffers, PoseStack poseStack, Direction facing, int light) {
         int tint = NodeDeviceRendering.color(0.45F, 0.5F, 1.0F);
         poseStack.pushPose();
         tubeOrientation(poseStack, facing);
         poseStack.scale(1.1F, 0.5F, 1.1F);
         poseStack.translate(0.0F, -0.5F, 0.0F);
-        valveRod(collector, poseStack, tint, light);
+        valveRod(buffers, poseStack, tint, light);
         poseStack.translate(0.0F, -0.25F, 0.0F);
-        valveRod(collector, poseStack, tint, light);
+        valveRod(buffers, poseStack, tint, light);
         poseStack.translate(0.0F, -0.25F, 0.0F);
-        valveRod(collector, poseStack, tint, light);
+        valveRod(buffers, poseStack, tint, light);
         poseStack.popPose();
     }
 
-    public static void buffer(SubmitNodeCollector collector, PoseStack poseStack, Direction side, boolean blocked, int light) {
+    public static void buffer(MultiBufferSource buffers, PoseStack poseStack, Direction side, boolean blocked, int light) {
         int tint = blocked ? NodeDeviceRendering.color(1.0F, 0.3F, 0.3F) : NodeDeviceRendering.color(0.3F, 0.3F, 1.0F);
         poseStack.pushPose();
         tubeOrientation(poseStack, side.getOpposite());
         poseStack.scale(1.2F, 1.0F, 1.2F);
         poseStack.translate(0.0F, -0.5F, 0.0F);
-        valveRod(collector, poseStack, tint, light);
+        valveRod(buffers, poseStack, tint, light);
         poseStack.popPose();
     }
 
-    public static void filterCore(SubmitNodeCollector collector, PoseStack poseStack, int argb, int light) {
+    public static void filterCore(MultiBufferSource buffers, PoseStack poseStack, int argb, int light) {
         BoxGeometry.UvRect rect = rect(Thaumcraft.id("block/pipe_filter_core"));
         float low = 0.375F - 0.03125F;
         float high = 0.625F + 0.03125F;
         ItemGeometry.solid(
-            collector,
+            buffers,
             poseStack,
             TextureAtlas.LOCATION_BLOCKS,
             false,
@@ -153,16 +153,16 @@ public final class EssentiaRendering {
         );
     }
 
-    public static void centrifuge(SubmitNodeCollector collector, PoseStack poseStack, float rotation, int light) {
+    public static void centrifuge(MultiBufferSource buffers, PoseStack poseStack, float rotation, int light) {
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, CENTRIFUGE_TEXTURE), (pose, buffer) -> {
+        ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, CENTRIFUGE_TEXTURE), (pose, buffer) -> {
             EntityQuadSink sink = new EntityQuadSink(pose, buffer);
             ModelBoxGeometry.box(sink, -4.0F, -8.0F, -4.0F, 8, 4, 8, 20, 16, 64.0F, 32.0F, true, WHITE, light);
             ModelBoxGeometry.box(sink, -4.0F, 4.0F, -4.0F, 8, 4, 8, 20, 16, 64.0F, 32.0F, true, WHITE, light);
         });
         poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, CENTRIFUGE_TEXTURE), (pose, buffer) -> {
+        ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, CENTRIFUGE_TEXTURE), (pose, buffer) -> {
             EntityQuadSink sink = new EntityQuadSink(pose, buffer);
             ModelBoxGeometry.box(sink, -4.0F, -1.0F, -1.0F, 8, 2, 2, 16, 0, 64.0F, 32.0F, true, WHITE, light);
             ModelBoxGeometry.box(sink, 4.0F, -3.0F, -2.0F, 4, 6, 4, 0, 16, 64.0F, 32.0F, true, WHITE, light);
@@ -173,7 +173,7 @@ public final class EssentiaRendering {
     }
 
     public static void crystallizer(
-        SubmitNodeCollector collector,
+        MultiBufferSource buffers,
         PoseStack poseStack,
         Direction facing,
         float spin,
@@ -186,7 +186,7 @@ public final class EssentiaRendering {
         poseStack.pushPose();
         orientation(poseStack, facing);
         ObjModel base = ObjModel.get(CRYSTALLIZER_MODEL);
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, CRYSTALLIZER_TEXTURE), (pose, buffer) -> base.renderAll(pose, buffer, WHITE, light));
+        ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, CRYSTALLIZER_TEXTURE), (pose, buffer) -> base.renderAll(pose, buffer, WHITE, light));
         ObjModel relay = ObjModel.get(RELAY_MODEL);
         int tint = NodeDeviceRendering.color(red, green, blue);
         for (int index = 0; index < 4; index++) {
@@ -197,7 +197,8 @@ public final class EssentiaRendering {
             poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
             poseStack.translate(0.34F, 0.0F, 1.2125F);
             poseStack.mulPose(Axis.ZP.rotationDegrees(spin));
-            collector.submitCustomGeometry(
+            ItemGeometry.submit(
+                buffers,
                 poseStack,
                 TcRenderTypes.of(Kind.ENTITY_TRANSLUCENT, RELAY_TEXTURE),
                 (pose, buffer) -> relay.renderPart("Crystal", pose, buffer, tint, crystalLight)
@@ -207,21 +208,21 @@ public final class EssentiaRendering {
         poseStack.popPose();
     }
 
-    public static void reservoir(SubmitNodeCollector collector, PoseStack poseStack, Direction facing, int light) {
+    public static void reservoir(MultiBufferSource buffers, PoseStack poseStack, Direction facing, int light) {
         poseStack.pushPose();
         orientation(poseStack, facing);
         ObjModel model = ObjModel.get(RESERVOIR_MODEL);
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, RESERVOIR_TEXTURE), (pose, buffer) -> model.renderAll(pose, buffer, WHITE, light));
+        ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(Kind.ENTITY_CUTOUT, RESERVOIR_TEXTURE), (pose, buffer) -> model.renderAll(pose, buffer, WHITE, light));
         poseStack.popPose();
     }
 
-    public static void reservoirLiquid(SubmitNodeCollector collector, PoseStack poseStack, float level, float red, float green, float blue) {
+    public static void reservoirLiquid(MultiBufferSource buffers, PoseStack poseStack, float level, float red, float green, float blue) {
         BoxGeometry.UvRect rect = rect(ANIMATED_GLOW);
         int color = FastColor.ARGB32.colorFromFloat(0.9F, red, green, blue);
         float top = 0.1875F + 0.625F * level;
         int light = liquidLight(0);
         ItemGeometry.solid(
-            collector.order(1),
+            buffers,
             poseStack,
             TextureAtlas.LOCATION_BLOCKS,
             true,

@@ -1,10 +1,11 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import thaumcraft.client.platform.ItemGeometry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.util.Mth;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.geom.CubeGeometry;
@@ -38,7 +39,7 @@ public final class RunicMatrixRendering {
     }
 
     public static void submit(
-        SubmitNodeCollector collector,
+        MultiBufferSource buffers,
         PoseStack poseStack,
         int light,
         boolean animated,
@@ -52,10 +53,11 @@ public final class RunicMatrixRendering {
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
         if (crafting) {
-            collector.order(1).submitCustomGeometry(
+            ItemGeometry.submit(
+                buffers,
                 poseStack,
                 TcRenderTypes.additive(PARTICLES),
-                (pose, buffer) -> InfusionHaloGeometry.render(new VertexQuadSink(pose, buffer), craftCount, true, WHITE_U, WHITE_V, LightCoordsUtil.FULL_BRIGHT)
+                (pose, buffer) -> InfusionHaloGeometry.render(new VertexQuadSink(pose, buffer), craftCount, true, WHITE_U, WHITE_V, LightTexture.FULL_BRIGHT)
             );
         }
         if (animated) {
@@ -77,7 +79,8 @@ public final class RunicMatrixRendering {
                     }
                     poseStack.pushPose();
                     cube(poseStack, a, b, c, b1, b2, b3);
-                    collector.submitCustomGeometry(
+                    ItemGeometry.submit(
+                        buffers,
                         poseStack,
                         TcRenderTypes.entityCutout(TEXTURE),
                         (pose, buffer) -> CubeGeometry.render(new EntityQuadSink(pose, buffer), 0, WHITE, light)
@@ -97,10 +100,11 @@ public final class RunicMatrixRendering {
                         int color = (Math.clamp(Math.round(alpha * 255.0F), 0, 255) << 24) | (204 << 16) | (26 << 8) | 255;
                         poseStack.pushPose();
                         cube(poseStack, a, b, c, b1, b2, b3);
-                        collector.order(1).submitCustomGeometry(
+                        ItemGeometry.submit(
+                            buffers,
                             poseStack,
                             TcRenderTypes.additive(TEXTURE),
-                            (pose, buffer) -> CubeGeometry.render(new VertexQuadSink(pose, buffer), 32, color, LightCoordsUtil.FULL_BRIGHT)
+                            (pose, buffer) -> CubeGeometry.render(new VertexQuadSink(pose, buffer), 32, color, LightTexture.FULL_BRIGHT)
                         );
                         poseStack.popPose();
                     }

@@ -1,15 +1,13 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -22,27 +20,29 @@ import thaumcraft.blockentity.ResearchTableBlockEntity;
 import thaumcraft.item.ResearchNotesItem;
 import thaumcraft.item.ScribingToolsItem;
 
-public class ResearchTableRenderer implements BlockEntityRenderer<ResearchTableBlockEntity, ResearchTableRenderer.State> {
-    private final ItemModelResolver itemModelResolver;
-
-    public static class State extends BlockEntityRenderState {
-        final ItemStackRenderState scribe = new ItemStackRenderState();
-        final ItemStackRenderState note = new ItemStackRenderState();
+public class ResearchTableRenderer implements BlockEntityRenderer<ResearchTableBlockEntity> {
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
+        final ItemSlot scribe = new ItemSlot();
+        final ItemSlot note = new ItemSlot();
         float rotation;
     }
 
     public ResearchTableRenderer(BlockEntityRendererProvider.Context context) {
-        this.itemModelResolver = context.itemModelResolver();
     }
 
     @Override
-    public State createRenderState() {
-        return new State();
+    public void render(ResearchTableBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
     }
 
-    @Override
-    public void extractRenderState(ResearchTableBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    private void extract(ResearchTableBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition) {
         state.scribe.clear();
         state.note.clear();
         if (entity.getLevel() == null) {
@@ -52,16 +52,15 @@ public class ResearchTableRenderer implements BlockEntityRenderer<ResearchTableB
         state.rotation = 270.0F - facing.toYRot();
         ItemStack scribe = entity.getItem(ResearchTableBlockEntity.SCRIBE_SLOT);
         if (scribe.getItem() instanceof ScribingToolsItem) {
-            itemModelResolver.updateForTopItem(state.scribe, scribe.copyWithCount(1), ItemDisplayContext.FIXED, entity.getLevel(), null, (int) entity.getBlockPos().asLong());
+            state.scribe.set(scribe.copyWithCount(1), ItemDisplayContext.FIXED, entity.getLevel(), (int) entity.getBlockPos().asLong());
         }
         ItemStack note = entity.getItem(ResearchTableBlockEntity.NOTE_SLOT);
         if (note.getItem() instanceof ResearchNotesItem) {
-            itemModelResolver.updateForTopItem(state.note, note.copyWithCount(1), ItemDisplayContext.FIXED, entity.getLevel(), null, (int) entity.getBlockPos().asLong() + 1);
+            state.note.set(note.copyWithCount(1), ItemDisplayContext.FIXED, entity.getLevel(), (int) entity.getBlockPos().asLong() + 1);
         }
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
         if (!state.scribe.isEmpty()) {
             poseStack.pushPose();
             poseStack.translate(0.5F, 1.01F, 0.5F);
@@ -69,7 +68,7 @@ public class ResearchTableRenderer implements BlockEntityRenderer<ResearchTableB
             poseStack.translate(-0.28F, 0.0F, -0.28F);
             poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
             poseStack.scale(0.3F, 0.3F, 0.3F);
-            state.scribe.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+            state.scribe.submit(poseStack, buffers, state.lightCoords, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
         if (!state.note.isEmpty()) {
@@ -80,7 +79,7 @@ public class ResearchTableRenderer implements BlockEntityRenderer<ResearchTableB
             poseStack.mulPose(Axis.YP.rotationDegrees(15.0F));
             poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
             poseStack.scale(0.5F, 0.5F, 0.5F);
-            state.note.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+            state.note.submit(poseStack, buffers, state.lightCoords, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
     }

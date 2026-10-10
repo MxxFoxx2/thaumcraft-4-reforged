@@ -1,13 +1,12 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
+import thaumcraft.client.platform.ItemGeometry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -23,10 +22,12 @@ import thaumcraft.client.platform.VertexQuadSink;
 import thaumcraft.vis.VisNet;
 import thaumcraft.vis.VisRelayBlockEntity;
 
-public class VisRelayRenderer implements BlockEntityRenderer<VisRelayBlockEntity, VisRelayRenderer.State> {
+public class VisRelayRenderer implements BlockEntityRenderer<VisRelayBlockEntity> {
     private static final ResourceLocation BEAM = Thaumcraft.id("textures/misc/beam1.png");
 
-    public static class State extends BlockEntityRenderState {
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
         Direction orientation = Direction.UP;
         int crystalColor = -1;
         boolean connected;
@@ -47,14 +48,18 @@ public class VisRelayRenderer implements BlockEntityRenderer<VisRelayBlockEntity
     public VisRelayRenderer(BlockEntityRendererProvider.Context context) {
     }
 
-    @Override
-    public State createRenderState() {
-        return new State();
-    }
 
     @Override
-    public void extractRenderState(VisRelayBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    public void render(VisRelayBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
+    }
+
+    private void extract(VisRelayBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition) {
         Entity viewer = Minecraft.getInstance().getCameraEntity();
         int viewerTicks = viewer == null ? 0 : viewer.tickCount;
         state.orientation = entity.getOrientation();
@@ -86,11 +91,11 @@ public class VisRelayRenderer implements BlockEntityRenderer<VisRelayBlockEntity
         }
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-        NodeDeviceRendering.relay(collector, poseStack, state.ambient, state.orientation, state.crystalColor, state.connected, state.ticks);
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
+        NodeDeviceRendering.relay(buffers, poseStack, state.ambient, state.orientation, state.crystalColor, state.connected, state.ticks);
         if (state.hasBeam) {
-            collector.submitCustomGeometry(
+            ItemGeometry.submit(
+                buffers,
                 poseStack,
                 TcRenderTypes.additive(BEAM),
                 (pose, buffer) -> PowerBeamGeometry.render(

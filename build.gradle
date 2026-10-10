@@ -24,6 +24,13 @@ repositories {
         }
     }
     maven {
+        name = "Illusive Soulworks maven"
+        url = "https://maven.theillusivec4.top/"
+        content {
+            includeGroup "top.theillusivec4.curios"
+        }
+    }
+    maven {
         name = "Jared's maven"
         url = "https://maven.blamejared.com/"
         content {
@@ -45,6 +52,11 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(java_ve
 
 neoForge {
     version = project.neo_version
+
+    parchment {
+        minecraftVersion = project.parchment_minecraft_version
+        mappingsVersion = project.parchment_mappings_version
+    }
 
     runs {
         client {
@@ -79,6 +91,8 @@ configurations {
 
 dependencies {
     implementation "com.github.glitchfiend:TerraBlender-neoforge:${terrablender_version}"
+    implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
     compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
@@ -107,6 +121,7 @@ neoForge.ideSyncTask generateModMetadata
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xmaxerrs', '100000', '-XDshould-stop.ifError=FLOW']
 }
 
 idea {

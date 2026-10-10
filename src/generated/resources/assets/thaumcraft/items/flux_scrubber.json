@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "thaumcraft:item/flux_scrubber",
-    "model": {
-      "type": "thaumcraft:flux_scrubber"
-    }
-  }
-}

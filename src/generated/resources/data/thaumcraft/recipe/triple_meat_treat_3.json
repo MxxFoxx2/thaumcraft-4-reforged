@@ -1,29 +1,37 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:chicken_nugget"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:chicken_nugget"
     },
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:fish_nugget"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:fish_nugget"
     },
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:pork_nugget"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:pork_nugget"
     },
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:triple_meat_treat"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:triple_meat_treat"
     }
   ],
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "minecraft:sugar",
-    "thaumcraft:fish_nugget",
-    "thaumcraft:chicken_nugget",
-    "thaumcraft:pork_nugget"
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "item": "thaumcraft:fish_nugget"
+    },
+    {
+      "item": "thaumcraft:chicken_nugget"
+    },
+    {
+      "item": "thaumcraft:pork_nugget"
+    }
   ],
   "result": {
     "id": "thaumcraft:triple_meat_treat"

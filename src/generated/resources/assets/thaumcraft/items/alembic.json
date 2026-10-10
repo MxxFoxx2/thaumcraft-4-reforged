@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "thaumcraft:item/alembic",
-    "model": {
-      "type": "thaumcraft:alembic"
-    }
-  }
-}

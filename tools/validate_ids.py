@@ -162,6 +162,7 @@ class Validator:
         for entries in self.registry.values():
             self.flat |= entries
         self.flat |= self.loot_tables | self.enchantments
+        self.flat |= datapack_ids(server, ["worldgen/placed_feature", "worldgen/configured_feature", "worldgen/configured_carver", "worldgen/biome", "worldgen/structure", "worldgen/template_pool"])
 
     def report(self, source, value, expected):
         self.problems.append((source, value, expected))
@@ -196,6 +197,8 @@ class Validator:
 
     def walk(self, source, value, keys, file_kind):
         if isinstance(value, str):
+            if keys and keys[-1] == "render_type":
+                return
             if keys and keys[-1] == "tag" and file_kind in ("recipe", "other"):
                 value = "#" + value
             if value.startswith("minecraft:") or value.startswith("#minecraft:"):
@@ -213,6 +216,8 @@ class Validator:
     def classify(self, value, keys, file_kind):
         key = keys[-1] if keys else ""
         if value.startswith("#"):
+            if file_kind == "other" and key == "tag":
+                return "tag:block"
             if file_kind == "block_tag" or key in ("blocks", "block"):
                 return "tag:block"
             if "biomes" in keys:
@@ -273,9 +278,10 @@ class Validator:
     def check_structure(self, path):
         relative = path.relative_to(self.out).as_posix()
         root = read_nbt(path.read_bytes())
+        name_key = mcformat.PROFILES[self.version].block_state_keys[0]
         for entry in root["palette"]:
-            if entry["id"].startswith("minecraft:"):
-                self.check(relative, entry["id"], "block")
+            if entry[name_key].startswith("minecraft:"):
+                self.check(relative, entry[name_key], "block")
         for entry in root["blocks"]:
             nbt = entry.get("nbt")
             if nbt and nbt["id"].startswith("minecraft:"):
@@ -292,6 +298,8 @@ class Validator:
     def check_aspects(self, path):
         text = path.read_text(encoding="utf-8")
         for value in ID_PATTERN.findall(text):
+            if not value.startswith("#") and value in self.registry["entity_type"]:
+                continue
             self.check(path.name, value, "tag:item" if value.startswith("#") else "item")
 
     def run(self, aspects):

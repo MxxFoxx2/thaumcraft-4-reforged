@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "thaumcraft:item/runic_matrix",
-    "model": {
-      "type": "thaumcraft:runic_matrix"
-    }
-  }
-}

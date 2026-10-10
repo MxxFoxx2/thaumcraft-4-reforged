@@ -1,19 +1,23 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:magic_tallow"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:magic_tallow"
     },
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:white_tallow_candle"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:white_tallow_candle"
     }
   ],
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "S": "minecraft:string",
-    "T": "thaumcraft:magic_tallow"
+    "S": {
+      "item": "minecraft:string"
+    },
+    "T": {
+      "item": "thaumcraft:magic_tallow"
+    }
   },
   "pattern": [
     " S ",

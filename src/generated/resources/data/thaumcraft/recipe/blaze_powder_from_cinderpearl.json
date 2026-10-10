@@ -1,14 +1,16 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:cinderpearl"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:cinderpearl"
     }
   ],
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "thaumcraft:cinderpearl"
+    {
+      "item": "thaumcraft:cinderpearl"
+    }
   ],
   "result": {
     "id": "minecraft:blaze_powder"

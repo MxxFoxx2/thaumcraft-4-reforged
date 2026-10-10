@@ -34,6 +34,7 @@ class Profile:
     block_tag_folder = "tags/block"
     item_tag_folder = "tags/item"
     structure_folder = "structure"
+    block_state_keys = ("id", "properties")
     common_namespace = "c"
     biome_modifier_namespace = "neoforge"
     loot_modifier_namespace = "neoforge"
@@ -45,6 +46,11 @@ class Profile:
     tag_expansions = {}
     data_maps = True
     enchantment_json = True
+
+    vanilla_features = {}
+
+    def vanilla_feature(self, value):
+        return self.vanilla_features.get(value, value)
 
     def rename_vanilla(self, value):
         prefix = "#" if value.startswith("#") else ""
@@ -126,6 +132,7 @@ class Profile:
 
 class Legacy(Profile):
     modern = False
+    block_state_keys = ("Name", "Properties")
     explicit_render_types = True
     feature_folder = "configured_feature"
 
@@ -229,6 +236,8 @@ class Profile1211(Legacy):
     name = "1.21.1"
     data_version = 3955
     random_sequence = True
+    pack_mcmeta = {"pack": {"description": "Thaumcraft Reforged resources", "pack_format": 34}}
+    vanilla_features = {"minecraft:grass": "minecraft:single_piece_of_grass"}
     loot_table_reference_key = "value"
     loot_condition_namespace = "neoforge:"
     loot_modifier_type = "neoforge:add_table"
@@ -267,8 +276,11 @@ class Profile1211(Legacy):
             return [{"condition": kind, "terms": terms}]
         return [{"condition": kind, **rest}]
 
+    def _with_conditions(self, rest):
+        return {("conditions" if key == "condition" else key): (self._condition_list(value) if key == "condition" else value) for key, value in rest.items()}
+
     def _function(self, function):
-        return {"function": function["type"], **{key: value for key, value in function.items() if key != "type"}}
+        return {"function": function["type"], **self._with_conditions({key: value for key, value in function.items() if key != "type"})}
 
 
 class Profile1192(Legacy):
@@ -381,7 +393,7 @@ class Profile1192(Legacy):
         if kind == "minecraft:copy_components":
             ops = [{"source": snake_nbt_key(key), "target": snake_nbt_key(key), "op": "replace"} for key in rest["include"]]
             return {"function": "minecraft:copy_nbt", "source": rest["source"], "ops": ops}
-        return {"function": kind, **rest}
+        return {"function": kind, **self._with_conditions(rest)}
 
 
 PROFILES = {"26.3": Profile(), "1.21.1": Profile1211(), "1.19.2": Profile1192()}

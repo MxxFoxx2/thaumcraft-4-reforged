@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mcformat
 import gen_biomes
+import gen_curios
 import gen_loot
 import gen_phase4
 import gen_phase5
@@ -41,7 +42,22 @@ ASPECT_TINT = {"type": f"{NS}:aspect"}
 block_tags = defaultdict(set)
 item_tags = defaultdict(set)
 BLOCK_MODELS = {}
+ITEM_MODELS = {}
+ITEM_IDS = set()
 TEXTURE_REFERENCES = set()
+MANIFEST = {"predicates": {}, "tints": {}, "builtin_entity": {}, "composite": {}, "armor_layers": {}}
+NOTES = defaultdict(list)
+INJECTIONS = []
+TRADES = {}
+FUELS = {"alumentum": 6400, "magical_log": 400}
+FUEL_ITEMS = {"alumentum": ["alumentum"], "magical_log": ["greatwood_log", "silverwood_log"]}
+NBT_KEYS = {
+    "thaumcraft:wand_parts": "wand_parts",
+    "thaumcraft:wand_vis": "wand_vis",
+    "thaumcraft:wand_target": "wand_target",
+    "thaumcraft:research_note": "research_note",
+    "thaumcraft:aspects": "aspects",
+}
 
 
 def write(path, content):
@@ -60,20 +76,199 @@ def tint(color):
     return {"type": "minecraft:constant", "value": value}
 
 
+def convert_elements(name, content):
+    if profile.modern or "elements" not in content:
+        return content
+    return {**content, "elements": [profile.model_element(element, name, NOTES["model_elements"]) for element in content["elements"]]}
+
+
 def block_model(name, content):
+    if not profile.modern and "parent" not in content:
+        content = {"parent": "minecraft:block/block", **content}
     BLOCK_MODELS[name] = content
-    write(ASSETS / "models" / "block" / f"{name}.json", content)
+    write(ASSETS / "models" / "block" / f"{name}.json", convert_elements(f"block/{name}", content))
+
+
+def texture_file(reference):
+    if ":" not in reference:
+        reference = "minecraft:" + reference
+    namespace, path = reference.split(":", 1)
+    if namespace != NS:
+        return None
+    for root in (ASSETS / "textures", SOURCE_TEXTURES):
+        candidate = root / f"{path}.png"
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def texture_layer(reference, cache={}):
+    if reference not in cache:
+        from PIL import Image
+        file = texture_file(reference)
+        layer = "solid"
+        if file is not None:
+            alpha = Image.open(file).convert("RGBA").getchannel("A")
+            histogram = alpha.histogram()
+            if any(histogram[1:255]):
+                layer = "translucent"
+            elif histogram[0]:
+                layer = "cutout"
+        cache[reference] = layer
+    return cache[reference]
+
+
+def model_textures(name, seen=None):
+    seen = seen or set()
+    if name in seen or name not in BLOCK_MODELS:
+        return []
+    seen.add(name)
+    content = BLOCK_MODELS[name]
+    result = [value for value in content.get("textures", {}).values() if not value.startswith("#")]
+    parent = content.get("parent", "")
+    if parent.startswith(f"{NS}:block/"):
+        result += model_textures(parent[len(f"{NS}:block/"):], seen)
+    return result
+
+
+def apply_render_types():
+    order = ["solid", "cutout", "translucent"]
+    for name in BLOCK_MODELS:
+        layers = [texture_layer(texture) for texture in model_textures(name)]
+        if not layers:
+            continue
+        layer = max(layers, key=order.index)
+        if layer == "solid":
+            continue
+        path = ASSETS / "models" / "block" / f"{name}.json"
+        content = json.loads(path.read_text(encoding="utf-8"))
+        content["render_type"] = f"minecraft:{layer}"
+        path.write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8")
 
 
 def item_model(name, content):
-    write(ASSETS / "models" / "item" / f"{name}.json", content)
+    ITEM_MODELS[name] = content
+    write(ASSETS / "models" / "item" / f"{name}.json", convert_elements(f"item/{name}", content))
+
+
+def tint_manifest(tints):
+    result = {}
+    for layer, entry in enumerate(tints):
+        if entry["type"] == "minecraft:constant":
+            result[str(layer)] = {"constant": f"#{entry['value'] & 0xFFFFFF:06X}"}
+        else:
+            result[str(layer)] = {"source": entry["type"]}
+    return result
+
+
+def register_tints(name, tints):
+    if tints:
+        MANIFEST["tints"][name] = tint_manifest(tints)
+    else:
+        MANIFEST["tints"].pop(name, None)
 
 
 def item_definition(name, model, tints=None):
+    ITEM_IDS.add(name)
+    if not profile.modern:
+        if model != ref(name, "item"):
+            item_model(name, {"parent": model})
+        register_tints(name, tints)
+        return
     definition = {"type": "minecraft:model", "model": model}
     if tints:
         definition["tints"] = tints
     write(ASSETS / "items" / f"{name}.json", {"model": definition})
+
+
+BLOCK_DISPLAY = {
+    "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.625, 0.625, 0.625]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.25, 0.25, 0.25]},
+    "fixed": {"rotation": [0, 0, 0], "translation": [0, 0, 0], "scale": [0.5, 0.5, 0.5]},
+    "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375, 0.375, 0.375]},
+    "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [0.4, 0.4, 0.4]},
+    "firstperson_lefthand": {"rotation": [0, 225, 0], "translation": [0, 0, 0], "scale": [0.4, 0.4, 0.4]},
+}
+
+
+def builtin_entity_model(name, base, identity=False):
+    kind = "item" if ":item/" in base else "block"
+    source = (ITEM_MODELS if kind == "item" else BLOCK_MODELS).get(base.split("/")[-1], {})
+    content = {"parent": "minecraft:builtin/entity", "textures": source.get("textures", {})}
+    if not identity:
+        content["gui_light"] = "side"
+        content["display"] = BLOCK_DISPLAY
+    elif "gui_light" in source:
+        content["gui_light"] = source["gui_light"]
+    item_model(name, content)
+
+
+def special_params(model):
+    return {key: value for key, value in model.items() if key != "type"}
+
+
+def special_item(name, base, model):
+    ITEM_IDS.add(name)
+    if not profile.modern:
+        builtin_entity_model(name, base)
+        MANIFEST["builtin_entity"][name] = {
+            "renderer": model["type"],
+            "params": special_params(model),
+            "base_model": base,
+        }
+        return
+    write(ASSETS / "items" / f"{name}.json", {"model": {"type": "minecraft:special", "base": base, "model": model}})
+
+
+def view_select_item(name, base, model, views, fallback_view):
+    ITEM_IDS.add(name)
+    if profile.modern:
+        def special(view):
+            return {"type": "minecraft:special", "base": base, "model": {**model, "view": view}}
+
+        write(ASSETS / "items" / f"{name}.json", {"model": {
+            "type": "minecraft:select",
+            "property": "minecraft:display_context",
+            "cases": [{"when": contexts, "model": special(view)} for view, contexts in views],
+            "fallback": special(fallback_view),
+        }})
+        return
+    builtin_entity_model(name, base, identity=True)
+    MANIFEST["builtin_entity"][name] = {
+        "renderer": model["type"],
+        "params": special_params(model),
+        "base_model": base,
+        "view_param": "view",
+        "views_by_display_context": {context: view for view, contexts in views for context in contexts},
+        "fallback_view": fallback_view,
+    }
+
+
+def composite_item(name, base, model):
+    ITEM_IDS.add(name)
+    if profile.modern:
+        write(ASSETS / "items" / f"{name}.json", {"model": {
+            "type": "minecraft:composite",
+            "models": [
+                {"type": "minecraft:model", "model": base},
+                {"type": "minecraft:special", "base": base, "model": model},
+            ],
+        }})
+        return
+    kind = "item" if ":item/" in base else "block"
+    source_name = base.split("/")[-1]
+    source = (ITEM_MODELS if kind == "item" else BLOCK_MODELS)[source_name]
+    part = base
+    if kind == "item" and source_name == name:
+        part = ref(f"{name}_base", "item")
+        item_model(f"{name}_base", source)
+    builtin_entity_model(name, base)
+    MANIFEST["composite"][name] = {
+        "parts": [
+            {"kind": "block_model" if kind == "block" else "item_model", "model": part},
+            {"kind": "builtin_entity", "renderer": model["type"], "params": special_params(model)},
+        ],
+    }
 
 
 def blockstate(name, content):
@@ -638,15 +833,34 @@ def recipes():
     smelting("gold_nugget_from_coin", tc("gold_coin"), "minecraft:gold_nugget", 1, 0.0)
 
 
+SECTIONS = {
+    "builtin_entity": "item id -> special renderer. The item model json is parent minecraft:builtin/entity (with the display transforms of a block item), so the item is drawn by a BlockEntityWithoutLevelRenderer: dispatch on the item id, create the renderer named in renderer (26.3 special model type id) with params. base_model is the 26.3 base model the special renderer was layered on (its textures are copied into the builtin/entity json for the particle). Entries with views_by_display_context are items whose renderer takes params.view: in renderByItem use views_by_display_context[ItemDisplayContext name] and fall back to fallback_view when the context is not listed (ground, fixed, head, gui of other kinds).",
+    "composite": "item id -> list of parts drawn together. The item json is builtin/entity. The BlockEntityWithoutLevelRenderer must draw parts in order: item_model/block_model is a baked json model to load as an additional model (ModelEvent.RegisterAdditional) and render with the item transform, builtin_entity is a special renderer as in builtin_entity.",
+    "tints": "item id -> layer index -> colour source. constant is a fixed RGB for ItemColor of that layer (tintindex = layer index; block items use the tintindex of the block model elements). source is a tint source id: thaumcraft:aspect = colour of the first aspect of the stack component thaumcraft:aspects (white when empty); thaumcraft:research_note = colour of the research note component thaumcraft:research_note (0x999999 when absent). Register one ItemColor per item with these layers.",
+    "armor_layers": "armor id -> ArmorMaterial.Layer location and the generated texture.",
+    "predicates": "item id -> property overrides, empty for TC4 (every select/condition item of 26.3 is a builtin_entity view select).",
+}
+
+
+def write_manifest(name, content):
+    path = mcformat.manifest_dir / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(content, indent=2) + "\n", encoding="utf-8")
+
+
 def tag_entries(values):
     return [{"id": value, "required": False} if value.startswith(f"{NS}:") else value for value in sorted(values)]
 
 
 def write_tags():
     for tag, values in block_tags.items():
+        if tag in profile.dropped_tags:
+            continue
         namespace, path = profile.tag_name(tag)
         write(DATA / namespace / profile.block_tag_folder / f"{path}.json", {"replace": False, "values": tag_entries(values)})
     for tag, values in item_tags.items():
+        if tag in profile.dropped_tags:
+            continue
         namespace, path = profile.tag_name(tag)
         write(DATA / namespace / profile.item_tag_folder / f"{path}.json", {"replace": False, "values": tag_entries(values)})
 
@@ -694,11 +908,16 @@ def item_definition_models(definition):
 
 def validate_models():
     missing = []
-    for path in (ASSETS / "items").glob("*.json"):
-        for model in item_definition_models(json.loads(path.read_text(encoding="utf-8"))["model"]):
-            namespace, _, location = model.partition(":")
-            if namespace == NS and not (ASSETS / "models" / f"{location}.json").exists():
-                missing.append(f"{path.name}: {model}")
+    if profile.modern:
+        for path in (ASSETS / "items").glob("*.json"):
+            for model in item_definition_models(json.loads(path.read_text(encoding="utf-8"))["model"]):
+                namespace, _, location = model.partition(":")
+                if namespace == NS and not (ASSETS / "models" / f"{location}.json").exists():
+                    missing.append(f"{path.name}: {model}")
+    else:
+        for name in sorted(ITEM_IDS):
+            if not (ASSETS / "models" / "item" / f"{name}.json").exists():
+                missing.append(f"item {name}: no models/item json")
     for path in (ASSETS / "blockstates").glob("*.json"):
         text = path.read_text(encoding="utf-8")
         content = json.loads(text)
@@ -710,6 +929,33 @@ def validate_models():
                     missing.append(f"{path.name}: {variant['model']}")
     if missing:
         raise SystemExit("missing models:\n  " + "\n  ".join(missing))
+
+
+def write_extras():
+    if profile.modern:
+        return
+    if INJECTIONS:
+        write(DATA / profile.loot_modifier_namespace / "loot_modifiers" / "global_loot_modifiers.json", {"replace": False, "entries": INJECTIONS})
+    values = {f"{NS}:{item}": ticks for name, ticks in FUELS.items() for item in FUEL_ITEMS[name]}
+    if profile.data_maps:
+        write(DATA / "neoforge" / "data_maps" / "item" / "furnace_fuels.json", {"values": {key: {"burn_time": ticks} for key, ticks in values.items()}})
+    write_manifest("fuels.json", values)
+    if profile.pack_mcmeta:
+        write(OUT / "pack.mcmeta", profile.pack_mcmeta)
+
+
+def write_manifests():
+    if profile.modern:
+        return
+    manifest = {"minecraft_version": profile.name, "sections": SECTIONS, "nbt_keys": NBT_KEYS, **MANIFEST}
+    manifest["notes"] = {"model_elements": NOTES["model_elements"]}
+    write_manifest(f"item_models_{profile.name}.json", manifest)
+    write_manifest("trades.json", {
+        "meaning": "villager professions without a trade_set registry; build MerchantOffers in VillagerTradesEvent (or a profession level to ItemListing list). Each profession level 1..5 draws offers_picked_per_level distinct offers from the shared pool (seeded random per villager). wants/gives are item stacks (id, count where count is an int or a minecraft:uniform {min,max} range rolled per offer); given_item_modifier set_count rolls the result count. max_uses, xp and reputation_discount (price multiplier) map to MerchantOffer(maxUses, xp, priceMultiplier). Professions have no job site (point_of_interest is null), the wizard and banker villagers are spawned by the village templates with Xp 1.",
+        "professions": TRADES,
+    })
+    if NOTES["recipes"]:
+        write_manifest(f"recipe_notes_{profile.name}.json", NOTES["recipes"])
 
 
 def main():
@@ -732,7 +978,12 @@ def main():
     gen_phase4.generate(ctx)
     gen_phase5.generate(ctx)
     gen_phase6.generate(ctx)
+    gen_curios.generate(ctx)
     write_tags()
+    if profile.explicit_render_types:
+        apply_render_types()
+    write_extras()
+    write_manifests()
     validate_textures()
     validate_models()
     count = sum(1 for _ in OUT.rglob("*.json"))

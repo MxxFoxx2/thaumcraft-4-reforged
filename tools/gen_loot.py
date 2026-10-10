@@ -81,7 +81,7 @@ def drops(ctx):
 
 
 def available(ctx, names):
-    existing = {path.stem for path in (ctx.ASSETS / "items").glob("*.json")}
+    existing = ctx.ITEM_IDS
     return [name for name in names if name in existing]
 
 
@@ -112,6 +112,7 @@ def injection(ctx, name, targets, minimum_rolls, maximum_rolls, vanilla_weight, 
     }))
     for index, target in enumerate(targets):
         modifier_name = name if len(targets) == 1 else f"{name}_{index}"
+        ctx.INJECTIONS.append(f"{ctx.NS}:{modifier_name}")
         ctx.write(
             ctx.DATA / ctx.NS / "loot_modifiers" / f"{modifier_name}.json",
             ctx.profile.loot_modifier(modifier_name, target, f"{ctx.NS}:inject/{name}"),

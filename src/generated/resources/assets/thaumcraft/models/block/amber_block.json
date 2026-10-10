@@ -3,5 +3,6 @@
   "textures": {
     "end": "thaumcraft:block/amberblock_top",
     "side": "thaumcraft:block/amberblock"
-  }
+  },
+  "render_type": "minecraft:translucent"
 }

@@ -517,5 +517,7 @@ public final class ModernAspects extends AspectRegistrar {
         entity("minecraft:wandering_trader", tags().add(Aspect.MAN, 3).add(Aspect.EXCHANGE, 3).add(Aspect.TRAVEL, 2));
         entity("minecraft:warden", tags().add(Aspect.DARKNESS, 8).add(Aspect.SENSES, 6).add(Aspect.SOUL, 6).add(Aspect.DEATH, 6).add(Aspect.ENTROPY, 4));
         entity("minecraft:zombie_villager", tags().add(Aspect.UNDEAD, 2).add(Aspect.MAN, 2).add(Aspect.HEAL, 1).add(Aspect.EARTH, 1));
+        entity("minecraft:boat", tags().add(Aspect.MECHANISM, 2).add(Aspect.WATER, 2));
+        entity("minecraft:chest_boat", tags().add(Aspect.MECHANISM, 2).add(Aspect.WATER, 2).add(Aspect.VOID, 1));
     }
 }

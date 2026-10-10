@@ -15,14 +15,13 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
-import net.minecraft.world.item.crafting.SingleRecipeInput;
 import javax.annotation.Nullable;
 
 public final class AspectRegistry {
@@ -287,6 +286,12 @@ public final class AspectRegistry {
                     }
                     craftingByOutput.computeIfAbsent(result.getItem(), key -> new ArrayList<>())
                         .add(new CraftingSource(ingredients, Math.max(1, result.getCount())));
+                }
+            } else if (recipe instanceof AbstractCookingRecipe cooking) {
+                ItemStack result = cooking.getResultItem(minecraftServer.registryAccess());
+                if (!result.isEmpty()) {
+                    processingByOutput.computeIfAbsent(result.getItem(), key -> new ArrayList<>())
+                        .add(new CraftingSource(List.of(cooking.getIngredients().get(0)), Math.max(1, result.getCount())));
                 }
             } else if (recipe instanceof SingleItemRecipe single) {
                 ItemStack result = single.getResultItem(minecraftServer.registryAccess());

@@ -724,6 +724,21 @@
         "HEAL": 1,
         "EARTH": 1
       }
+    },
+    {
+      "target": "minecraft:boat",
+      "aspects": {
+        "MECHANISM": 2,
+        "WATER": 2
+      }
+    },
+    {
+      "target": "minecraft:chest_boat",
+      "aspects": {
+        "MECHANISM": 2,
+        "WATER": 2,
+        "VOID": 1
+      }
     }
   ]
 }

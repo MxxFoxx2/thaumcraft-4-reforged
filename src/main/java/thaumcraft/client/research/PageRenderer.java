@@ -8,7 +8,7 @@ import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.locale.Language;
@@ -37,7 +37,7 @@ final class PageRenderer {
     final ResearchItem research;
     final Map<Aspect, List<ItemStack>> aspectItems = new HashMap<>();
     final List<Hit> hits = new ArrayList<>();
-    GuiGraphicsExtractor graphics;
+    GuiGraphics graphics;
     int mouseX;
     int mouseY;
     int cycle = -1;
@@ -73,7 +73,7 @@ final class PageRenderer {
         }
     }
 
-    void begin(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    void begin(GuiGraphics graphics, int mouseX, int mouseY) {
         this.graphics = graphics;
         this.mouseX = mouseX;
         this.mouseY = mouseY;
@@ -96,15 +96,15 @@ final class PageRenderer {
     }
 
     void overlay(int x, int y, int drawX, int drawY, int u, int v, int width, int height, float alpha) {
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x, y);
-        graphics.pose().scale(2.0F, 2.0F);
-        GuiBlit.blit(graphics, OVERLAY, drawX, drawY, width, height, u, v, width, height, 256, 256, FastColor.ARGB32.white(alpha));
-        graphics.pose().popMatrix();
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y, 0.0F);
+        graphics.pose().scale(2.0F, 2.0F, 1.0F);
+        GuiBlit.blit(graphics, OVERLAY, drawX, drawY, width, height, u, v, width, height, 256, 256, FastColor.ARGB32.colorFromFloat(alpha, 1.0F, 1.0F, 1.0F));
+        graphics.pose().popPose();
     }
 
     void centered(Component text, int x, int y, int color) {
-        graphics.text(font, text, x - font.width(text) / 2, y, color, false);
+        graphics.drawString(font, text, x - font.width(text) / 2, y, color, false);
     }
 
     void title(String key, int x, int y) {
@@ -133,9 +133,9 @@ final class PageRenderer {
         if (stack.isEmpty()) {
             return;
         }
-        graphics.item(stack, x, y);
+        graphics.renderItem(stack, x, y);
         if (output) {
-            graphics.itemDecorations(font, stack, x, y);
+            graphics.renderItemDecorations(font, stack, x, y);
         }
         int size = (int) Math.ceil(16 * scale);
         if (hovering(x, y, size, size)) {
@@ -169,9 +169,9 @@ final class PageRenderer {
             return;
         }
         if (tooltipStack.isEmpty()) {
-            graphics.setTooltipForNextFrame(font, tooltip, Optional.empty(), mouseX, mouseY);
+            graphics.renderTooltip(font, tooltip, Optional.empty(), mouseX, mouseY);
         } else {
-            graphics.setTooltipForNextFrame(font, tooltip, tooltipStack.getTooltipImage(), tooltipStack, mouseX, mouseY);
+            graphics.renderTooltip(font, tooltip, tooltipStack.getTooltipImage(), tooltipStack, mouseX, mouseY);
         }
     }
 
@@ -220,33 +220,33 @@ final class PageRenderer {
             int tx = x + start;
             int ty = y + count * 50;
             if (hovering(tx, ty, 40, 40)) {
-                graphics.pose().pushMatrix();
-                graphics.pose().translate(tx - 5, ty - 5);
-                graphics.pose().scale(2.5F, 2.5F);
+                graphics.pose().pushPose();
+                graphics.pose().translate(tx - 5, ty - 5, 0.0F);
+                graphics.pose().scale(2.5F, 2.5F, 1.0F);
                 GuiBlit.blit(graphics, AspectRenderer.BACK, 0, 0, 16, 16, 0, 0, 64, 64, 64, 64, 0xFFFFFFFF);
-                graphics.pose().popMatrix();
+                graphics.pose().popPose();
             }
-            graphics.pose().pushMatrix();
-            graphics.pose().scale(2.0F, 2.0F);
+            graphics.pose().pushPose();
+            graphics.pose().scale(2.0F, 2.0F, 1.0F);
             AspectRenderer.drawTag(graphics, tx / 2, ty / 2, aspect, aspects.getAmount(aspect));
-            graphics.pose().popMatrix();
+            graphics.pose().popPose();
             Component name = BookText.uniform(aspect.getName());
-            graphics.text(font, name, tx + 16 - font.width(name) / 2, y + 33 + count * 50, TITLE_COLOR, false);
+            graphics.drawString(font, name, tx + 16 - font.width(name) / 2, y + 33 + count * 50, TITLE_COLOR, false);
             Aspect[] components = aspect.getComponents();
             if (components != null) {
-                graphics.pose().pushMatrix();
-                graphics.pose().scale(1.5F, 1.5F);
+                graphics.pose().pushPose();
+                graphics.pose().scale(1.5F, 1.5F, 1.0F);
                 AspectRenderer.drawTag(graphics, (int) ((x + start + 54) / 1.5F), (int) ((y + 4 + count * 50) / 1.5F), components[0], 0.0F);
                 AspectRenderer.drawTag(graphics, (int) ((x + start + 96) / 1.5F), (int) ((y + 4 + count * 50) / 1.5F), components[1], 0.0F);
-                graphics.pose().popMatrix();
+                graphics.pose().popPose();
                 Component first = BookText.uniform("§o" + components[0].getName());
-                graphics.text(font, first, tx + 16 - font.width(first) / 2 + 50, y + 30 + count * 50, TITLE_COLOR, false);
+                graphics.drawString(font, first, tx + 16 - font.width(first) / 2 + 50, y + 30 + count * 50, TITLE_COLOR, false);
                 Component second = BookText.uniform("§o" + components[1].getName());
-                graphics.text(font, second, tx + 16 - font.width(second) / 2 + 92, y + 30 + count * 50, TITLE_COLOR, false);
-                graphics.text(font, "=", tx + 7 + 32, y + 12 + count * 50, 0xFF999999, false);
-                graphics.text(font, "+", tx + 4 + 79, y + 12 + count * 50, 0xFF999999, false);
+                graphics.drawString(font, second, tx + 16 - font.width(second) / 2 + 92, y + 30 + count * 50, TITLE_COLOR, false);
+                graphics.drawString(font, "=", tx + 7 + 32, y + 12 + count * 50, 0xFF999999, false);
+                graphics.drawString(font, "+", tx + 4 + 79, y + 12 + count * 50, 0xFF999999, false);
             } else {
-                graphics.text(font, BookText.uniform(lang("tc.aspect.primal")), tx + 48, y + 12 + count * 50, 0xFF444444, false);
+                graphics.drawString(font, BookText.uniform(lang("tc.aspect.primal")), tx + 48, y + 12 + count * 50, 0xFF444444, false);
             }
             count++;
         }
@@ -256,14 +256,14 @@ final class PageRenderer {
             int ty = y + count * 50;
             List<ItemStack> items = aspectItems.get(aspect);
             if (hovering(tx, ty, 40, 40) && items != null && !items.isEmpty()) {
-                graphics.nextStratum();
+                graphics.flush();
                 int column = 0;
                 int row = 0;
                 for (ItemStack item : items) {
                     int itemX = mouseX + 8 + column * 17;
                     int itemY = 17 * row + (mouseY - (4 + items.size() / 8 * 8));
-                    graphics.item(item, itemX, itemY);
-                    graphics.itemDecorations(font, item, itemX, itemY);
+                    graphics.renderItem(item, itemX, itemY);
+                    graphics.renderItemDecorations(font, item, itemX, itemY);
                     if (++column >= 8) {
                         column = 0;
                         row++;

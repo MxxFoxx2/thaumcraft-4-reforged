@@ -8,14 +8,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
-import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.display.RecipeDisplay;
-import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay;
-import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
-import net.minecraft.world.item.crafting.display.SlotDisplayContext;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.enchantment.Enchantment;
 import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
@@ -57,10 +55,10 @@ final class PageRecipes {
         return slots;
     }
 
-    private static List<List<ItemStack>> resolve(List<SlotDisplay> displays, ContextMap context) {
+    private static List<List<ItemStack>> resolve(List<Ingredient> ingredients) {
         List<List<ItemStack>> slots = new ArrayList<>();
-        for (SlotDisplay display : displays) {
-            slots.add(display.resolveForStacks(context));
+        for (Ingredient ingredient : ingredients) {
+            slots.add(List.of(ingredient.getItems()));
         }
         return slots;
     }
@@ -73,14 +71,12 @@ final class PageRecipes {
         if (holder == null) {
             return null;
         }
-        ContextMap context = SlotDisplayContext.fromLevel(renderer.minecraft.level);
-        for (RecipeDisplay display : holder.value().display()) {
-            if (display instanceof ShapedCraftingRecipeDisplay shaped) {
-                return new Grid(true, shaped.width(), shaped.height(), resolve(shaped.ingredients(), context), shaped.result().resolveForStacks(context));
-            }
-            if (display instanceof ShapelessCraftingRecipeDisplay shapeless) {
-                return new Grid(false, 3, 3, resolve(shapeless.ingredients(), context), shapeless.result().resolveForStacks(context));
-            }
+        RegistryAccess registries = renderer.minecraft.level.registryAccess();
+        if (holder.value() instanceof ShapedRecipe shaped) {
+            return new Grid(true, shaped.getWidth(), shaped.getHeight(), resolve(shaped.getIngredients()), List.of(shaped.getResultItem(registries)));
+        }
+        if (holder.value() instanceof ShapelessRecipe shapeless) {
+            return new Grid(false, 3, 3, resolve(shapeless.getIngredients()), List.of(shapeless.getResultItem(registries)));
         }
         return null;
     }
@@ -155,13 +151,13 @@ final class PageRecipes {
         }
         int start = side * 152;
         renderer.title("recipe.type.crucible", x + start, y);
-        renderer.graphics.pose().pushMatrix();
-        renderer.graphics.pose().translate(x + start, y + 28);
-        renderer.graphics.pose().scale(2.0F, 2.0F);
+        renderer.graphics.pose().pushPose();
+        renderer.graphics.pose().translate(x + start, y + 28, 0.0F);
+        renderer.graphics.pose().scale(2.0F, 2.0F, 1.0F);
         blit(renderer, 0, 0, 0, 3, 56, 17);
         blit(renderer, 0, 32, 0, 20, 56, 48);
         blit(renderer, 21, 24, 100, 84, 11, 13);
-        renderer.graphics.pose().popMatrix();
+        renderer.graphics.pose().popPose();
         renderer.aspectRows(recipe.aspects(), 3, x + start + 28, y + 96 + 32, 1);
         renderer.slot(stacks(recipe.result()), x + 48 + start, y + 36, true, false);
         renderer.slot(recipe.catalyst().displayStacks(), x + 26 + start, y + 72, false, true);
@@ -209,12 +205,12 @@ final class PageRecipes {
         int start = side * 152;
         renderer.title("recipe.type.infusion", x + start, y);
         renderer.instability(recipe.instability(), x + start, y + 194);
-        renderer.graphics.pose().pushMatrix();
-        renderer.graphics.pose().translate(x + start, y + 20);
-        renderer.graphics.pose().scale(2.0F, 2.0F);
+        renderer.graphics.pose().pushPose();
+        renderer.graphics.pose().translate(x + start, y + 20, 0.0F);
+        renderer.graphics.pose().scale(2.0F, 2.0F, 1.0F);
         blit(renderer, 0, 0, 0, 3, 56, 17);
         blit(renderer, 0, 19, 200, 77, 60, 44);
-        renderer.graphics.pose().popMatrix();
+        renderer.graphics.pose().popPose();
         renderer.aspectRows(recipe.aspects(), 5, x + start + 8, y + 164, 1);
         renderer.slot(stacks(recipe.result()), x + 48 + start, y + 28, true, false);
         renderer.slot(recipe.central().displayStacks(), x + 48 + start, y + 94, false, true);
@@ -239,11 +235,11 @@ final class PageRecipes {
         renderer.instability(recipe.instability(), x + start, y + 194);
         renderer.centered(name, x + start + 56, y + 24, ENCHANT_COLOR);
         renderer.centered(Component.literal(experience * level + " levels"), x + start + 56, y + 40, XP_COLOR);
-        renderer.graphics.pose().pushMatrix();
-        renderer.graphics.pose().translate(x + start, y + 20);
-        renderer.graphics.pose().scale(2.0F, 2.0F);
+        renderer.graphics.pose().pushPose();
+        renderer.graphics.pose().translate(x + start, y + 20, 0.0F);
+        renderer.graphics.pose().scale(2.0F, 2.0F, 1.0F);
         blit(renderer, 0, 19, 200, 77, 60, 44);
-        renderer.graphics.pose().popMatrix();
+        renderer.graphics.pose().popPose();
         renderer.aspectRows(recipe.aspects(), 5, x + start + 8, y + 164, level);
         components(renderer, recipe.components(), x + 56 + start, y + 102);
     }
@@ -267,14 +263,14 @@ final class PageRecipes {
         float shrink = dy > 3 ? (dy - 3) * 0.2F : 0.0F;
         float originX = x + start + xoff * (1.0F + shrink);
         float originY = y + 108 + yoff * (1.0F - shrink);
-        renderer.graphics.pose().pushMatrix();
-        renderer.graphics.pose().translate(originX, originY);
-        renderer.graphics.pose().scale(1.0F - shrink, 1.0F - shrink);
-        renderer.graphics.pose().pushMatrix();
-        renderer.graphics.pose().translate(-8 - xoff, -119 + Math.max(3 - dx, 3 - dz) * 8 + dx * 4 + dz * 4 + dy * 50);
-        renderer.graphics.pose().scale(2.0F, 2.0F);
+        renderer.graphics.pose().pushPose();
+        renderer.graphics.pose().translate(originX, originY, 0.0F);
+        renderer.graphics.pose().scale(1.0F - shrink, 1.0F - shrink, 1.0F);
+        renderer.graphics.pose().pushPose();
+        renderer.graphics.pose().translate(-8 - xoff, -119 + Math.max(3 - dx, 3 - dz) * 8 + dx * 4 + dz * 4 + dy * 50, 0.0F);
+        renderer.graphics.pose().scale(2.0F, 2.0F, 1.0F);
         GuiBlit.blit(renderer.graphics, PageRenderer.OVERLAY, 0, 0, 64, 44, 0, 72, 64, 44, 256, 256, 0x80FFFFFF);
-        renderer.graphics.pose().popMatrix();
+        renderer.graphics.pose().popPose();
         List<TcStack> blocks = recipe.blocks();
         int count = 0;
         for (int layer = 0; layer < dy; layer++) {
@@ -282,13 +278,13 @@ final class PageRecipes {
                 for (int column = dx - 1; column >= 0; column--) {
                     ItemStack stack = count < blocks.size() ? renderer.variant(stacks(blocks.get(count))) : ItemStack.EMPTY;
                     if (!stack.isEmpty()) {
-                        renderer.graphics.item(stack, column * 16 + depth * 16, -column * 8 + depth * 8 + layer * 50);
+                        renderer.graphics.renderItem(stack, column * 16 + depth * 16, -column * 8 + depth * 8 + layer * 50);
                     }
                     count++;
                 }
             }
         }
-        renderer.graphics.pose().popMatrix();
+        renderer.graphics.pose().popPose();
         count = 0;
         float size = 16.0F * (1.0F - shrink);
         for (int layer = 0; layer < dy; layer++) {

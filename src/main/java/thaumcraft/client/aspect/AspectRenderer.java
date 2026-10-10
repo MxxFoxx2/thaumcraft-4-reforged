@@ -3,7 +3,7 @@ package thaumcraft.client.aspect;
 import java.text.DecimalFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import thaumcraft.Thaumcraft;
@@ -20,15 +20,15 @@ public final class AspectRenderer {
     private AspectRenderer() {
     }
 
-    public static void drawTag(GuiGraphicsExtractor graphics, int x, int y, Aspect aspect, float amount) {
+    public static void drawTag(GuiGraphics graphics, int x, int y, Aspect aspect, float amount) {
         drawTag(graphics, x, y, aspect, amount, 0, 1.0F, false);
     }
 
-    public static void drawTag(GuiGraphicsExtractor graphics, int x, int y, Aspect aspect) {
+    public static void drawTag(GuiGraphics graphics, int x, int y, Aspect aspect) {
         drawTag(graphics, x, y, aspect, 0.0F, 0, 1.0F, true);
     }
 
-    public static void drawTag(GuiGraphicsExtractor graphics, int x, int y, Aspect aspect, float amount, int bonus, float alpha, boolean blackAndWhite) {
+    public static void drawTag(GuiGraphics graphics, int x, int y, Aspect aspect, float amount, int bonus, float alpha, boolean blackAndWhite) {
         int color;
         if (blackAndWhite) {
             color = FastColor.ARGB32.colorFromFloat(alpha * 0.8F, 0.1F, 0.1F, 0.1F);
@@ -46,41 +46,41 @@ public final class AspectRenderer {
             GuiBlit.blit(graphics, PARTICLES, x - 4, y - 4, 16, 16, particleU, 80, 16, 16, 256, 256, 0xFFFFFFFF);
             if (bonus > 1) {
                 String text = String.valueOf(bonus);
-                graphics.pose().pushMatrix();
-                graphics.pose().scale(0.5F, 0.5F);
+                graphics.pose().pushPose();
+                graphics.pose().scale(0.5F, 0.5F, 1.0F);
                 drawOutlined(graphics, font, text, 8 - font.width(text) / 2 + x * 2, 15 - font.lineHeight + y * 2);
-                graphics.pose().popMatrix();
+                graphics.pose().popPose();
             }
         }
     }
 
-    public static void drawBack(GuiGraphicsExtractor graphics, int x, int y) {
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x - 2, y - 2);
-        graphics.pose().scale(1.25F, 1.25F);
+    public static void drawBack(GuiGraphics graphics, int x, int y) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x - 2, y - 2, 0.0F);
+        graphics.pose().scale(1.25F, 1.25F, 1.0F);
         GuiBlit.blit(graphics, BACK, 0, 0, 16, 16, 0, 0, 64, 64, 64, 64, 0xFFFFFFFF);
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
     }
 
-    public static void drawUnknown(GuiGraphicsExtractor graphics, int x, int y) {
+    public static void drawUnknown(GuiGraphics graphics, int x, int y) {
         GuiBlit.blit(graphics, UNKNOWN, x, y, 16, 16, 0, 0, 32, 32, 32, 32, 0xFFFFFFFF);
     }
 
-    private static void drawAmount(GuiGraphicsExtractor graphics, Font font, String text, int x, int y) {
-        graphics.pose().pushMatrix();
-        graphics.pose().scale(0.5F, 0.5F);
+    private static void drawAmount(GuiGraphics graphics, Font font, String text, int x, int y) {
+        graphics.pose().pushPose();
+        graphics.pose().scale(0.5F, 0.5F, 1.0F);
         drawOutlined(graphics, font, text, 32 - font.width(text) + x * 2, 32 - font.lineHeight + y * 2);
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
     }
 
-    private static void drawOutlined(GuiGraphicsExtractor graphics, Font font, String text, int x, int y) {
+    private static void drawOutlined(GuiGraphics graphics, Font font, String text, int x, int y) {
         for (int offsetX = -1; offsetX <= 1; offsetX++) {
             for (int offsetY = -1; offsetY <= 1; offsetY++) {
                 if ((offsetX == 0 || offsetY == 0) && (offsetX != 0 || offsetY != 0)) {
-                    graphics.text(font, text, x + offsetX, y + offsetY, 0xFF000000, false);
+                    graphics.drawString(font, text, x + offsetX, y + offsetY, 0xFF000000, false);
                 }
             }
         }
-        graphics.text(font, text, x, y, 0xFFFFFFFF, false);
+        graphics.drawString(font, text, x, y, 0xFFFFFFFF, false);
     }
 }

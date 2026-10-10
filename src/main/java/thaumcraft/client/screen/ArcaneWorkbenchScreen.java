@@ -1,6 +1,6 @@
 package thaumcraft.client.screen;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,16 +24,17 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
     private static final int INSUFFICIENT_COLOR = 15625838;
 
     public ArcaneWorkbenchScreen(ArcaneWorkbenchMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 190, 234);
+        super(menu, inventory, title);
+        imageWidth = 190;
+        imageHeight = 234;
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         GuiBlit.blit(graphics, TEXTURE, leftPos, topPos, imageWidth, imageHeight, 0, 0, imageWidth, imageHeight, 256, 256, 0xFFFFFFFF);
         ItemStack wandStack = menu.getWand();
         WandItem wand = wandStack.getItem() instanceof WandItem wandItem ? wandItem : null;
@@ -62,15 +63,15 @@ public class ArcaneWorkbenchScreen extends AbstractContainerScreen<ArcaneWorkben
             ArcaneWorkbenchBlockEntity workbench = menu.workbench();
             ArcaneCrafting.Match match = workbench == null ? null : ArcaneCrafting.find(workbench.getGrid(), minecraft.player);
             if (match != null && !match.result().isEmpty()) {
-                graphics.item(match.result(), leftPos + 160, topPos + 64);
+                graphics.renderItem(match.result(), leftPos + 160, topPos + 64);
                 graphics.fill(leftPos + 160, topPos + 64, leftPos + 176, topPos + 80, 0xA8000000);
             }
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(leftPos + 168, topPos + 46);
-            graphics.pose().scale(0.5F, 0.5F);
+            graphics.pose().pushPose();
+            graphics.pose().translate(leftPos + 168, topPos + 46, 0.0F);
+            graphics.pose().scale(0.5F, 0.5F, 1.0F);
             Component text = Component.literal("Insufficient vis");
-            graphics.text(font, text, -font.width(text) / 2, 0, 0xFF000000 | INSUFFICIENT_COLOR, false);
-            graphics.pose().popMatrix();
+            graphics.drawString(font, text, -font.width(text) / 2, 0, 0xFF000000 | INSUFFICIENT_COLOR, false);
+            graphics.pose().popPose();
         }
     }
 }

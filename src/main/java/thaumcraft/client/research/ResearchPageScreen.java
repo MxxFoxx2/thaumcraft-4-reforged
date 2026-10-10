@@ -5,13 +5,12 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.lwjgl.glfw.GLFW;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.client.platform.GuiBlit;
@@ -47,7 +46,7 @@ public class ResearchPageScreen extends Screen {
 
     public static void open(ResearchItem item) {
         HISTORY.clear();
-        Minecraft.getInstance().gui.setScreen(new ResearchPageScreen(item, 0));
+        Minecraft.getInstance().setScreen(new ResearchPageScreen(item, 0));
     }
 
     private static List<ResearchPage> buildPages(Minecraft minecraft, ResearchItem research) {
@@ -88,32 +87,27 @@ public class ResearchPageScreen extends Screen {
     }
 
     @Override
-    public boolean isInGameUi() {
-        return true;
-    }
-
-    @Override
-    public boolean keyPressed(KeyEvent event) {
-        if (event.isEscape() || minecraft.options.keyInventory.matches(event)) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE || minecraft.options.keyInventory.matches(keyCode, scanCode)) {
             HISTORY.clear();
             ResearchBrowserScreen.open();
             return true;
         }
-        return super.keyPressed(event);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
         renderer.begin(graphics, mouseX, mouseY);
         renderer.resetFrame();
         int left = (width - PANE_WIDTH) / 2;
         int top = (height - PANE_HEIGHT) / 2;
-        graphics.pose().pushMatrix();
-        graphics.pose().translate((width - PANE_WIDTH * 1.3F) / 2.0F, (height - PANE_HEIGHT * 1.3F) / 2.0F);
-        graphics.pose().scale(1.3F, 1.3F);
+        graphics.pose().pushPose();
+        graphics.pose().translate((width - PANE_WIDTH * 1.3F) / 2.0F, (height - PANE_HEIGHT * 1.3F) / 2.0F, 0.0F);
+        graphics.pose().scale(1.3F, 1.3F, 1.0F);
         GuiBlit.blit(graphics, BookText.BOOK, 0, 0, PANE_WIDTH, PANE_HEIGHT, 0, 0, PANE_WIDTH, PANE_HEIGHT, 256, 256, 0xFFFFFFFF);
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
         if (lastCycle < System.currentTimeMillis()) {
             renderer.cycle++;
             lastCycle = System.currentTimeMillis() + 1000L;
@@ -126,7 +120,7 @@ public class ResearchPageScreen extends Screen {
         if (!HISTORY.isEmpty()) {
             drawScaled(graphics, left + 118, top + 189, 38, 202, 20, 12, bob);
             if (renderer.hovering(left + 118, top + 189, 20, 12)) {
-                graphics.text(font, Component.translatable("recipe.return"), mouseX, mouseY, 0xFFFFFFFF, true);
+                graphics.drawString(font, Component.translatable("recipe.return"), mouseX, mouseY, 0xFFFFFFFF, true);
             }
         }
         if (page > 0) {
@@ -137,29 +131,29 @@ public class ResearchPageScreen extends Screen {
         }
     }
 
-    private void drawScaled(GuiGraphicsExtractor graphics, int x, int y, int u, int v, int width, int height, float scale) {
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x + width / 2.0F, y + height / 2.0F);
-        graphics.pose().scale(1.0F + scale, 1.0F + scale);
+    private void drawScaled(GuiGraphics graphics, int x, int y, int u, int v, int width, int height, float scale) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x + width / 2.0F, y + height / 2.0F, 0.0F);
+        graphics.pose().scale(1.0F + scale, 1.0F + scale, 1.0F);
         GuiBlit.blit(graphics, BookText.BOOK, -width / 2, -height / 2, width, height, u, v, width, height, 256, 256, 0xFFFFFFFF);
-        graphics.pose().popMatrix();
+        graphics.pose().popPose();
     }
 
-    private void drawPage(GuiGraphicsExtractor graphics, ResearchPage node, int side, int x, int y) {
+    private void drawPage(GuiGraphics graphics, ResearchPage node, int side, int x, int y) {
         if (page == 0 && side == 0) {
             GuiBlit.blit(graphics, BookText.BOOK, x + 4, y - 13, 96, 4, 24, 184, 96, 4, 256, 256, 0xFFFFFFFF);
             GuiBlit.blit(graphics, BookText.BOOK, x + 4, y + 4, 96, 4, 24, 184, 96, 4, 256, 256, 0xFFFFFFFF);
             Component name = Component.translatable(research.nameKey());
             int nameWidth = font.width(name);
             if (nameWidth <= 130) {
-                graphics.text(font, name, x + 52 - nameWidth / 2, y - 6, 0xFF303030, false);
+                graphics.drawString(font, name, x + 52 - nameWidth / 2, y - 6, 0xFF303030, false);
             } else {
                 float scale = 130.0F / nameWidth;
-                graphics.pose().pushMatrix();
-                graphics.pose().translate(x + 52 - nameWidth / 2 * scale, y - 6.0F * scale);
-                graphics.pose().scale(scale, scale);
-                graphics.text(font, name, 0, 0, 0xFF303030, false);
-                graphics.pose().popMatrix();
+                graphics.pose().pushPose();
+                graphics.pose().translate(x + 52 - nameWidth / 2 * scale, y - 6.0F * scale, 0.0F);
+                graphics.pose().scale(scale, scale, 1.0F);
+                graphics.drawString(font, name, 0, 0, 0xFF303030, false);
+                graphics.pose().popPose();
             }
             y += 25;
         }
@@ -180,9 +174,9 @@ public class ResearchPageScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        int mouseX = (int) event.x();
-        int mouseY = (int) event.y();
+    public boolean mouseClicked(double eventX, double eventY, int button) {
+        int mouseX = (int) eventX;
+        int mouseY = (int) eventY;
         int left = (width - PANE_WIDTH) / 2;
         int top = (height - PANE_HEIGHT) / 2;
         if (page < pages.size() - 2 && inside(mouseX, mouseY, left + 261, top + 189, 14, 10)) {
@@ -200,7 +194,7 @@ public class ResearchPageScreen extends Screen {
             if (previous == null) {
                 ResearchBrowserScreen.open();
             } else {
-                minecraft.gui.setScreen(new ResearchPageScreen(previous, entry.page()));
+                minecraft.setScreen(new ResearchPageScreen(previous, entry.page()));
             }
             return true;
         }
@@ -209,11 +203,11 @@ public class ResearchPageScreen extends Screen {
                 playPage();
                 HISTORY.push(new HistoryEntry(research.key(), page));
                 ResearchItem target = hit.reference().research();
-                minecraft.gui.setScreen(new ResearchPageScreen(target, pageIndex(target, hit.reference().page())));
+                minecraft.setScreen(new ResearchPageScreen(target, pageIndex(target, hit.reference().page())));
                 return true;
             }
         }
-        return super.mouseClicked(event, doubleClick);
+        return super.mouseClicked(eventX, eventY, button);
     }
 
     private static boolean inside(int mouseX, int mouseY, int x, int y, int width, int height) {

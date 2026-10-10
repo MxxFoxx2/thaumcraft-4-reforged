@@ -26,6 +26,10 @@ import thaumcraft.wand.WandItem;
 public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Thaumcraft.MODID);
 
+    static {
+        Registration.armorMaterial(GogglesItem.MATERIAL);
+    }
+
     public static final DeferredItem<Item> ALUMENTUM = RegistryHelper.registerSimpleItem(ITEMS, "alumentum", properties -> Registration.fuel(properties, 6400));
     public static final DeferredItem<Item> NITOR = RegistryHelper.registerSimpleItem(ITEMS, "nitor");
     public static final DeferredItem<Item> THAUMIUM_INGOT = RegistryHelper.registerSimpleItem(ITEMS, "thaumium_ingot");

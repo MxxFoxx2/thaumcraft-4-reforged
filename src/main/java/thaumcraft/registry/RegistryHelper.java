@@ -20,7 +20,7 @@ final class RegistryHelper {
     }
 
     static <I extends Item> DeferredItem<I> registerItem(DeferredRegister.Items items, String name, Function<Item.Properties, ? extends I> factory, UnaryOperator<Item.Properties> properties) {
-        return items.registerItem(name, factory, properties.apply(new Item.Properties()));
+        return items.register(name, () -> factory.apply(properties.apply(new Item.Properties())));
     }
 
     static DeferredItem<Item> registerSimpleItem(DeferredRegister.Items items, String name) {
@@ -28,7 +28,7 @@ final class RegistryHelper {
     }
 
     static DeferredItem<Item> registerSimpleItem(DeferredRegister.Items items, String name, UnaryOperator<Item.Properties> properties) {
-        return items.registerSimpleItem(name, properties.apply(new Item.Properties()));
+        return items.register(name, () -> new Item(properties.apply(new Item.Properties())));
     }
 
     static DeferredItem<BlockItem> registerSimpleBlockItem(DeferredRegister.Items items, Holder<Block> block) {
@@ -36,7 +36,7 @@ final class RegistryHelper {
     }
 
     static DeferredItem<BlockItem> registerSimpleBlockItem(DeferredRegister.Items items, Holder<Block> block, UnaryOperator<Item.Properties> properties) {
-        return items.registerSimpleBlockItem(block, properties.apply(new Item.Properties()));
+        return items.register(block.unwrapKey().orElseThrow().location().getPath(), () -> new BlockItem(block.value(), properties.apply(new Item.Properties())));
     }
 
     static <B extends Block> DeferredBlock<B> registerBlock(DeferredRegister.Blocks blocks, String name, Function<BlockBehaviour.Properties, ? extends B> factory) {
@@ -44,10 +44,10 @@ final class RegistryHelper {
     }
 
     static <B extends Block> DeferredBlock<B> registerBlock(DeferredRegister.Blocks blocks, String name, Function<BlockBehaviour.Properties, ? extends B> factory, UnaryOperator<BlockBehaviour.Properties> properties) {
-        return blocks.registerBlock(name, factory, properties.apply(BlockBehaviour.Properties.of()));
+        return blocks.register(name, () -> factory.apply(properties.apply(BlockBehaviour.Properties.of())));
     }
 
     static DeferredBlock<Block> registerSimpleBlock(DeferredRegister.Blocks blocks, String name, UnaryOperator<BlockBehaviour.Properties> properties) {
-        return blocks.registerSimpleBlock(name, properties.apply(BlockBehaviour.Properties.of()));
+        return blocks.register(name, () -> new Block(properties.apply(BlockBehaviour.Properties.of())));
     }
 }

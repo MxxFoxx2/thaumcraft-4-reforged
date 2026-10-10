@@ -25,6 +25,7 @@ AIR_ONLY = {
     "predicate": {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
 }
 BIOME_FILTER = {"type": "minecraft:biome"}
+PATCH_FEATURES = {"minecraft:flower_default"}
 
 STEPS = 11
 UNDERGROUND = {
@@ -157,9 +158,26 @@ def generate(ctx):
         return value
 
     def legacy_placement(modifier):
-        if modifier.get("type") == "minecraft:offset":
-            return {"type": "minecraft:random_offset", "xz_spread": modifier["x"], "y_spread": modifier["y"]}
+        predicate = modifier.get("predicate")
+        if isinstance(predicate, dict) and predicate.get("type") == "minecraft:would_survive":
+            return {**modifier, "predicate": {**predicate, "state": {"Name": predicate["state"]}}}
         return modifier
+
+    def legacy_patch(feature_name, placement):
+        if len(placement) < 3 or placement[-2] is not OFFSET or placement[-1] is not AIR_ONLY:
+            return feature_name, placement
+        outer = placement[:-3]
+        if feature_name in PATCH_FEATURES:
+            return feature_name, outer
+        return {
+            "type": "minecraft:random_patch",
+            "config": {
+                "tries": placement[-3]["count"],
+                "xz_spread": OFFSET["x"]["max"],
+                "y_spread": OFFSET["y"]["max"],
+                "feature": {"feature": feature_name, "placement": [AIR_ONLY]},
+            },
+        }, outer
 
     def feature(name, content):
         if not modern:
@@ -168,6 +186,7 @@ def generate(ctx):
 
     def placed(name, feature_name, placement):
         if not modern:
+            feature_name, placement = legacy_patch(feature_name, placement)
             placement = [legacy_placement(modifier) for modifier in placement]
         worldgen("placed_feature", name, {"feature": feature_name, "placement": placement})
 

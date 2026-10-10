@@ -1,19 +1,23 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:black_tallow_candle"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:black_tallow_candle"
     },
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:white_tallow_candle"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:white_tallow_candle"
     }
   ],
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "#c:dyes/black",
-    "thaumcraft:white_tallow_candle"
+    {
+      "tag": "c:dyes/black"
+    },
+    {
+      "item": "thaumcraft:white_tallow_candle"
+    }
   ],
   "result": {
     "id": "thaumcraft:black_tallow_candle"

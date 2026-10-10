@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "thaumcraft:item/alchemical_centrifuge",
-    "model": {
-      "type": "thaumcraft:centrifuge"
-    }
-  }
-}

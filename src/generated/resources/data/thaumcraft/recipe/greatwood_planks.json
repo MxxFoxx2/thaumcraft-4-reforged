@@ -1,18 +1,20 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:greatwood_log"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:greatwood_log"
     },
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:greatwood_planks"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:greatwood_planks"
     }
   ],
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "ingredients": [
-    "thaumcraft:greatwood_log"
+    {
+      "item": "thaumcraft:greatwood_log"
+    }
   ],
   "result": {
     "id": "thaumcraft:greatwood_planks",

@@ -1,19 +1,23 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:scribing_tools"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:scribing_tools"
     },
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:scribing_tools"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:scribing_tools"
     }
   ],
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "thaumcraft:scribing_tools",
-    "#c:dyes/black"
+    {
+      "item": "thaumcraft:scribing_tools"
+    },
+    {
+      "tag": "c:dyes/black"
+    }
   ],
   "result": {
     "id": "thaumcraft:scribing_tools"

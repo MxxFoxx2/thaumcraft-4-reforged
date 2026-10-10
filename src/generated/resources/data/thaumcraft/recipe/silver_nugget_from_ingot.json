@@ -1,8 +1,8 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:silver_nugget"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:silver_nugget"
     },
     {
       "type": "neoforge:not",
@@ -15,7 +15,9 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "#c:ingots/silver"
+    {
+      "tag": "c:ingots/silver"
+    }
   ],
   "result": {
     "id": "thaumcraft:silver_nugget",

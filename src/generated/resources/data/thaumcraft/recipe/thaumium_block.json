@@ -1,14 +1,16 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:thaumium_block"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:thaumium_block"
     }
   ],
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "K": "#c:ingots/thaumium"
+    "K": {
+      "tag": "c:ingots/thaumium"
+    }
   },
   "pattern": [
     "KKK",

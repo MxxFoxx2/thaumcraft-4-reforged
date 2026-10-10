@@ -1,14 +1,16 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:iron_wand_cap"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:iron_wand_cap"
     }
   ],
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "N": "#c:nuggets/iron"
+    "N": {
+      "tag": "c:nuggets/iron"
+    }
   },
   "pattern": [
     "NNN",

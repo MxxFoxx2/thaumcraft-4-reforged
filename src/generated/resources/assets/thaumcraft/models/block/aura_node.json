@@ -2,5 +2,6 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "thaumcraft:item/blank"
-  }
+  },
+  "render_type": "minecraft:cutout"
 }

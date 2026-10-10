@@ -10,6 +10,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -32,18 +33,18 @@ public final class BiomeEdit {
         int quartX = QuartPos.fromBlock(pos.getX());
         int quartZ = QuartPos.fromBlock(pos.getZ());
         boolean[] changed = {false};
-        chunk.fillBiomesFromNoise((x, y, z) -> {
+        chunk.fillBiomesFromNoise((x, y, z, sampler) -> {
             Holder<Biome> current = chunk.getNoiseBiome(x, y, z);
             if (x == quartX && z == quartZ && !current.is(biome)) {
                 changed[0] = true;
                 return biome;
             }
             return current;
-        });
+        }, Climate.empty());
         if (!changed[0]) {
             return false;
         }
-        chunk.markUnsaved();
+        chunk.setUnsaved(true);
         DIRTY.computeIfAbsent(level, key -> new LinkedHashMap<>()).put(chunk.getPos(), chunk);
         return true;
     }

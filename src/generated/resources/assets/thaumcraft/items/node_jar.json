@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "thaumcraft:item/node_jar",
-    "model": {
-      "type": "thaumcraft:node_jar"
-    }
-  }
-}

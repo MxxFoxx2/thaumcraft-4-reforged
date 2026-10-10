@@ -224,10 +224,11 @@ def template(biome, builder):
             entry["nbt"] = nbts[position]
         entries.append(entry)
     palette_tag = []
+    name_key, properties_key = mcformat.profile.block_state_keys
     for name, properties in palette:
-        entry = {"id": name}
+        entry = {name_key: name}
         if properties:
-            entry["properties"] = {key: value for key, value in properties}
+            entry[properties_key] = {key: value for key, value in properties}
         palette_tag.append(entry)
     block_position = [int(value) for value in villager_position]
     villager = {
@@ -258,7 +259,7 @@ def test_platform():
     return {
         "DataVersion": Int(mcformat.profile.data_version),
         "size": TagList([Int(value) for value in size], TAG_INT),
-        "palette": TagList([{"id": "minecraft:stone"}], TAG_COMPOUND),
+        "palette": TagList([{mcformat.profile.block_state_keys[0]: "minecraft:stone"}], TAG_COMPOUND),
         "blocks": TagList(entries, TAG_COMPOUND),
         "entities": TagList([], TAG_COMPOUND),
     }

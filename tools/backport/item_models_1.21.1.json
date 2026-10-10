@@ -1,0 +1,350 @@
+{
+  "minecraft_version": "1.21.1",
+  "sections": {
+    "builtin_entity": "item id -> special renderer. The item model json is parent minecraft:builtin/entity (with the display transforms of a block item), so the item is drawn by a BlockEntityWithoutLevelRenderer: dispatch on the item id, create the renderer named in renderer (26.3 special model type id) with params. base_model is the 26.3 base model the special renderer was layered on (its textures are copied into the builtin/entity json for the particle). Entries with views_by_display_context are items whose renderer takes params.view: in renderByItem use views_by_display_context[ItemDisplayContext name] and fall back to fallback_view when the context is not listed (ground, fixed, head, gui of other kinds).",
+    "composite": "item id -> list of parts drawn together. The item json is builtin/entity. The BlockEntityWithoutLevelRenderer must draw parts in order: item_model/block_model is a baked json model to load as an additional model (ModelEvent.RegisterAdditional) and render with the item transform, builtin_entity is a special renderer as in builtin_entity.",
+    "tints": "item id -> layer index -> colour source. constant is a fixed RGB for ItemColor of that layer (tintindex = layer index; block items use the tintindex of the block model elements). source is a tint source id: thaumcraft:aspect = colour of the first aspect of the stack component thaumcraft:aspects (white when empty); thaumcraft:research_note = colour of the research note component thaumcraft:research_note (0x999999 when absent). Register one ItemColor per item with these layers.",
+    "armor_layers": "armor id -> ArmorMaterial.Layer location and the generated texture.",
+    "predicates": "item id -> property overrides, empty for TC4 (every select/condition item of 26.3 is a builtin_entity view select)."
+  },
+  "nbt_keys": {
+    "thaumcraft:wand_parts": "wand_parts",
+    "thaumcraft:wand_vis": "wand_vis",
+    "thaumcraft:wand_target": "wand_target",
+    "thaumcraft:research_note": "research_note",
+    "thaumcraft:aspects": "aspects"
+  },
+  "predicates": {},
+  "tints": {
+    "air_infused_stone": {
+      "0": {
+        "constant": "#FFFF7E"
+      }
+    },
+    "fire_infused_stone": {
+      "0": {
+        "constant": "#FF3C01"
+      }
+    },
+    "water_infused_stone": {
+      "0": {
+        "constant": "#0090FF"
+      }
+    },
+    "earth_infused_stone": {
+      "0": {
+        "constant": "#00A000"
+      }
+    },
+    "order_infused_stone": {
+      "0": {
+        "constant": "#EECCFF"
+      }
+    },
+    "entropy_infused_stone": {
+      "0": {
+        "constant": "#555577"
+      }
+    },
+    "greatwood_leaves": {
+      "0": {
+        "constant": "#48B518"
+      }
+    },
+    "silverwood_leaves": {
+      "0": {
+        "constant": "#8899AA"
+      }
+    },
+    "white_tallow_candle": {
+      "0": {
+        "constant": "#F0F0F0"
+      }
+    },
+    "orange_tallow_candle": {
+      "0": {
+        "constant": "#EB8844"
+      }
+    },
+    "magenta_tallow_candle": {
+      "0": {
+        "constant": "#C354CD"
+      }
+    },
+    "light_blue_tallow_candle": {
+      "0": {
+        "constant": "#6689D3"
+      }
+    },
+    "yellow_tallow_candle": {
+      "0": {
+        "constant": "#DECF2A"
+      }
+    },
+    "lime_tallow_candle": {
+      "0": {
+        "constant": "#41CD34"
+      }
+    },
+    "pink_tallow_candle": {
+      "0": {
+        "constant": "#D88198"
+      }
+    },
+    "gray_tallow_candle": {
+      "0": {
+        "constant": "#434343"
+      }
+    },
+    "light_gray_tallow_candle": {
+      "0": {
+        "constant": "#A0A0A0"
+      }
+    },
+    "cyan_tallow_candle": {
+      "0": {
+        "constant": "#287697"
+      }
+    },
+    "purple_tallow_candle": {
+      "0": {
+        "constant": "#7B2FBE"
+      }
+    },
+    "blue_tallow_candle": {
+      "0": {
+        "constant": "#253192"
+      }
+    },
+    "brown_tallow_candle": {
+      "0": {
+        "constant": "#51301A"
+      }
+    },
+    "green_tallow_candle": {
+      "0": {
+        "constant": "#3B511A"
+      }
+    },
+    "red_tallow_candle": {
+      "0": {
+        "constant": "#B3312C"
+      }
+    },
+    "black_tallow_candle": {
+      "0": {
+        "constant": "#1E1B1B"
+      }
+    },
+    "air_shard": {
+      "0": {
+        "constant": "#FFFF7E"
+      }
+    },
+    "fire_shard": {
+      "0": {
+        "constant": "#FF3C01"
+      }
+    },
+    "water_shard": {
+      "0": {
+        "constant": "#0090FF"
+      }
+    },
+    "earth_shard": {
+      "0": {
+        "constant": "#00A000"
+      }
+    },
+    "order_shard": {
+      "0": {
+        "constant": "#EECCFF"
+      }
+    },
+    "entropy_shard": {
+      "0": {
+        "constant": "#555577"
+      }
+    },
+    "essentia_phial": {
+      "0": {
+        "constant": "#FFFFFF"
+      },
+      "1": {
+        "source": "thaumcraft:aspect"
+      }
+    },
+    "wisp_essence": {
+      "0": {
+        "source": "thaumcraft:aspect"
+      }
+    },
+    "crystallized_essence": {
+      "0": {
+        "source": "thaumcraft:aspect"
+      }
+    },
+    "mana_bean": {
+      "0": {
+        "source": "thaumcraft:aspect"
+      }
+    },
+    "research_notes": {
+      "0": {
+        "constant": "#FFFFFF"
+      },
+      "1": {
+        "source": "thaumcraft:research_note"
+      }
+    },
+    "discovery": {
+      "0": {
+        "constant": "#FFFFFF"
+      },
+      "1": {
+        "source": "thaumcraft:research_note"
+      }
+    }
+  },
+  "builtin_entity": {
+    "aura_node": {
+      "renderer": "thaumcraft:aura_node",
+      "params": {},
+      "base_model": "thaumcraft:item/aura_node"
+    },
+    "node_stabilizer": {
+      "renderer": "thaumcraft:node_stabilizer",
+      "params": {
+        "advanced": false
+      },
+      "base_model": "thaumcraft:item/node_stabilizer"
+    },
+    "advanced_node_stabilizer": {
+      "renderer": "thaumcraft:node_stabilizer",
+      "params": {
+        "advanced": true
+      },
+      "base_model": "thaumcraft:item/advanced_node_stabilizer"
+    },
+    "node_transducer": {
+      "renderer": "thaumcraft:node_transducer",
+      "params": {},
+      "base_model": "thaumcraft:item/node_transducer"
+    },
+    "vis_relay": {
+      "renderer": "thaumcraft:vis_relay",
+      "params": {},
+      "base_model": "thaumcraft:item/vis_relay"
+    },
+    "node_jar": {
+      "renderer": "thaumcraft:node_jar",
+      "params": {},
+      "base_model": "thaumcraft:item/node_jar"
+    },
+    "wand": {
+      "renderer": "thaumcraft:wand",
+      "params": {},
+      "base_model": "thaumcraft:item/wand",
+      "view_param": "view",
+      "views_by_display_context": {
+        "gui": "inventory",
+        "thirdperson_lefthand": "equipped",
+        "thirdperson_righthand": "equipped",
+        "firstperson_lefthand": "first_person",
+        "firstperson_righthand": "first_person"
+      },
+      "fallback_view": "entity"
+    },
+    "thaumometer": {
+      "renderer": "thaumcraft:thaumometer",
+      "params": {},
+      "base_model": "thaumcraft:item/thaumometer",
+      "view_param": "view",
+      "views_by_display_context": {
+        "gui": "inventory",
+        "thirdperson_lefthand": "equipped",
+        "thirdperson_righthand": "equipped",
+        "firstperson_lefthand": "first_person",
+        "firstperson_righthand": "first_person"
+      },
+      "fallback_view": "entity"
+    },
+    "vis_charge_relay": {
+      "renderer": "thaumcraft:vis_charge_relay",
+      "params": {},
+      "base_model": "thaumcraft:item/vis_charge_relay"
+    },
+    "runic_matrix": {
+      "renderer": "thaumcraft:runic_matrix",
+      "params": {},
+      "base_model": "thaumcraft:item/runic_matrix"
+    },
+    "alchemical_centrifuge": {
+      "renderer": "thaumcraft:centrifuge",
+      "params": {},
+      "base_model": "thaumcraft:item/alchemical_centrifuge"
+    },
+    "essentia_crystallizer": {
+      "renderer": "thaumcraft:essentia_crystallizer",
+      "params": {},
+      "base_model": "thaumcraft:item/essentia_crystallizer"
+    },
+    "essentia_reservoir": {
+      "renderer": "thaumcraft:essentia_reservoir",
+      "params": {},
+      "base_model": "thaumcraft:item/essentia_reservoir"
+    },
+    "filled_jar": {
+      "renderer": "thaumcraft:filled_jar",
+      "params": {},
+      "base_model": "thaumcraft:item/filled_jar"
+    },
+    "filled_void_jar": {
+      "renderer": "thaumcraft:filled_jar",
+      "params": {
+        "void": true
+      },
+      "base_model": "thaumcraft:item/filled_void_jar"
+    },
+    "alembic": {
+      "renderer": "thaumcraft:alembic",
+      "params": {},
+      "base_model": "thaumcraft:item/alembic"
+    },
+    "flux_scrubber": {
+      "renderer": "thaumcraft:flux_scrubber",
+      "params": {},
+      "base_model": "thaumcraft:item/flux_scrubber"
+    },
+    "arcane_bellows": {
+      "renderer": "thaumcraft:arcane_bellows",
+      "params": {},
+      "base_model": "thaumcraft:item/arcane_bellows"
+    }
+  },
+  "composite": {
+    "essentia_valve": {
+      "parts": [
+        {
+          "kind": "item_model",
+          "model": "thaumcraft:item/essentia_valve_base"
+        },
+        {
+          "kind": "builtin_entity",
+          "renderer": "thaumcraft:tube_valve",
+          "params": {}
+        }
+      ]
+    }
+  },
+  "armor_layers": {
+    "goggles": {
+      "layer_id": "thaumcraft:goggles",
+      "texture": "thaumcraft:textures/models/armor/goggles_layer_1.png",
+      "meaning": "ArmorMaterial.Layer(ResourceLocation thaumcraft:goggles) resolves to textures/models/armor/goggles_layer_1.png; the png is generated into the resources from the 26.3 humanoid equipment texture"
+    }
+  },
+  "notes": {
+    "model_elements": []
+  }
+}

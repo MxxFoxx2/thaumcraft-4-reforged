@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -17,7 +16,7 @@ import thaumcraft.client.platform.GuiBlit;
 final class BookText {
     static final ResourceLocation BOOK = Thaumcraft.id("textures/gui/gui_researchbook.png");
 
-    private static final Style UNIFORM = Style.EMPTY.withFont(new FontDescription.Resource(ResourceLocation.withDefaultNamespace("uniform")));
+    private static final Style UNIFORM = Style.EMPTY.withFont(ResourceLocation.withDefaultNamespace("uniform"));
     private static final Pattern MARKER = Pattern.compile("^@(\\d+)@$");
     private static final Pattern INSERT = Pattern.compile("<LINE/?>|<IMG>(.*?)</IMG>");
 
@@ -82,18 +81,18 @@ final class BookText {
         return lines;
     }
 
-    static void draw(GuiGraphicsExtractor graphics, Font font, List<Line> lines, int x, int y, int width, int color) {
+    static void draw(GuiGraphics graphics, Font font, List<Line> lines, int x, int y, int width, int color) {
         int currentY = y;
         for (Line line : lines) {
             switch (line) {
-                case Text text -> graphics.text(font, text.text(), x, currentY, color, false);
+                case Text text -> graphics.drawString(font, text.text(), x, currentY, color, false);
                 case Rule rule -> GuiBlit.blit(graphics, BOOK, x + width / 2 - 48, currentY + 2, 96, 4, 24, 184, 96, 4, 256, 256, 0xFFFFFFFF);
                 case Picture picture -> {
-                    graphics.pose().pushMatrix();
-                    graphics.pose().translate(x - 3 + width / 2 - picture.width() / 2 * picture.scale(), currentY);
-                    graphics.pose().scale(picture.scale(), picture.scale());
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(x - 3 + width / 2 - picture.width() / 2 * picture.scale(), currentY, 0.0F);
+                    graphics.pose().scale(picture.scale(), picture.scale(), 1.0F);
                     GuiBlit.blit(graphics, picture.texture(), 0, 0, picture.width(), picture.regionHeight(), picture.u(), picture.v(), picture.width(), picture.regionHeight(), 256, 256, 0xFFFFFFFF);
-                    graphics.pose().popMatrix();
+                    graphics.pose().popPose();
                 }
             }
             currentY += line.height();

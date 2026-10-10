@@ -1,6 +1,6 @@
 package thaumcraft.client.screen;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -13,22 +13,23 @@ public class AlchemicalFurnaceScreen extends AbstractContainerScreen<AlchemicalF
     private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/gui_alchemyfurnace.png");
 
     public AlchemicalFurnaceScreen(AlchemicalFurnaceMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 176, 166);
+        super(menu, inventory, title);
+        imageWidth = 176;
+        imageHeight = 166;
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
     }
 
-    private void sheet(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int u, int v) {
+    private void sheet(GuiGraphics graphics, int x, int y, int width, int height, int u, int v) {
         if (width > 0 && height > 0) {
             GuiBlit.blit(graphics, TEXTURE, x, y, width, height, u, v, width, height, 256, 256, 0xFFFFFFFF);
         }
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         sheet(graphics, leftPos, topPos, imageWidth, imageHeight, 0, 0);
         if (menu.getBurnTime() > 0) {
             int burn = menu.getBurnTimeRemainingScaled(20);

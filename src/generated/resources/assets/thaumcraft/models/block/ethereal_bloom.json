@@ -2,5 +2,6 @@
   "parent": "minecraft:block/cross",
   "textures": {
     "cross": "thaumcraft:block/purifier_seed"
-  }
+  },
+  "render_type": "minecraft:cutout"
 }

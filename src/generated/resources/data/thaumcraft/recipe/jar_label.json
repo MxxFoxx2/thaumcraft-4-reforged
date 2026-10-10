@@ -1,19 +1,31 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:jar_label"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:jar_label"
     }
   ],
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "#c:dyes/black",
-    "minecraft:slime_ball",
-    "minecraft:paper",
-    "minecraft:paper",
-    "minecraft:paper",
-    "minecraft:paper"
+    {
+      "tag": "c:dyes/black"
+    },
+    {
+      "item": "minecraft:slime_ball"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    }
   ],
   "result": {
     "id": "thaumcraft:jar_label",

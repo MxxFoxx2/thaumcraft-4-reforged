@@ -129,7 +129,7 @@ def defined_item(ctx, identifier):
     namespace, _, name = identifier.partition(":")
     if namespace != NS:
         return True
-    return (ctx.ASSETS / "items" / f"{name}.json").exists()
+    return name in ctx.ITEM_IDS
 
 
 def ingredient_ids(value):

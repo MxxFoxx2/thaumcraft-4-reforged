@@ -9,6 +9,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -29,6 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import javax.annotation.Nullable;
+import thaumcraft.item.InteractionResults;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 
@@ -138,7 +140,10 @@ public class WandItem extends Item {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
+    public void inventoryTick(ItemStack stack, Level level, Entity owner, int slotId, boolean isSelected) {
+        if (level.isClientSide()) {
+            return;
+        }
         if (owner instanceof Player player) {
             RodUpdate update = Wands.getRod(stack).onUpdate();
             if (update != null) {
@@ -176,7 +181,12 @@ public class WandItem extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        InteractionResult result = handleUse(level, player, hand);
+        return InteractionResults.holder(result, player.getItemInHand(hand), level);
+    }
+
+    private InteractionResult handleUse(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         BlockHitResult hit = getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
         if (hit.getType() != HitResult.Type.BLOCK) {
@@ -212,13 +222,12 @@ public class WandItem extends Item {
     }
 
     @Override
-    public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remainingTime) {
+    public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remainingTime) {
         WandInteractable target = getObjectInUse(stack, level);
         if (target != null && entity instanceof Player player) {
             target.onWandStoppedUsing(stack, level, player, remainingTime);
         }
         WandKeys.TARGET.remove(stack);
-        return false;
     }
 
     private static @Nullable WandInteractable getObjectInUse(ItemStack stack, Level level) {

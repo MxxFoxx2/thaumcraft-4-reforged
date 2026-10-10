@@ -35,7 +35,7 @@ def stack(item, minimum, maximum):
 
 def generate(ctx):
     ns = ctx.NS
-    available = {path.stem for path in (ctx.ASSETS / "items").glob("*.json")}
+    available = ctx.ITEM_IDS
 
     def exists(item):
         namespace, name = item.split(":")
@@ -46,6 +46,7 @@ def generate(ctx):
 
     def trades_for(profession, definitions):
         names = []
+        offers = []
         for name, wants, gives in definitions:
             if not exists(wants[0]) or not exists(gives[0]):
                 continue
@@ -58,8 +59,19 @@ def generate(ctx):
             }
             if gives[1] != 1 or gives[2] != 1:
                 content["given_item_modifier"] = {"type": "minecraft:set_count", "count": uniform(gives[1], gives[2])}
+            offers.append({"name": name, **content})
+            if not ctx.profile.modern:
+                continue
             ctx.write(ctx.DATA / ns / "villager_trade" / profession / f"{name}.json", content)
             names.append(f"{ns}:{profession}/{name}")
+        if not ctx.profile.modern:
+            ctx.TRADES[profession] = {
+                "profession": f"{ns}:{profession}",
+                "point_of_interest": None,
+                "pool": offers,
+                "levels": {str(level): {"offers_picked_per_level": min(2, len(offers)), "offers": "pool"} for level in range(1, 6)},
+            }
+            return
         ctx.write(ctx.DATA / ns / "tags" / "villager_trade" / profession / "pool.json", {"values": names})
         for level in range(1, 6):
             ctx.write(ctx.DATA / ns / "trade_set" / profession / f"level_{level}.json", {

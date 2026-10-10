@@ -2,5 +2,6 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "thaumcraft:block/alchemyblockadv"
-  }
+  },
+  "render_type": "minecraft:translucent"
 }

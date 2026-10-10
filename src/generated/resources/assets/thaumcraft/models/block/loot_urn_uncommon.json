@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "thaumcraft:block/urn_side_1",
     "top": "thaumcraft:block/urn_top",
@@ -101,5 +102,6 @@
         }
       }
     }
-  ]
+  ],
+  "render_type": "minecraft:cutout"
 }

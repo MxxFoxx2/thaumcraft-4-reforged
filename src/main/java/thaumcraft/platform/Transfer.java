@@ -17,15 +17,12 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.transfer.ResourceHandler;
-import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
-import net.neoforged.neoforge.transfer.fluid.FluidResource;
-import net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler;
-import net.neoforged.neoforge.transfer.item.ItemResource;
-import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
-import net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper;
-import net.neoforged.neoforge.transfer.transaction.Transaction;
-import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import javax.annotation.Nullable;
 
 public final class Transfer {
@@ -35,7 +32,7 @@ public final class Transfer {
     private Transfer() {
     }
 
-    private record Exposure<B extends BlockEntity>(Supplier<? extends BlockEntityType<B>> type, BiFunction<B, @Nullable Direction, @Nullable Object> provider) {
+    private record Exposure<B extends BlockEntity>(Supplier<? extends BlockEntityType<B>> type, BiFunction<B, Direction, Object> provider) {
     }
 
     public static final class FluidTank {
@@ -46,59 +43,53 @@ public final class Transfer {
         }
 
         public FluidStack getFluid() {
-            return handler.getResource(0).toStack(handler.getAmountAsInt(0));
+            return handler.getFluid();
         }
 
         public void setFluid(FluidStack stack) {
-            handler.set(0, FluidResource.of(stack), stack.getAmount());
+            handler.setFluid(stack);
         }
 
         public int getAmount() {
-            return handler.getAmountAsInt(0);
+            return handler.getFluidAmount();
         }
 
         public int getCapacity() {
-            return handler.capacity();
+            return handler.getCapacity();
         }
 
-        private static final class Handler extends FluidStacksResourceHandler {
-            private final Predicate<FluidStack> filter;
+        private static final class Handler extends net.neoforged.neoforge.fluids.capability.templates.FluidTank {
             private final boolean extractable;
             private final Runnable onChanged;
 
             private Handler(int capacity, Predicate<FluidStack> filter, boolean extractable, Runnable onChanged) {
-                super(1, capacity);
-                this.filter = filter;
+                super(capacity, filter);
                 this.extractable = extractable;
                 this.onChanged = onChanged;
             }
 
-            private int capacity() {
-                return capacity;
+            @Override
+            public FluidStack drain(int maxDrain, FluidAction action) {
+                return extractable ? super.drain(maxDrain, action) : FluidStack.EMPTY;
             }
 
             @Override
-            public boolean isValid(int index, FluidResource resource) {
-                return filter.test(resource.toStack(1));
+            public FluidStack drain(FluidStack resource, FluidAction action) {
+                return extractable ? super.drain(resource, action) : FluidStack.EMPTY;
             }
 
             @Override
-            public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
-                return extractable ? super.extract(index, resource, amount, transaction) : 0;
-            }
-
-            @Override
-            protected void onContentsChanged(int index, FluidStack previousContents) {
+            protected void onContentsChanged() {
                 onChanged.run();
             }
         }
     }
 
-    public static <B extends BlockEntity> void exposeItems(Supplier<? extends BlockEntityType<B>> type, BiFunction<B, @Nullable Direction, @Nullable Container> provider) {
+    public static <B extends BlockEntity> void exposeItems(Supplier<? extends BlockEntityType<B>> type, BiFunction<B, Direction, Container> provider) {
         ITEMS.add(new Exposure<>(type, provider::apply));
     }
 
-    public static <B extends BlockEntity> void exposeFluids(Supplier<? extends BlockEntityType<B>> type, BiFunction<B, @Nullable Direction, @Nullable FluidTank> provider) {
+    public static <B extends BlockEntity> void exposeFluids(Supplier<? extends BlockEntityType<B>> type, BiFunction<B, Direction, FluidTank> provider) {
         FLUIDS.add(new Exposure<>(type, provider::apply));
     }
 
@@ -116,27 +107,27 @@ public final class Transfer {
     }
 
     private static <B extends BlockEntity> void registerItems(RegisterCapabilitiesEvent event, Exposure<B> exposure) {
-        event.registerBlockEntity(Capabilities.Item.BLOCK, exposure.type().get(), (entity, side) -> {
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, exposure.type().get(), (entity, side) -> {
             Object container = exposure.provider().apply(entity, side);
             if (container instanceof WorldlyContainer worldly && side != null) {
-                return new WorldlyContainerWrapper(worldly, side);
+                return new SidedInvWrapper(worldly, side);
             }
-            return container instanceof Container plain ? VanillaContainerWrapper.of(plain) : null;
+            return container instanceof Container plain ? new InvWrapper(plain) : null;
         });
     }
 
     private static <B extends BlockEntity> void registerFluids(RegisterCapabilitiesEvent event, Exposure<B> exposure) {
-        event.registerBlockEntity(Capabilities.Fluid.BLOCK, exposure.type().get(), (entity, side) ->
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, exposure.type().get(), (entity, side) ->
             exposure.provider().apply(entity, side) instanceof FluidTank tank ? tank.handler : null
         );
     }
 
-    private static @Nullable ResourceHandler<ItemResource> items(Level level, BlockPos pos, @Nullable Direction side) {
-        return level.getCapability(Capabilities.Item.BLOCK, pos, side);
+    private static @Nullable IItemHandler items(Level level, BlockPos pos, @Nullable Direction side) {
+        return level.getCapability(Capabilities.ItemHandler.BLOCK, pos, side);
     }
 
-    private static @Nullable ResourceHandler<FluidResource> fluids(Level level, BlockPos pos, @Nullable Direction side) {
-        return level.getCapability(Capabilities.Fluid.BLOCK, pos, side);
+    private static @Nullable IFluidHandler fluids(Level level, BlockPos pos, @Nullable Direction side) {
+        return level.getCapability(Capabilities.FluidHandler.BLOCK, pos, side);
     }
 
     public static boolean hasItems(Level level, BlockPos pos, @Nullable Direction side) {
@@ -148,106 +139,83 @@ public final class Transfer {
     }
 
     public static int count(Level level, BlockPos pos, @Nullable Direction side, Predicate<ItemStack> filter) {
-        ResourceHandler<ItemResource> handler = items(level, pos, side);
+        IItemHandler handler = items(level, pos, side);
         if (handler == null) {
             return 0;
         }
         int total = 0;
-        for (int index = 0; index < handler.size(); index++) {
-            ItemResource resource = handler.getResource(index);
-            if (!resource.isEmpty() && filter.test(resource.toStack(1))) {
-                total += handler.getAmountAsInt(index);
+        for (int index = 0; index < handler.getSlots(); index++) {
+            ItemStack stack = handler.getStackInSlot(index);
+            if (!stack.isEmpty() && filter.test(stack.copyWithCount(1))) {
+                total += stack.getCount();
             }
         }
         return total;
     }
 
     public static ItemStack insert(Level level, BlockPos pos, @Nullable Direction side, ItemStack stack, boolean simulate) {
-        ResourceHandler<ItemResource> handler = items(level, pos, side);
+        IItemHandler handler = items(level, pos, side);
         if (handler == null || stack.isEmpty()) {
             return stack;
         }
-        try (Transaction transaction = Transaction.openRoot()) {
-            int inserted = ResourceHandlerUtil.insertStacking(handler, ItemResource.of(stack), stack.getCount(), transaction);
-            if (!simulate) {
-                transaction.commit();
-            }
-            return stack.copyWithCount(stack.getCount() - inserted);
-        }
+        return ItemHandlerHelper.insertItemStacked(handler, stack, simulate);
     }
 
     public static ItemStack extract(Level level, BlockPos pos, @Nullable Direction side, Predicate<ItemStack> filter, int maxAmount, boolean simulate) {
-        ResourceHandler<ItemResource> handler = items(level, pos, side);
+        IItemHandler handler = items(level, pos, side);
         if (handler == null || maxAmount <= 0) {
             return ItemStack.EMPTY;
         }
-        for (int index = 0; index < handler.size(); index++) {
-            ItemResource resource = handler.getResource(index);
-            if (resource.isEmpty() || !filter.test(resource.toStack(1))) {
+        for (int index = 0; index < handler.getSlots(); index++) {
+            ItemStack stack = handler.getStackInSlot(index);
+            if (stack.isEmpty() || !filter.test(stack.copyWithCount(1))) {
                 continue;
             }
-            try (Transaction transaction = Transaction.openRoot()) {
-                int extracted = handler.extract(resource, maxAmount, transaction);
-                if (extracted <= 0) {
-                    continue;
-                }
-                if (!simulate) {
-                    transaction.commit();
-                }
-                return resource.toStack(extracted);
+            ItemStack extracted = handler.extractItem(index, maxAmount, simulate);
+            if (!extracted.isEmpty()) {
+                return extracted;
             }
         }
         return ItemStack.EMPTY;
     }
 
     public static int countFluid(Level level, BlockPos pos, @Nullable Direction side, Predicate<FluidStack> filter) {
-        ResourceHandler<FluidResource> handler = fluids(level, pos, side);
+        IFluidHandler handler = fluids(level, pos, side);
         if (handler == null) {
             return 0;
         }
         int total = 0;
-        for (int index = 0; index < handler.size(); index++) {
-            FluidResource resource = handler.getResource(index);
-            if (!resource.isEmpty() && filter.test(resource.toStack(1))) {
-                total += handler.getAmountAsInt(index);
+        for (int index = 0; index < handler.getTanks(); index++) {
+            FluidStack fluid = handler.getFluidInTank(index);
+            if (!fluid.isEmpty() && filter.test(fluid.copyWithAmount(1))) {
+                total += fluid.getAmount();
             }
         }
         return total;
     }
 
     public static FluidStack insertFluid(Level level, BlockPos pos, @Nullable Direction side, FluidStack stack, boolean simulate) {
-        ResourceHandler<FluidResource> handler = fluids(level, pos, side);
+        IFluidHandler handler = fluids(level, pos, side);
         if (handler == null || stack.isEmpty()) {
             return stack;
         }
-        try (Transaction transaction = Transaction.openRoot()) {
-            int inserted = handler.insert(FluidResource.of(stack), stack.getAmount(), transaction);
-            if (!simulate) {
-                transaction.commit();
-            }
-            return stack.copyWithAmount(stack.getAmount() - inserted);
-        }
+        int inserted = handler.fill(stack, simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE);
+        return stack.copyWithAmount(stack.getAmount() - inserted);
     }
 
     public static FluidStack extractFluid(Level level, BlockPos pos, @Nullable Direction side, Predicate<FluidStack> filter, int maxAmount, boolean simulate) {
-        ResourceHandler<FluidResource> handler = fluids(level, pos, side);
+        IFluidHandler handler = fluids(level, pos, side);
         if (handler == null || maxAmount <= 0) {
             return FluidStack.EMPTY;
         }
-        for (int index = 0; index < handler.size(); index++) {
-            FluidResource resource = handler.getResource(index);
-            if (resource.isEmpty() || !filter.test(resource.toStack(1))) {
+        for (int index = 0; index < handler.getTanks(); index++) {
+            FluidStack fluid = handler.getFluidInTank(index);
+            if (fluid.isEmpty() || !filter.test(fluid.copyWithAmount(1))) {
                 continue;
             }
-            try (Transaction transaction = Transaction.openRoot()) {
-                int extracted = handler.extract(resource, maxAmount, transaction);
-                if (extracted <= 0) {
-                    continue;
-                }
-                if (!simulate) {
-                    transaction.commit();
-                }
-                return resource.toStack(extracted);
+            FluidStack extracted = handler.drain(fluid.copyWithAmount(maxAmount), simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE);
+            if (!extracted.isEmpty()) {
+                return extracted;
             }
         }
         return FluidStack.EMPTY;

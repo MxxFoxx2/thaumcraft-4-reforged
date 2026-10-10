@@ -1,8 +1,8 @@
 {
   "neoforge:conditions": [
     {
-      "type": "neoforge:registered",
-      "value": "thaumcraft:lead_nugget"
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:lead_nugget"
     },
     {
       "type": "neoforge:not",
@@ -15,7 +15,9 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "#c:ingots/lead"
+    {
+      "tag": "c:ingots/lead"
+    }
   ],
   "result": {
     "id": "thaumcraft:lead_nugget",

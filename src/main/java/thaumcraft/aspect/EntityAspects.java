@@ -92,18 +92,18 @@ public record EntityAspects(AspectList aspects, List<Condition> conditions) {
                 return false;
             }
             if (value instanceof String text) {
-                return tag instanceof StringTag stringTag && stringTag.value().equals(text);
+                return tag instanceof StringTag stringTag && stringTag.getAsString().equals(text);
             }
             if (!(tag instanceof NumericTag numeric)) {
                 return false;
             }
             if (value instanceof Boolean flag) {
-                return (numeric.longValue() != 0L) == flag;
+                return (numeric.getAsLong() != 0L) == flag;
             }
             if (value instanceof Double number) {
-                return numeric.doubleValue() == number;
+                return numeric.getAsDouble() == number;
             }
-            return numeric.longValue() == (Long) value;
+            return numeric.getAsLong() == (Long) value;
         }
     }
 }

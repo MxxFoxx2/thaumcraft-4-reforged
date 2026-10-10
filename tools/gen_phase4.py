@@ -1,3 +1,5 @@
+import shutil
+
 NS = "thaumcraft"
 
 FACINGS = ["down", "up", "north", "south", "west", "east"]
@@ -31,9 +33,7 @@ def particle_model(ctx, name, texture, kind="block"):
 
 
 def special_item(ctx, name, model, base=None):
-    ctx.write(ctx.ASSETS / "items" / f"{name}.json", {
-        "model": {"type": "minecraft:special", "base": base or ctx.ref(name, "item"), "model": model},
-    })
+    ctx.special_item(name, base or ctx.ref(name, "item"), model)
 
 
 LEGACY_VIEWS = [
@@ -45,19 +45,7 @@ LEGACY_VIEWS = [
 
 def legacy_special_item(ctx, name, model, particle):
     ctx.item_model(name, {"gui_light": "side", "textures": {"particle": ctx.ref(particle, "item")}})
-    base = ctx.ref(name, "item")
-
-    def special(view):
-        return {"type": "minecraft:special", "base": base, "model": {**model, "view": view}}
-
-    ctx.write(ctx.ASSETS / "items" / f"{name}.json", {
-        "model": {
-            "type": "minecraft:select",
-            "property": "minecraft:display_context",
-            "cases": [{"when": contexts, "model": special(view)} for view, contexts in LEGACY_VIEWS],
-            "fallback": special("entity"),
-        },
-    })
+    ctx.view_select_item(name, ctx.ref(name, "item"), model, LEGACY_VIEWS, "entity")
 
 
 def item_base_from_block(ctx, name):
@@ -198,9 +186,19 @@ def wands(ctx):
     ctx.generated_item("primal_staff_core", "staff_rod_primal")
     legacy_special_item(ctx, "thaumometer", {"type": f"{NS}:thaumometer"}, "blank")
     ctx.generated_item("goggles_of_revealing", "gogglesrevealing")
-    ctx.write(ctx.ASSETS / "equipment" / "goggles.json", {
-        "layers": {"humanoid": [{"texture": f"{NS}:goggles"}]},
-    })
+    if ctx.profile.modern:
+        ctx.write(ctx.ASSETS / "equipment" / "goggles.json", {
+            "layers": {"humanoid": [{"texture": f"{NS}:goggles"}]},
+        })
+    else:
+        target = ctx.ASSETS / "textures" / "models" / "armor" / "goggles_layer_1.png"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ctx.SOURCE_TEXTURES / "entity" / "equipment" / "humanoid" / "goggles.png", target)
+        ctx.MANIFEST["armor_layers"]["goggles"] = {
+            "layer_id": f"{NS}:goggles",
+            "texture": f"{NS}:textures/models/armor/goggles_layer_1.png",
+            "meaning": "ArmorMaterial.Layer(ResourceLocation thaumcraft:goggles) resolves to textures/models/armor/goggles_layer_1.png; the png is generated into the resources from the 26.3 humanoid equipment texture",
+        }
 
 
 def recipes(ctx):

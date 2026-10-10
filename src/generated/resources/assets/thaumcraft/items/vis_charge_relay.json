@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "thaumcraft:item/vis_charge_relay",
-    "model": {
-      "type": "thaumcraft:vis_charge_relay"
-    }
-  }
-}

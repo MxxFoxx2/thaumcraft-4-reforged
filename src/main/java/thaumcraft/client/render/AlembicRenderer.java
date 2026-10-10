@@ -1,12 +1,12 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
@@ -16,8 +16,10 @@ import thaumcraft.essentia.Essentia;
 import thaumcraft.essentia.EssentiaBufferBlockEntity;
 import thaumcraft.essentia.TubeBlockEntity;
 
-public class AlembicRenderer implements BlockEntityRenderer<AlembicBlockEntity, AlembicRenderer.State> {
-    public static class State extends BlockEntityRenderState {
+public class AlembicRenderer implements BlockEntityRenderer<AlembicBlockEntity> {
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
         Direction facing = Direction.NORTH;
         boolean aboveFurnace;
         boolean aboveAlembic;
@@ -28,14 +30,18 @@ public class AlembicRenderer implements BlockEntityRenderer<AlembicBlockEntity, 
     public AlembicRenderer(BlockEntityRendererProvider.Context context) {
     }
 
-    @Override
-    public State createRenderState() {
-        return new State();
-    }
 
     @Override
-    public void extractRenderState(AlembicBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    public void render(AlembicBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
+    }
+
+    private void extract(AlembicBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition) {
         state.facing = entity.getFacing();
         state.aboveFurnace = entity.isAboveFurnace();
         state.aboveAlembic = entity.isAboveAlembic();
@@ -50,8 +56,7 @@ public class AlembicRenderer implements BlockEntityRenderer<AlembicBlockEntity, 
         }
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-        AlchemyRendering.alembic(collector, poseStack, state.lightCoords, true, state.facing, state.aboveFurnace, state.aboveAlembic, state.filter, state.nozzles);
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
+        AlchemyRendering.alembic(buffers, poseStack, state.lightCoords, true, state.facing, state.aboveFurnace, state.aboveAlembic, state.filter, state.nozzles);
     }
 }

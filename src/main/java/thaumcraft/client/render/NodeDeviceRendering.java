@@ -1,8 +1,9 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import thaumcraft.client.platform.ItemGeometry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -34,37 +35,37 @@ public final class NodeDeviceRendering {
             | Math.clamp(Math.round(blue * 255.0F), 0, 255);
     }
 
-    private static void part(SubmitNodeCollector collector, PoseStack poseStack, Part texture, ObjModel model, String name, int argb, int light) {
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.of(texture.kind(), texture.texture()), (pose, buffer) -> model.renderPart(name, pose, buffer, argb, light));
+    private static void part(MultiBufferSource buffers, PoseStack poseStack, Part texture, ObjModel model, String name, int argb, int light) {
+        ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(texture.kind(), texture.texture()), (pose, buffer) -> model.renderPart(name, pose, buffer, argb, light));
     }
 
-    public static void stabilizer(SubmitNodeCollector collector, PoseStack poseStack, int light, int lock, int count, int viewerTicks, boolean animated) {
+    public static void stabilizer(MultiBufferSource buffers, PoseStack poseStack, int light, int lock, int count, int viewerTicks, boolean animated) {
         ObjModel model = ObjModel.get(DEVICE_MODEL);
         Part base = new Part(Kind.ENTITY_CUTOUT, STABILIZER);
         Part over = new Part(Kind.ENTITY_CUTOUT, STABILIZER_OVER);
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
         poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
-        part(collector, poseStack, base, model, "lock", WHITE, light);
+        part(buffers, poseStack, base, model, "lock", WHITE, light);
         for (int index = 0; index < 4; index++) {
             poseStack.pushPose();
             poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
             poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
             poseStack.translate(0.0F, 0.0F, count / 100.0F);
-            part(collector, poseStack, base, model, "piston", WHITE, light);
+            part(buffers, poseStack, base, model, "piston", WHITE, light);
             int tint = lock == 2 ? color(1.0F, 0.2F, 0.2F) : WHITE;
             int overLight = light;
             if (animated) {
                 float scale = Mth.sin((viewerTicks + index * 5) / 3.0F) * 0.1F + 0.9F;
                 overLight = WorldRendering.emissiveLight(50 + (int) (170.0F * (count / 37.0F * scale)));
             }
-            part(collector, poseStack, over, model, "piston", tint, overLight);
+            part(buffers, poseStack, over, model, "piston", tint, overLight);
             poseStack.popPose();
         }
         poseStack.popPose();
     }
 
-    public static void transducer(SubmitNodeCollector collector, PoseStack poseStack, int light, int status, int count, int viewerTicks, boolean animated) {
+    public static void transducer(MultiBufferSource buffers, PoseStack poseStack, int light, int status, int count, int viewerTicks, boolean animated) {
         ObjModel model = ObjModel.get(DEVICE_MODEL);
         Part base = new Part(Kind.ENTITY_CUTOUT, CONVERTER);
         Part over = new Part(Kind.ENTITY_CUTOUT, CONVERTER_OVER);
@@ -73,31 +74,31 @@ public final class NodeDeviceRendering {
         poseStack.pushPose();
         poseStack.translate(0.5F, 1.0F, 0.5F);
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        part(collector, poseStack, base, model, "lock", WHITE, light);
+        part(buffers, poseStack, base, model, "lock", WHITE, light);
         int lockLight = light;
         if (animated) {
             float scale = Mth.sin(viewerTicks / 3.0F) * 0.1F + 0.9F;
             lockLight = WorldRendering.emissiveLight(50 + (int) (170.0F * (travel * 2.5F * scale)));
         }
-        part(collector, poseStack, over, model, "lock", tint, lockLight);
+        part(buffers, poseStack, over, model, "lock", tint, lockLight);
         for (int index = 0; index < 4; index++) {
             poseStack.pushPose();
             poseStack.mulPose(Axis.ZP.rotationDegrees(90 * index));
             poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
             poseStack.translate(0.0F, 0.0F, travel);
-            part(collector, poseStack, base, model, "piston", WHITE, light);
+            part(buffers, poseStack, base, model, "piston", WHITE, light);
             int overLight = light;
             if (animated) {
                 float scale = Mth.sin((viewerTicks + index * 5) / 3.0F) * 0.1F + 0.9F;
                 overLight = WorldRendering.emissiveLight(50 + (int) (170.0F * (travel * 2.5F * scale)));
             }
-            part(collector, poseStack, over, model, "piston", tint, overLight);
+            part(buffers, poseStack, over, model, "piston", tint, overLight);
             poseStack.popPose();
         }
         poseStack.popPose();
     }
 
-    public static void charger(SubmitNodeCollector collector, PoseStack poseStack, int light, int crystalColor, boolean connected, float ticks) {
+    public static void charger(MultiBufferSource buffers, PoseStack poseStack, int light, int crystalColor, boolean connected, float ticks) {
         ObjModel model = ObjModel.get(RELAY_MODEL);
         Part solid = new Part(Kind.ENTITY_CUTOUT, RELAY);
         Part glass = new Part(Kind.ENTITY_TRANSLUCENT, RELAY);
@@ -106,12 +107,12 @@ public final class NodeDeviceRendering {
         poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
         poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
         poseStack.mulPose(Axis.ZP.rotationDegrees(45.0F));
-        part(collector, poseStack, solid, model, "RingFloat", WHITE, light);
+        part(buffers, poseStack, solid, model, "RingFloat", WHITE, light);
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
         poseStack.translate(0.0F, 0.0F, 0.5F);
         for (int index = 0; index < 4; index++) {
-            part(collector, poseStack, solid, model, "Support", WHITE, light);
+            part(buffers, poseStack, solid, model, "Support", WHITE, light);
             poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
         }
         poseStack.popPose();
@@ -121,11 +122,11 @@ public final class NodeDeviceRendering {
         }
         float scale = Mth.sin(ticks / 2.0F) * 0.05F + 0.95F;
         int crystalLight = WorldRendering.emissiveLight((connected ? 50 : 0) + (int) (150.0F * scale));
-        part(collector, poseStack, glass, model, "Crystal", tint, crystalLight);
+        part(buffers, poseStack, glass, model, "Crystal", tint, crystalLight);
         poseStack.popPose();
     }
 
-    public static void relay(SubmitNodeCollector collector, PoseStack poseStack, int light, Direction orientation, int crystalColor, boolean connected, float ticks) {
+    public static void relay(MultiBufferSource buffers, PoseStack poseStack, int light, Direction orientation, int crystalColor, boolean connected, float ticks) {
         ObjModel model = ObjModel.get(RELAY_MODEL);
         Part solid = new Part(Kind.ENTITY_CUTOUT, RELAY);
         Part glass = new Part(Kind.ENTITY_TRANSLUCENT, RELAY);
@@ -145,16 +146,16 @@ public final class NodeDeviceRendering {
         poseStack.pushPose();
         poseStack.scale(0.75F, 0.75F, 0.75F);
         poseStack.translate(0.0F, 0.0F, -0.16F);
-        part(collector, poseStack, solid, model, "RingBase", WHITE, light);
+        part(buffers, poseStack, solid, model, "RingBase", WHITE, light);
         poseStack.popPose();
-        part(collector, poseStack, solid, model, "RingFloat", WHITE, light);
+        part(buffers, poseStack, solid, model, "RingFloat", WHITE, light);
         int tint = WHITE;
         if (crystalColor >= 0) {
             tint = color((crystalColor >> 16 & 255) / 200.0F, (crystalColor >> 8 & 255) / 200.0F, (crystalColor & 255) / 200.0F);
         }
         float scale = Mth.sin(ticks / 2.0F) * 0.05F + 0.95F;
         int crystalLight = WorldRendering.emissiveLight((connected ? 50 : 0) + (int) (150.0F * scale));
-        part(collector, poseStack, glass, model, "Crystal", tint, crystalLight);
+        part(buffers, poseStack, glass, model, "Crystal", tint, crystalLight);
         poseStack.popPose();
     }
 }

@@ -1,8 +1,8 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +23,7 @@ public final class EssentiaJarRendering {
     }
 
     public static void submit(
-        SubmitNodeCollector collector,
+        MultiBufferSource buffers,
         PoseStack poseStack,
         int light,
         int posX,
@@ -37,15 +37,15 @@ public final class EssentiaJarRendering {
         poseStack.translate(0.5F, 0.01F, 0.5F);
         poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
         if (amount > 0 && aspect != null) {
-            liquid(collector, poseStack, light, aspect, amount / (float) maxAmount * 0.625F);
+            liquid(buffers, poseStack, light, aspect, amount / (float) maxAmount * 0.625F);
         }
         if (filter != null) {
-            label(collector, poseStack, light, posX, filter, facing);
+            label(buffers, poseStack, light, posX, filter, facing);
         }
         poseStack.popPose();
     }
 
-    private static void liquid(SubmitNodeCollector collector, PoseStack poseStack, int light, Aspect aspect, float level) {
+    private static void liquid(MultiBufferSource buffers, PoseStack poseStack, int light, Aspect aspect, float level) {
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
         poseStack.translate(-0.5F, 0.0F, -0.5F);
@@ -53,7 +53,7 @@ public final class EssentiaJarRendering {
         int color = FastColor.ARGB32.opaque(aspect.getColor());
         int liquidLight = EssentiaRendering.liquidLight(light);
         ItemGeometry.solid(
-            collector.order(1),
+            buffers,
             poseStack,
             TextureAtlas.LOCATION_BLOCKS,
             true,
@@ -62,7 +62,7 @@ public final class EssentiaJarRendering {
         poseStack.popPose();
     }
 
-    private static void label(SubmitNodeCollector collector, PoseStack poseStack, int light, int posX, Aspect filter, Direction facing) {
+    private static void label(MultiBufferSource buffers, PoseStack poseStack, int light, int posX, Aspect filter, Direction facing) {
         poseStack.pushPose();
         switch (facing) {
             case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
@@ -78,7 +78,7 @@ public final class EssentiaJarRendering {
             poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
         }
         poseStack.scale(0.5F, 0.5F, 0.5F);
-        ItemGeometry.solid(collector.order(2), poseStack, LABEL, true, sink -> quad(sink, -0.5F, -0.5F, 0.5F, 0.5F, WHITE, light));
+        ItemGeometry.solid(buffers, poseStack, LABEL, true, sink -> quad(sink, -0.5F, -0.5F, 0.5F, 0.5F, WHITE, light));
         poseStack.popPose();
         poseStack.pushPose();
         poseStack.translate(0.0F, -0.4F, 0.316F);
@@ -88,7 +88,7 @@ public final class EssentiaJarRendering {
         poseStack.scale(0.021F, 0.021F, 0.021F);
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         int tint = FastColor.ARGB32.opaque(filter.getColor());
-        ItemGeometry.solid(collector.order(3), poseStack, filter.getImage(), true, sink -> quad(sink, -8.0F, -8.0F, 8.0F, 8.0F, tint, light));
+        ItemGeometry.solid(buffers, poseStack, filter.getImage(), true, sink -> quad(sink, -8.0F, -8.0F, 8.0F, 8.0F, tint, light));
         poseStack.popPose();
         poseStack.popPose();
     }
@@ -104,11 +104,11 @@ public final class EssentiaJarRendering {
         sink.vertex(minX, maxY, 0.0F, 0.0F, 1.0F, argb, light);
     }
 
-    public static void glass(SubmitNodeCollector collector, PoseStack poseStack, int light, boolean voidJar) {
+    public static void glass(MultiBufferSource buffers, PoseStack poseStack, int light, boolean voidJar) {
         BoxGeometry.UvRect bottom = EssentiaRendering.rect(Thaumcraft.id("block/jar_bottom"));
         BoxGeometry.UvRect top = EssentiaRendering.rect(Thaumcraft.id(voidJar ? "block/jar_top_void" : "block/jar_top"));
         BoxGeometry.UvRect side = EssentiaRendering.rect(Thaumcraft.id(voidJar ? "block/jar_side_void" : "block/jar_side"));
-        ItemGeometry.solid(collector.order(4), poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> {
+        ItemGeometry.solid(buffers, poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> {
             BoxGeometry.box(sink, 0.1875F, 0.0F, 0.1875F, 0.8125F, 0.75F, 0.8125F, bottom, top, side, WHITE, light);
             BoxGeometry.box(sink, 0.3125F, 0.75F, 0.3125F, 0.6875F, 0.875F, 0.6875F, bottom, top, side, WHITE, light);
         });

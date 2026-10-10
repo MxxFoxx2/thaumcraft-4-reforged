@@ -1,10 +1,11 @@
 package thaumcraft.client.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import thaumcraft.client.geom.QuadSink;
 
@@ -12,16 +13,16 @@ public final class ItemGeometry {
     private ItemGeometry() {
     }
 
-    public static void solid(OrderedSubmitNodeCollector collector, PoseStack poseStack, ResourceLocation texture, boolean translucent, Consumer<QuadSink> geometry) {
-        RenderType renderType = translucent ? RenderTypes.entityTranslucent(texture) : RenderTypes.entityCutout(texture);
-        collector.submitCustomGeometry(poseStack, renderType, (pose, buffer) -> geometry.accept(new EntityQuadSink(pose, buffer)));
+    public static void submit(MultiBufferSource buffers, PoseStack poseStack, RenderType renderType, BiConsumer<PoseStack.Pose, VertexConsumer> geometry) {
+        geometry.accept(poseStack.last(), buffers.getBuffer(renderType));
     }
 
-    public static void blended(OrderedSubmitNodeCollector collector, PoseStack poseStack, ResourceLocation texture, int blendMode, Consumer<QuadSink> geometry) {
-        collector.submitCustomGeometry(
-            poseStack,
-            TcRenderTypes.byBlend(texture, blendMode),
-            (pose, buffer) -> geometry.accept(new VertexQuadSink(pose, buffer))
-        );
+    public static void solid(MultiBufferSource buffers, PoseStack poseStack, ResourceLocation texture, boolean translucent, Consumer<QuadSink> geometry) {
+        RenderType renderType = translucent ? RenderType.entityTranslucent(texture) : RenderType.entityCutout(texture);
+        submit(buffers, poseStack, renderType, (pose, buffer) -> geometry.accept(new EntityQuadSink(pose, buffer)));
+    }
+
+    public static void blended(MultiBufferSource buffers, PoseStack poseStack, ResourceLocation texture, int blendMode, Consumer<QuadSink> geometry) {
+        submit(buffers, poseStack, TcRenderTypes.byBlend(texture, blendMode), (pose, buffer) -> geometry.accept(new VertexQuadSink(pose, buffer)));
     }
 }

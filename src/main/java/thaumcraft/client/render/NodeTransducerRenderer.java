@@ -1,21 +1,22 @@
 package thaumcraft.client.render;
 
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Camera;
+import net.minecraft.core.BlockPos;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import thaumcraft.node.NodeTransducerBlockEntity;
 
-public class NodeTransducerRenderer implements BlockEntityRenderer<NodeTransducerBlockEntity, NodeTransducerRenderer.State> {
-    public static class State extends BlockEntityRenderState {
+public class NodeTransducerRenderer implements BlockEntityRenderer<NodeTransducerBlockEntity> {
+    public static class State {
+        int lightCoords;
+        BlockPos blockPos = BlockPos.ZERO;
         int count;
         int status;
         int ambient;
@@ -25,14 +26,18 @@ public class NodeTransducerRenderer implements BlockEntityRenderer<NodeTransduce
     public NodeTransducerRenderer(BlockEntityRendererProvider.Context context) {
     }
 
-    @Override
-    public State createRenderState() {
-        return new State();
-    }
 
     @Override
-    public void extractRenderState(NodeTransducerBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
-        BlockEntityRenderer.super.extractRenderState(entity, state, partialTicks, cameraPosition, breakProgress);
+    public void render(NodeTransducerBlockEntity entity, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        State state = new State();
+        state.lightCoords = packedLight;
+        state.blockPos = entity.getBlockPos();
+        extract(entity, state, partialTick, camera.getPosition());
+        submit(state, poseStack, buffers, camera);
+    }
+
+    private void extract(NodeTransducerBlockEntity entity, State state, float partialTicks, Vec3 cameraPosition) {
         Entity viewer = Minecraft.getInstance().getCameraEntity();
         state.count = entity.getCount();
         state.status = entity.getStatus();
@@ -40,9 +45,8 @@ public class NodeTransducerRenderer implements BlockEntityRenderer<NodeTransduce
         state.viewerTicks = viewer == null ? 0 : viewer.tickCount;
     }
 
-    @Override
-    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
-        NodeDeviceRendering.transducer(collector, poseStack, state.ambient, state.status, state.count, state.viewerTicks, true);
+    private void submit(State state, PoseStack poseStack, MultiBufferSource buffers, Camera camera) {
+        NodeDeviceRendering.transducer(buffers, poseStack, state.ambient, state.status, state.count, state.viewerTicks, true);
     }
 
     @Override

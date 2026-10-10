@@ -1,6 +1,6 @@
 package thaumcraft.client.fx;
 
-import net.minecraft.client.GraphicsPreset;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -62,7 +62,7 @@ public abstract class ParticleFx extends WorldFx {
         if (minecraft.getCameraEntity() == null) {
             return;
         }
-        int visibleDistance = minecraft.options.graphicsPreset().get() == GraphicsPreset.FAST ? fancyDistance / 2 : fancyDistance;
+        int visibleDistance = minecraft.options.graphicsMode().get() == GraphicsStatus.FAST ? fancyDistance / 2 : fancyDistance;
         if (minecraft.getCameraEntity().distanceToSqr(x, y, z) > (double) visibleDistance * visibleDistance) {
             dead = true;
         }

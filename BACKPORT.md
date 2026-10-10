@@ -76,3 +76,16 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 - `ValueOutput`: `of(CompoundTag, Provider)`, `store(name, codec, value)`, `storeNullable`, `store(MapCodec, value)`, `store(CompoundTag)`, `put*`, `child`, `childrenList`, `list`, `discard`, `isEmpty`, `tag`
 - Codec IO goes through `provider.createSerializationContext(NbtOps.INSTANCE)`
 - `TcBlockEntity` bridges `loadAdditional(CompoundTag, Provider)` and `saveAdditional(CompoundTag, Provider)` to `loadAdditional(ValueInput)` and `saveAdditional(ValueOutput)`. Block entities extending vanilla classes directly need the same bridge: `ArcaneBoreBlockEntity`, `HungryChestBlockEntity` (both `BaseContainerBlockEntity`), `InfernalFurnaceBlockEntity` (`BlockEntity`)
+
+## Deviations on this branch
+
+- Curios: slot ids `necklace`, `ring` (size raised to 2 by `data/curios/curios/slots/ring.json` with `ADD`), `belt`; `Baubles` slot order 0 necklace, 1-2 ring, 3 belt; `platform/BaublesCurios` registers every `Bauble` item as a curio in common setup
+- Data attachments: `DataAttachments.SyncPayload` instead of `.sync()`, player attachments are resent on login, respawn and dimension change
+- Village trades: `world/village/VillageTrades` (`VillagerTradesEvent`), the whole pool is added to every level 1-5 and vanilla picks 2, same tables as the `villager_trade` data on `main`; `tools/backport/trades.json` is the manifest written by the generator
+- GameTests: names are `thaumcraft.<class>.<method>`; relative Y is one higher than on `main` (1.21.1 puts the structure block layer at relative Y 0); `runGameTestServer` leaves a flat `run/world`, delete it before `runServer`
+- Tools from `Registration` use the `TOOL` component on a plain `Item` (no right-click block actions); fast food eats in 0.8 s instead of 0.5 s; goggles extend `ArmorItem` with the armor layer `textures/models/armor/goggles_layer_1.png`
+- Blocks: `PlantSoil.PLAINS` uses `BlockTags.DIRT`; no `getEntityInsideCollisionShape`; workbench result slot without `safeClone`; bellows speed up furnaces through `CookTime`
+- Rendering: `WorldFx` draws in `RenderLevelStageEvent` (`AFTER_PARTICLES`) instead of vanilla particles; translucent layer order follows call order instead of `order(n)`; REPEAT sampler is the default; GUI `nextStratum` became `flush`, tooltips draw immediately; the first person sleeve is always drawn
+- Item models: special items render through `client/render/TcItemRenderer` (`BlockEntityWithoutLevelRenderer`) by `tools/backport/item_models_1.21.1.json`, tints through `ItemColor`
+- Worldgen: patches (`count` + `offset` with `trapezoid` on 26.3) are written as `minecraft:random_patch` with `xz_spread` 7 and `y_spread` 3
+- Aspects: smelting recipes (`AbstractCookingRecipe`) are read separately because they are not `SingleItemRecipe` on 1.21.1; `minecraft:boat` and `minecraft:chest_boat` entities have entries in `tools/modern_aspects/entities.json`

@@ -2,18 +2,13 @@ package thaumcraft.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.item.ItemDisplayContext;
 
-public enum LegacyItemView implements StringRepresentable {
+public enum LegacyItemView {
     INVENTORY("inventory"),
     EQUIPPED("equipped"),
     FIRST_PERSON("first_person"),
     ENTITY("entity");
-
-    public static final Codec<LegacyItemView> CODEC = StringRepresentable.fromEnum(LegacyItemView::values);
-    public static final MapCodec<LegacyItemView> FIELD = CODEC.optionalFieldOf("view", ENTITY);
 
     private final String name;
 
@@ -21,9 +16,17 @@ public enum LegacyItemView implements StringRepresentable {
         this.name = name;
     }
 
-    @Override
-    public String getSerializedName() {
+    public String getName() {
         return name;
+    }
+
+    public static LegacyItemView of(ItemDisplayContext context) {
+        return switch (context) {
+            case GUI -> INVENTORY;
+            case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND -> EQUIPPED;
+            case FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND -> FIRST_PERSON;
+            default -> ENTITY;
+        };
     }
 
     public void apply(PoseStack poseStack) {

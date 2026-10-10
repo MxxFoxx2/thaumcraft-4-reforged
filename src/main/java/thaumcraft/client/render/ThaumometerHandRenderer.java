@@ -7,9 +7,8 @@ import java.text.DecimalFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.entity.player.AvatarRenderer;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -54,7 +53,7 @@ public final class ThaumometerHandRenderer {
         }
         event.setCanceled(true);
         PoseStack poseStack = event.getPoseStack();
-        SubmitNodeCollector collector = event.getSubmitNodeCollector();
+        MultiBufferSource buffers = event.getMultiBufferSource();
         int light = event.getPackedLight();
         float partialTick = event.getPartialTick();
         float swing = event.getSwingProgress();
@@ -85,40 +84,36 @@ public final class ThaumometerHandRenderer {
         poseStack.translate(0.0F, 0.0F, -0.9F * 0.8F);
         poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 
-        AvatarRenderState avatar = event.getPlayerState().avatarRenderState;
-        if (avatar != null) {
+        poseStack.pushPose();
+        poseStack.scale(5.0F, 5.0F, 5.0F);
+        PlayerRenderer renderer = (PlayerRenderer) minecraft.getEntityRenderDispatcher().getRenderer(player);
+        for (int index = 0; index < 2; index++) {
+            int side = index * 2 - 1;
             poseStack.pushPose();
-            poseStack.scale(5.0F, 5.0F, 5.0F);
-            AvatarRenderer<?> renderer = (AvatarRenderer<?>) minecraft.getEntityRenderDispatcher().getRenderer(avatar);
-            ResourceLocation skin = avatar.skin.body().texturePath();
-            for (int index = 0; index < 2; index++) {
-                int side = index * 2 - 1;
-                poseStack.pushPose();
-                poseStack.translate(0.0F, -0.6F, 1.1F * side);
-                poseStack.mulPose(Axis.XP.rotationDegrees(-45 * side));
-                poseStack.mulPose(Axis.ZP.rotationDegrees(-90.0F));
-                poseStack.mulPose(Axis.ZP.rotationDegrees(59.0F));
-                poseStack.mulPose(Axis.YP.rotationDegrees(-65 * side));
-                renderer.renderRightHand(poseStack, collector, light, skin, avatar.showRightSleeve);
-                poseStack.popPose();
-            }
+            poseStack.translate(0.0F, -0.6F, 1.1F * side);
+            poseStack.mulPose(Axis.XP.rotationDegrees(-45 * side));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(-90.0F));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(59.0F));
+            poseStack.mulPose(Axis.YP.rotationDegrees(-65 * side));
+            renderer.renderRightHand(poseStack, buffers, light, player);
             poseStack.popPose();
         }
+        poseStack.popPose();
 
         poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
         poseStack.translate(0.4F, -0.4F, 0.0F);
         poseStack.scale(2.0F, 2.0F, 2.0F);
 
-        ThaumometerItemRenderer.submitModel(collector, poseStack, light);
-        ThaumometerItemRenderer.beginScreen(collector, poseStack);
-        renderReadout(minecraft, player, poseStack, collector);
+        ThaumometerItemRenderer.submitModel(buffers, poseStack, light);
+        ThaumometerItemRenderer.beginScreen(buffers, poseStack);
+        renderReadout(minecraft, player, poseStack, buffers);
         ThaumometerItemRenderer.endScreen(poseStack);
 
         poseStack.popPose();
         poseStack.popPose();
     }
 
-    private static void renderReadout(Minecraft minecraft, LocalPlayer player, PoseStack poseStack, SubmitNodeCollector collector) {
+    private static void renderReadout(Minecraft minecraft, LocalPlayer player, PoseStack poseStack, MultiBufferSource buffers) {
         Level level = player.level();
         ThaumometerClient.Hit hit = ThaumometerClient.lookAt(level, player);
         if (hit == null) {
@@ -158,7 +153,7 @@ public final class ThaumometerHandRenderer {
                 poseStack.pushPose();
                 float scale = 0.004F;
                 poseStack.scale(scale, scale, scale);
-                collector.submitText(poseStack, -font.width(nodeText) / 2, -40.0F, nodeText.getVisualOrderText(), false, Font.DisplayMode.NORMAL, ThaumometerItemRenderer.screenLight(0), NODE_TEXT_COLOR, 0, 0);
+                font.drawInBatch(nodeText, -font.width(nodeText) / 2, -40.0F, NODE_TEXT_COLOR, false, poseStack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, ThaumometerItemRenderer.screenLight(0));
                 poseStack.popPose();
             }
         }
@@ -172,7 +167,7 @@ public final class ThaumometerHandRenderer {
                 poseStack.pushPose();
                 poseStack.scale(0.0075F, 0.0075F, 0.0075F);
                 int light = ThaumometerItemRenderer.screenLight(posX);
-                drawTag(font, poseStack, collector, -baseX + posX * 16, -8 + posY * 16, aspect, aspects.getAmount(aspect), light);
+                drawTag(font, poseStack, buffers, -baseX + posX * 16, -8 + posY * 16, aspect, aspects.getAmount(aspect), light);
                 poseStack.popPose();
                 if (++posX >= 5 - posY) {
                     posX = 0;
@@ -191,24 +186,24 @@ public final class ThaumometerHandRenderer {
             scale -= 2.5E-5F * (width - 90);
         }
         poseStack.scale(scale, scale, scale);
-        collector.submitText(poseStack, -width / 2, 0.0F, text.getVisualOrderText(), false, Font.DisplayMode.NORMAL, ThaumometerItemRenderer.screenLight(0), TEXT_COLOR, 0, 0);
+        font.drawInBatch(text, -width / 2, 0.0F, TEXT_COLOR, false, poseStack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, ThaumometerItemRenderer.screenLight(0));
         poseStack.popPose();
     }
 
-    private static void drawTag(Font font, PoseStack poseStack, SubmitNodeCollector collector, int x, int y, Aspect aspect, int amount, int light) {
+    private static void drawTag(Font font, PoseStack poseStack, MultiBufferSource buffers, int x, int y, Aspect aspect, int amount, int light) {
         int color = FastColor.ARGB32.color(255, aspect.getColor());
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.additive(aspect.getImage()), (pose, buffer) -> {
-            vertex(buffer, pose, x, y + 16.0F, 0.0F, 1.0F, color, light);
-            vertex(buffer, pose, x + 16.0F, y + 16.0F, 1.0F, 1.0F, color, light);
-            vertex(buffer, pose, x + 16.0F, y, 1.0F, 0.0F, color, light);
-            vertex(buffer, pose, x, y, 0.0F, 0.0F, color, light);
-        });
+        VertexConsumer buffer = buffers.getBuffer(TcRenderTypes.additive(aspect.getImage()));
+        PoseStack.Pose pose = poseStack.last();
+        vertex(buffer, pose, x, y + 16.0F, 0.0F, 1.0F, color, light);
+        vertex(buffer, pose, x + 16.0F, y + 16.0F, 1.0F, 1.0F, color, light);
+        vertex(buffer, pose, x + 16.0F, y, 1.0F, 0.0F, color, light);
+        vertex(buffer, pose, x, y, 0.0F, 0.0F, color, light);
         if (amount > 0) {
             String label = AMOUNT_FORMAT.format(amount);
             poseStack.pushPose();
             poseStack.scale(0.5F, 0.5F, 0.5F);
             Component component = Component.literal(label);
-            collector.submitText(poseStack, 32 - font.width(component) + x * 2, 32 - font.lineHeight + y * 2, component.getVisualOrderText(), false, Font.DisplayMode.NORMAL, light, TEXT_COLOR, 0, 0);
+            font.drawInBatch(component, 32 - font.width(component) + x * 2, 32 - font.lineHeight + y * 2, TEXT_COLOR, false, poseStack.last().pose(), buffers, Font.DisplayMode.NORMAL, 0, light);
             poseStack.popPose();
         }
     }

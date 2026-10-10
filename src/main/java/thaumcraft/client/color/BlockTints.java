@@ -1,9 +1,10 @@
 package thaumcraft.client.color;
 
 import java.util.List;
-import net.minecraft.client.color.block.BlockTintSource;
-import net.minecraft.client.color.block.BlockTintSources;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -20,7 +21,7 @@ public final class BlockTints {
     }
 
     @SubscribeEvent
-    static void registerBlockTints(RegisterColorHandlersEvent.BlockTintSources event) {
+    static void registerBlockTints(RegisterColorHandlersEvent.Block event) {
         List<DeferredBlock<InfusedStoneBlock>> infusedStones = List.of(
             ModBlocks.AIR_INFUSED_STONE,
             ModBlocks.FIRE_INFUSED_STONE,
@@ -30,17 +31,21 @@ public final class BlockTints {
             ModBlocks.ENTROPY_INFUSED_STONE
         );
         for (DeferredBlock<InfusedStoneBlock> stone : infusedStones) {
-            event.register(List.of(constant(stone.get().getColor())), stone.get());
+            event.register(constant(stone.get().getColor()), stone.get());
         }
-        event.register(List.of(BlockTintSources.foliage()), ModBlocks.GREATWOOD_LEAVES.get());
-        event.register(List.of(constant(0x8899AA)), ModBlocks.SILVERWOOD_LEAVES.get());
+        event.register(
+            (state, level, pos, tintIndex) -> level != null && pos != null ? BiomeColors.getAverageFoliageColor(level, pos) : FoliageColor.getDefaultColor(),
+            ModBlocks.GREATWOOD_LEAVES.get()
+        );
+        event.register(constant(0x8899AA), ModBlocks.SILVERWOOD_LEAVES.get());
         for (int index = 0; index < ModBlocks.CANDLE_COLORS.length; index++) {
             Block candle = ModBlocks.CANDLES.get(ModBlocks.CANDLE_COLORS[index]).get();
-            event.register(List.of(constant(ModBlocks.CANDLE_TINTS[index])), candle);
+            event.register(constant(ModBlocks.CANDLE_TINTS[index]), candle);
         }
     }
 
-    private static BlockTintSource constant(int color) {
-        return BlockTintSources.constant(FastColor.ARGB32.opaque(color));
+    private static BlockColor constant(int color) {
+        int argb = FastColor.ARGB32.opaque(color);
+        return (state, level, pos, tintIndex) -> argb;
     }
 }

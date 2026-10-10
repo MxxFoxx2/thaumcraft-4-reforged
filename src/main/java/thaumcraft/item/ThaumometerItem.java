@@ -2,6 +2,7 @@ package thaumcraft.item;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -19,7 +20,12 @@ public class ThaumometerItem extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        InteractionResult result = handleUse(level, player, hand);
+        return InteractionResults.holder(result, player.getItemInHand(hand), level);
+    }
+
+    private InteractionResult handleUse(Level level, Player player, InteractionHand hand) {
         player.startUsingItem(hand);
         return InteractionResult.CONSUME;
     }
@@ -37,10 +43,9 @@ public class ThaumometerItem extends Item {
     }
 
     @Override
-    public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remainingTime) {
+    public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remainingTime) {
         if (level.isClientSide()) {
             ScanClientHooks.stopUsing(entity);
         }
-        return false;
     }
 }

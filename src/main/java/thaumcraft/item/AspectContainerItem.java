@@ -1,11 +1,10 @@
 package thaumcraft.item;
 
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 
 public class AspectContainerItem extends Item {
     private final String separator;
@@ -18,8 +17,8 @@ public class AspectContainerItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
-        AspectTooltips.append(stack, builder, separator, withAmount);
-        super.appendHoverText(stack, context, display, builder, flag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        AspectTooltips.append(stack, tooltip::add, separator, withAmount);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 }

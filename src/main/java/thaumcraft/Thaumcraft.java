@@ -25,12 +25,6 @@ import thaumcraft.registry.ModVillagers;
 import thaumcraft.research.ConfigResearch;
 import thaumcraft.research.Knowledge;
 import thaumcraft.research.ResearchNoteKeys;
-import thaumcraft.test.AlchemyGameTests;
-import thaumcraft.test.ArcaneGameTests;
-import thaumcraft.test.EssentiaGameTests;
-import thaumcraft.test.HexGridGameTests;
-import thaumcraft.test.InfusionGameTests;
-import thaumcraft.test.ThaumcraftGameTests;
 import thaumcraft.wand.WandKeys;
 
 @Mod(Thaumcraft.MODID)
@@ -59,12 +53,6 @@ public class Thaumcraft {
         ModPayloads.register();
         ConfigRecipes.init();
         ConfigResearch.init();
-        ThaumcraftGameTests.register(modEventBus);
-        HexGridGameTests.register(modEventBus);
-        EssentiaGameTests.register(modEventBus);
-        AlchemyGameTests.register(modEventBus);
-        ArcaneGameTests.register(modEventBus);
-        InfusionGameTests.register(modEventBus);
     }
 
     public static ResourceLocation id(String path) {

@@ -1,7 +1,6 @@
 package thaumcraft.item;
 
 import java.util.List;
-import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -20,7 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -102,8 +100,8 @@ public class ManaBeanItem extends Item {
             int slot = level.getRandom().nextInt(POTION_SLOTS);
             if (slot >= 1 && slot <= POTION_EFFECTS.size()) {
                 Holder<MobEffect> effect = POTION_EFFECTS.get(slot - 1);
-                if (effect.value().isInstantaneous()) {
-                    effect.value().applyInstantaneousEffect(serverLevel, player, player, player, 2, 3.0);
+                if (effect.value().isInstantenous()) {
+                    effect.value().applyInstantenousEffect(player, player, player, 2, 3.0);
                 } else {
                     player.addEffect(new MobEffectInstance(effect, 160 + level.getRandom().nextInt(80), 0));
                 }
@@ -116,30 +114,33 @@ public class ManaBeanItem extends Item {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
+    public void inventoryTick(ItemStack stack, Level level, Entity owner, int slotId, boolean isSelected) {
+        if (level.isClientSide()) {
+            return;
+        }
         if (getAspect(stack) == null) {
             AspectKeys.ASPECTS.set(stack, new AspectList().add(randomAspect(level.getRandom()), 1));
         }
-        super.inventoryTick(stack, level, owner, slot);
+        super.inventoryTick(stack, level, owner, slotId, isSelected);
     }
 
     @Override
-    public void onCraftedBy(ItemStack stack, Player player) {
+    public void onCraftedBy(ItemStack stack, Level level, Player player) {
         if (getAspect(stack) == null) {
             AspectKeys.ASPECTS.set(stack, new AspectList().add(randomAspect(player.getRandom()), 1));
         }
-        super.onCraftedBy(stack, player);
+        super.onCraftedBy(stack, level, player);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         AspectList list = AspectKeys.ASPECTS.get(stack);
         if (list != null) {
             for (Aspect aspect : list.getAspectsSorted()) {
-                builder.accept(Component.empty().append(aspect.getDescription()).append(" x" + list.getAmount(aspect)));
+                tooltip.add(Component.empty().append(aspect.getDescription()).append(" x" + list.getAmount(aspect)));
             }
         }
-        super.appendHoverText(stack, context, display, builder, flag);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 
     @Override

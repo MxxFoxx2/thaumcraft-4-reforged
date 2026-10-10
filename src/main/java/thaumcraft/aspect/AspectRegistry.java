@@ -14,7 +14,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -24,7 +23,6 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.storage.TagValueOutput;
 import javax.annotation.Nullable;
 
 public final class AspectRegistry {
@@ -160,9 +158,7 @@ public final class AspectRegistry {
     }
 
     private static CompoundTag save(Entity entity) {
-        TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, entity.level().registryAccess());
-        entity.saveWithoutId(output);
-        return output.buildResult();
+        return entity.saveWithoutId(new CompoundTag());
     }
 
     private static @Nullable AspectList cap(@Nullable AspectList source) {
@@ -234,15 +230,15 @@ public final class AspectRegistry {
             if (ingredient.isEmpty()) {
                 continue;
             }
-            List<Holder<Item>> options = ingredient.items().toList();
-            if (options.size() == 1) {
-                items.add(options.getFirst().value());
+            ItemStack[] options = ingredient.getItems();
+            if (options.length == 1) {
+                items.add(options[0].getItem());
                 continue;
             }
-            for (Holder<Item> option : options) {
-                AspectList aspects = generate(option.value(), history);
+            for (ItemStack option : options) {
+                AspectList aspects = generate(option.getItem(), history);
                 if (aspects != null && aspects.size() > 0) {
-                    items.add(option.value());
+                    items.add(option.getItem());
                     break;
                 }
             }
@@ -254,12 +250,12 @@ public final class AspectRegistry {
         AspectList mid = new AspectList();
         for (Item ingredient : ingredients) {
             AspectList aspects = generate(ingredient, history);
-            ItemStackTemplate remainder = ingredient.getCraftingRemainder(new ItemStack(ingredient));
-            if (remainder != null) {
-                if (remainder.item().value() == ingredient) {
+            ItemStack remainder = new ItemStack(ingredient).getCraftingRemainingItem();
+            if (!remainder.isEmpty()) {
+                if (remainder.getItem() == ingredient) {
                     continue;
                 }
-                generate(remainder.item().value(), history);
+                generate(remainder.getItem(), history);
             }
             if (aspects != null) {
                 for (Aspect aspect : aspects.getAspects()) {
@@ -281,25 +277,29 @@ public final class AspectRegistry {
         for (RecipeHolder<?> holder : minecraftServer.getRecipeManager().getRecipes()) {
             Recipe<?> recipe = holder.value();
             if (recipe instanceof ShapedRecipe shaped) {
-                ItemStack result = shaped.assemble(CraftingInput.EMPTY);
+                ItemStack result = shaped.getResultItem(minecraftServer.registryAccess());
                 if (!result.isEmpty()) {
                     List<Ingredient> ingredients = new ArrayList<>();
-                    shaped.getIngredients().forEach(optional -> optional.ifPresent(ingredients::add));
+                    for (Ingredient ingredient : shaped.getIngredients()) {
+                        if (!ingredient.isEmpty()) {
+                            ingredients.add(ingredient);
+                        }
+                    }
                     craftingByOutput.computeIfAbsent(result.getItem(), key -> new ArrayList<>())
                         .add(new CraftingSource(ingredients, Math.max(1, result.getCount())));
                 }
             } else if (recipe instanceof SingleItemRecipe single) {
-                ItemStack result = single.assemble(new SingleRecipeInput(ItemStack.EMPTY));
+                ItemStack result = single.getResultItem(minecraftServer.registryAccess());
                 if (!result.isEmpty()) {
                     processingByOutput.computeIfAbsent(result.getItem(), key -> new ArrayList<>())
-                        .add(new CraftingSource(List.of(single.input()), Math.max(1, result.getCount())));
+                        .add(new CraftingSource(List.of(single.getIngredients().get(0)), Math.max(1, result.getCount())));
                 }
             } else if (recipe instanceof ShapelessRecipe shapeless) {
-                ItemStackTemplate result = shapeless.result();
-                if (result != null) {
-                    List<Ingredient> ingredients = shapeless.placementInfo().ingredients();
-                    craftingByOutput.computeIfAbsent(result.item().value(), key -> new ArrayList<>())
-                        .add(new CraftingSource(ingredients.subList(0, Math.min(9, ingredients.size())), Math.max(1, result.count())));
+                ItemStack result = shapeless.getResultItem(minecraftServer.registryAccess());
+                if (!result.isEmpty()) {
+                    List<Ingredient> ingredients = shapeless.getIngredients();
+                    craftingByOutput.computeIfAbsent(result.getItem(), key -> new ArrayList<>())
+                        .add(new CraftingSource(new ArrayList<>(ingredients.subList(0, Math.min(9, ingredients.size()))), Math.max(1, result.getCount())));
                 }
             }
         }

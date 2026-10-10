@@ -1,18 +1,18 @@
 package thaumcraft.item;
 
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import thaumcraft.registry.ModItems;
 import thaumcraft.registry.ModSounds;
@@ -36,7 +36,12 @@ public class ResearchNotesItem extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        InteractionResult result = handleUse(level, player, hand);
+        return InteractionResults.holder(result, player.getItemInHand(hand), level);
+    }
+
+    private InteractionResult handleUse(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         ResearchNote note = ResearchNoteKeys.NOTE.get(stack);
         boolean completable = note != null && note.complete() && !ResearchManager.isComplete(player, note.key());
@@ -80,13 +85,13 @@ public class ResearchNotesItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
-        super.appendHoverText(stack, context, display, builder, flag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
         ResearchNote note = ResearchNoteKeys.NOTE.get(stack);
         if (note == null) {
             if (!discovery) {
-                builder.accept(Component.translatable("item.researchnotes.unknown.1").withStyle(ChatFormatting.GOLD));
-                builder.accept(Component.translatable("item.researchnotes.unknown.2").withStyle(ChatFormatting.BLUE));
+                tooltip.add(Component.translatable("item.researchnotes.unknown.1").withStyle(ChatFormatting.GOLD));
+                tooltip.add(Component.translatable("item.researchnotes.unknown.2").withStyle(ChatFormatting.BLUE));
             }
             return;
         }
@@ -94,15 +99,15 @@ public class ResearchNotesItem extends Item {
         if (research == null) {
             return;
         }
-        builder.accept(Component.translatable(research.nameKey()).withStyle(ChatFormatting.GOLD));
-        builder.accept(Component.translatable(research.textKey()).withStyle(ChatFormatting.ITALIC));
+        tooltip.add(Component.translatable(research.nameKey()).withStyle(ChatFormatting.GOLD));
+        tooltip.add(Component.translatable(research.textKey()).withStyle(ChatFormatting.ITALIC));
         int warp = Math.min(5, research.warp());
         if (warp > 0) {
             String level = Component.translatable("tc.forbidden.level." + warp).getString();
-            builder.accept(Component.literal(Component.translatable("tc.forbidden").getString().replace("%n", level)).withStyle(ChatFormatting.DARK_PURPLE));
+            tooltip.add(Component.literal(Component.translatable("tc.forbidden").getString().replace("%n", level)).withStyle(ChatFormatting.DARK_PURPLE));
         }
         if (note.copies() > 0) {
-            builder.accept(Component.literal("x" + (note.copies() + 1)).withStyle(ChatFormatting.GRAY));
+            tooltip.add(Component.literal("x" + (note.copies() + 1)).withStyle(ChatFormatting.GRAY));
         }
     }
 }

@@ -1,16 +1,16 @@
 package thaumcraft.item;
 
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.registry.ModSounds;
@@ -38,7 +38,12 @@ public class ThaumonomiconItem extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        InteractionResult result = handleUse(level, player, hand);
+        return InteractionResults.holder(result, player.getItemInHand(hand), level);
+    }
+
+    private InteractionResult handleUse(Level level, Player player, InteractionHand hand) {
         if (player instanceof ServerPlayer serverPlayer) {
             if (cheat && ResearchConfig.ALLOW_CHEAT_SHEET) {
                 for (ResearchItem item : ResearchCategories.allResearch()) {
@@ -67,10 +72,10 @@ public class ThaumonomiconItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         if (cheat) {
-            builder.accept(Component.literal("Cheat Sheet"));
+            tooltip.add(Component.literal("Cheat Sheet"));
         }
-        super.appendHoverText(stack, context, display, builder, flag);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 }

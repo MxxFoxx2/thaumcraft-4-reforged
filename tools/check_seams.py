@@ -24,6 +24,12 @@ OUTSIDE_PLATFORM = [
     "net.minecraft.world.item.component.Consumable",
     "net.minecraft.world.item.component.Consumables",
     "net.minecraft.world.item.consume_effects.*",
+    "net.neoforged.neoforge.items.*",
+    "net.neoforged.neoforge.fluids.capability.*",
+    "net.minecraft.world.level.portal.DimensionTransition",
+    "net.minecraft.world.item.Tier",
+    "net.minecraft.world.item.SimpleTier",
+    "top.theillusivec4.curios.*",
 ]
 
 OUTSIDE_CLIENT_PLATFORM = [

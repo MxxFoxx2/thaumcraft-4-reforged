@@ -9,6 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -29,6 +30,7 @@ import thaumcraft.alchemy.FluxBlock;
 import thaumcraft.alchemy.FluxGasBlock;
 import thaumcraft.alchemy.FluxGooBlock;
 import thaumcraft.alchemy.FluxScrubberBlock;
+import thaumcraft.arcane.FocalManipulatorBlock;
 import thaumcraft.alchemy.MnemonicMatrixBlock;
 import thaumcraft.alchemy.ThaumatoriumBlock;
 import thaumcraft.arcane.ArcaneWorkbenchBlock;
@@ -40,6 +42,7 @@ import thaumcraft.block.ChargedObsidianTotemBlock;
 import thaumcraft.block.CustomPlantBlock;
 import thaumcraft.block.FlammableBlock;
 import thaumcraft.block.GolemFetterBlock;
+import thaumcraft.block.HoleBlock;
 import thaumcraft.block.InfusedStoneBlock;
 import thaumcraft.block.LootBlock;
 import thaumcraft.block.MagicalLeavesBlock;
@@ -55,6 +58,7 @@ import thaumcraft.block.SilverwoodKnotBlock;
 import thaumcraft.block.TableBlock;
 import thaumcraft.block.TravelPavingStoneBlock;
 import thaumcraft.block.WandPedestalBlock;
+import thaumcraft.block.WardedBlock;
 import thaumcraft.block.WardingPavingStoneBlock;
 import thaumcraft.essentia.CentrifugeBlock;
 import thaumcraft.essentia.EssentiaBufferBlock;
@@ -87,7 +91,7 @@ public final class ModBlocks {
         10526880, 2651799, 8073150, 2437522, 5320730, 3887386, 11743532, 1973019,
     };
 
-    public static final DeferredBlock<DropExperienceBlock> CINNABAR_ORE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<DropExperienceBlock> CINNABAR_ORE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "cinnabar_ore",
         properties -> new DropExperienceBlock(ConstantInt.of(0), properties),
         properties -> rock(properties, 1.5F, 5.0F)
@@ -98,7 +102,7 @@ public final class ModBlocks {
     public static final DeferredBlock<InfusedStoneBlock> EARTH_INFUSED_STONE = infusedStone("earth_infused_stone", 0x00A000);
     public static final DeferredBlock<InfusedStoneBlock> ORDER_INFUSED_STONE = infusedStone("order_infused_stone", 0xEECCFF);
     public static final DeferredBlock<InfusedStoneBlock> ENTROPY_INFUSED_STONE = infusedStone("entropy_infused_stone", 0x555577);
-    public static final DeferredBlock<DropExperienceBlock> AMBER_ORE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<DropExperienceBlock> AMBER_ORE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "amber_ore",
         properties -> new DropExperienceBlock(UniformInt.of(1, 4), properties),
         properties -> rock(properties, 1.5F, 5.0F)
@@ -112,48 +116,48 @@ public final class ModBlocks {
         RegistryHelper.registerBlock(BLOCKS, "silverwood_log", MagicalLogBlock::new, ModBlocks::log),
         properties -> Registration.fuel(properties, 400)
     );
-    public static final DeferredBlock<MagicalLeavesBlock> GREATWOOD_LEAVES = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<MagicalLeavesBlock> GREATWOOD_LEAVES = withItem(RegistryHelper.registerBlock(BLOCKS,
         "greatwood_leaves",
         properties -> new MagicalLeavesBlock(() -> ModBlocks.GREATWOOD_SAPLING.get(), 200, false, properties),
         ModBlocks::leaves
     ));
-    public static final DeferredBlock<MagicalLeavesBlock> SILVERWOOD_LEAVES = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<MagicalLeavesBlock> SILVERWOOD_LEAVES = withItem(RegistryHelper.registerBlock(BLOCKS,
         "silverwood_leaves",
         properties -> new MagicalLeavesBlock(() -> ModBlocks.SILVERWOOD_SAPLING.get(), 250, true, properties),
         properties -> leaves(properties).lightLevel(state -> 7)
     ));
-    public static final DeferredBlock<MagicalSaplingBlock> GREATWOOD_SAPLING = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<MagicalSaplingBlock> GREATWOOD_SAPLING = withItem(RegistryHelper.registerBlock(BLOCKS,
         "greatwood_sapling",
         properties -> new MagicalSaplingBlock(false, properties),
         properties -> plant(properties).randomTicks()
     ));
-    public static final DeferredBlock<MagicalSaplingBlock> SILVERWOOD_SAPLING = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<MagicalSaplingBlock> SILVERWOOD_SAPLING = withItem(RegistryHelper.registerBlock(BLOCKS,
         "silverwood_sapling",
         properties -> new MagicalSaplingBlock(true, properties),
         properties -> plant(properties).randomTicks().lightLevel(state -> 8)
     ));
-    public static final DeferredBlock<CustomPlantBlock> SHIMMERLEAF = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<CustomPlantBlock> SHIMMERLEAF = withItem(RegistryHelper.registerBlock(BLOCKS,
         "shimmerleaf",
         properties -> new CustomPlantBlock(CustomPlantBlock.Kind.SHIMMERLEAF, properties),
         properties -> plant(properties).lightLevel(state -> 8)
     ));
-    public static final DeferredBlock<CustomPlantBlock> CINDERPEARL = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<CustomPlantBlock> CINDERPEARL = withItem(RegistryHelper.registerBlock(BLOCKS,
         "cinderpearl",
         properties -> new CustomPlantBlock(CustomPlantBlock.Kind.CINDERPEARL, properties),
         properties -> plant(properties).lightLevel(state -> 8)
     ));
-    public static final DeferredBlock<CustomPlantBlock> ETHEREAL_BLOOM = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<CustomPlantBlock> ETHEREAL_BLOOM = withItem(RegistryHelper.registerBlock(BLOCKS,
         "ethereal_bloom",
         properties -> new CustomPlantBlock(CustomPlantBlock.Kind.ETHEREAL_BLOOM, properties),
         properties -> plant(properties).lightLevel(state -> 15)
     ));
-    public static final DeferredBlock<CustomPlantBlock> VISHROOM = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<CustomPlantBlock> VISHROOM = withItem(RegistryHelper.registerBlock(BLOCKS,
         "vishroom",
         properties -> new CustomPlantBlock(CustomPlantBlock.Kind.VISHROOM, properties),
         properties -> plant(properties).lightLevel(state -> 8)
     ));
 
-    public static final DeferredBlock<ManaPodBlock> MANA_POD = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<ManaPodBlock> MANA_POD = RegistryHelper.registerBlock(BLOCKS,
         "mana_pod",
         ManaPodBlock::new,
         properties -> properties
@@ -170,160 +174,160 @@ public final class ModBlocks {
     public static final DeferredBlock<AmberBlock> AMBER_BLOCK = withItem(RegistryHelper.registerBlock(BLOCKS, "amber_block", AmberBlock::new, ModBlocks::amber));
     public static final DeferredBlock<AmberBlock> AMBER_BRICKS = withItem(RegistryHelper.registerBlock(BLOCKS, "amber_bricks", AmberBlock::new, ModBlocks::amber));
 
-    public static final DeferredBlock<ObsidianTotemBlock> OBSIDIAN_TOTEM = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<ObsidianTotemBlock> OBSIDIAN_TOTEM = withItem(RegistryHelper.registerBlock(BLOCKS,
         "obsidian_totem",
         ObsidianTotemBlock::new,
         properties -> obsidian(properties)
     ));
     public static final DeferredBlock<Block> OBSIDIAN_TILE = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, "obsidian_tile", ModBlocks::obsidian));
-    public static final DeferredBlock<TravelPavingStoneBlock> TRAVEL_PAVING_STONE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<TravelPavingStoneBlock> TRAVEL_PAVING_STONE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "travel_paving_stone",
         TravelPavingStoneBlock::new,
         properties -> noSpawn(rock(properties, 2.0F, 10.0F)).lightLevel(state -> 9)
     ));
-    public static final DeferredBlock<WardingPavingStoneBlock> WARDING_PAVING_STONE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<WardingPavingStoneBlock> WARDING_PAVING_STONE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "warding_paving_stone",
         WardingPavingStoneBlock::new,
         properties -> noSpawn(rock(properties, 2.0F, 10.0F))
     ));
-    public static final DeferredBlock<Block> THAUMIUM_BLOCK = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, 
+    public static final DeferredBlock<Block> THAUMIUM_BLOCK = withItem(RegistryHelper.registerSimpleBlock(BLOCKS,
         "thaumium_block",
         properties -> rock(properties, 4.0F, 20.0F).mapColor(MapColor.COLOR_PURPLE).sound(SoundType.METAL)
     ));
-    public static final DeferredBlock<Block> TALLOW_BLOCK = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, 
+    public static final DeferredBlock<Block> TALLOW_BLOCK = withItem(RegistryHelper.registerSimpleBlock(BLOCKS,
         "tallow_block",
         properties -> rock(properties, 2.0F, 10.0F).mapColor(MapColor.TERRACOTTA_WHITE).sound(SoundType.WOOL)
     ));
     public static final DeferredBlock<Block> ARCANE_STONE = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, "arcane_stone", properties -> rock(properties, 4.0F, 20.0F)));
     public static final DeferredBlock<Block> ARCANE_STONE_BRICKS = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, "arcane_stone_bricks", properties -> rock(properties, 4.0F, 20.0F)));
-    public static final DeferredBlock<GolemFetterBlock> GOLEM_FETTER = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<GolemFetterBlock> GOLEM_FETTER = withItem(RegistryHelper.registerBlock(BLOCKS,
         "golem_fetter",
         GolemFetterBlock::new,
         properties -> rock(properties, 2.0F, 10.0F)
     ));
     public static final DeferredBlock<Block> ANCIENT_STONE = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, "ancient_stone", properties -> rock(properties, 2.0F, 10.0F)));
     public static final DeferredBlock<Block> ANCIENT_ROCK = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, "ancient_rock", properties -> rock(properties, 2.0F, 10.0F)));
-    public static final DeferredBlock<Block> ANCIENT_STONE_NO_SPAWN = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, 
+    public static final DeferredBlock<Block> ANCIENT_STONE_NO_SPAWN = withItem(RegistryHelper.registerSimpleBlock(BLOCKS,
         "ancient_stone_no_spawn",
         properties -> noSpawn(rock(properties, 2.0F, 10.0F))
     ));
-    public static final DeferredBlock<Block> CRUSTED_STONE = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, 
+    public static final DeferredBlock<Block> CRUSTED_STONE = withItem(RegistryHelper.registerSimpleBlock(BLOCKS,
         "crusted_stone",
         properties -> rock(properties, 2.0F, 10.0F).lightLevel(state -> 4)
     ));
-    public static final DeferredBlock<Block> ANCIENT_STONE_PEDESTAL = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, 
+    public static final DeferredBlock<Block> ANCIENT_STONE_PEDESTAL = withItem(RegistryHelper.registerSimpleBlock(BLOCKS,
         "ancient_stone_pedestal",
         properties -> rock(properties, 2.0F, 10.0F)
     ));
 
-    public static final DeferredBlock<FlammableBlock> GREATWOOD_PLANKS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<FlammableBlock> GREATWOOD_PLANKS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "greatwood_planks",
         properties -> new FlammableBlock(20, 5, properties),
         ModBlocks::planks
     ));
-    public static final DeferredBlock<FlammableBlock> SILVERWOOD_PLANKS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<FlammableBlock> SILVERWOOD_PLANKS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "silverwood_planks",
         properties -> new FlammableBlock(20, 5, properties),
         ModBlocks::planks
     ));
-    public static final DeferredBlock<SlabBlock> GREATWOOD_SLAB = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<SlabBlock> GREATWOOD_SLAB = withItem(RegistryHelper.registerBlock(BLOCKS,
         "greatwood_slab",
         SlabBlock::new,
         properties -> wood(properties, 2.0F, 5.0F)
     ));
-    public static final DeferredBlock<SlabBlock> SILVERWOOD_SLAB = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<SlabBlock> SILVERWOOD_SLAB = withItem(RegistryHelper.registerBlock(BLOCKS,
         "silverwood_slab",
         SlabBlock::new,
         properties -> wood(properties, 2.0F, 5.0F)
     ));
-    public static final DeferredBlock<SlabBlock> ARCANE_STONE_SLAB = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<SlabBlock> ARCANE_STONE_SLAB = withItem(RegistryHelper.registerBlock(BLOCKS,
         "arcane_stone_slab",
         SlabBlock::new,
         properties -> rock(properties, 2.0F, 10.0F)
     ));
-    public static final DeferredBlock<SlabBlock> ANCIENT_STONE_SLAB = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<SlabBlock> ANCIENT_STONE_SLAB = withItem(RegistryHelper.registerBlock(BLOCKS,
         "ancient_stone_slab",
         SlabBlock::new,
         properties -> rock(properties, 2.0F, 10.0F)
     ));
-    public static final DeferredBlock<StairBlock> GREATWOOD_STAIRS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<StairBlock> GREATWOOD_STAIRS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "greatwood_stairs",
         properties -> new StairBlock(ModBlocks.GREATWOOD_PLANKS.get().defaultBlockState(), properties),
         ModBlocks::planks
     ));
-    public static final DeferredBlock<StairBlock> SILVERWOOD_STAIRS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<StairBlock> SILVERWOOD_STAIRS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "silverwood_stairs",
         properties -> new StairBlock(ModBlocks.SILVERWOOD_PLANKS.get().defaultBlockState(), properties),
         ModBlocks::planks
     ));
-    public static final DeferredBlock<StairBlock> ARCANE_STONE_STAIRS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<StairBlock> ARCANE_STONE_STAIRS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "arcane_stone_stairs",
         properties -> new StairBlock(ModBlocks.ARCANE_STONE_BRICKS.get().defaultBlockState(), properties),
         properties -> rock(properties, 2.0F, 10.0F)
     ));
-    public static final DeferredBlock<StairBlock> ANCIENT_STONE_STAIRS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<StairBlock> ANCIENT_STONE_STAIRS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "ancient_stone_stairs",
         properties -> new StairBlock(ModBlocks.ANCIENT_STONE.get().defaultBlockState(), properties),
         properties -> rock(properties, 2.0F, 10.0F)
     ));
 
-    public static final DeferredBlock<LootBlock> LOOT_URN = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<LootBlock> LOOT_URN = withItem(RegistryHelper.registerBlock(BLOCKS,
         "loot_urn",
         properties -> new LootBlock(LootBlock.Kind.URN, properties),
         properties -> properties.mapColor(MapColor.CLAY).strength(0.15F, 0.0F).noOcclusion()
     ));
-    public static final DeferredBlock<LootBlock> LOOT_CRATE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<LootBlock> LOOT_CRATE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "loot_crate",
         properties -> new LootBlock(LootBlock.Kind.CRATE, properties),
         properties -> wood(properties, 0.15F, 0.0F).noOcclusion()
     ));
 
-    public static final DeferredBlock<AuraNodeBlock> AURA_NODE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<AuraNodeBlock> AURA_NODE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "aura_node",
         AuraNodeBlock::new,
         properties -> airy(properties)
     ));
-    public static final DeferredBlock<EnergizedNodeBlock> ENERGIZED_AURA_NODE = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<EnergizedNodeBlock> ENERGIZED_AURA_NODE = RegistryHelper.registerBlock(BLOCKS,
         "energized_aura_node",
         EnergizedNodeBlock::new,
         properties -> airy(properties)
     );
-    public static final DeferredBlock<ChargedObsidianTotemBlock> CHARGED_OBSIDIAN_TOTEM = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<ChargedObsidianTotemBlock> CHARGED_OBSIDIAN_TOTEM = withItem(RegistryHelper.registerBlock(BLOCKS,
         "charged_obsidian_totem",
         ChargedObsidianTotemBlock::new,
         properties -> obsidian(properties)
     ));
-    public static final DeferredBlock<SilverwoodKnotBlock> SILVERWOOD_KNOT = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<SilverwoodKnotBlock> SILVERWOOD_KNOT = RegistryHelper.registerBlock(BLOCKS,
         "silverwood_knot",
         SilverwoodKnotBlock::new,
         ModBlocks::log
     );
-    public static final DeferredBlock<NodeStabilizerBlock> NODE_STABILIZER = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<NodeStabilizerBlock> NODE_STABILIZER = withItem(RegistryHelper.registerBlock(BLOCKS,
         "node_stabilizer",
         properties -> new NodeStabilizerBlock(false, properties),
         properties -> stoneDevice(properties)
     ));
-    public static final DeferredBlock<NodeStabilizerBlock> ADVANCED_NODE_STABILIZER = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<NodeStabilizerBlock> ADVANCED_NODE_STABILIZER = withItem(RegistryHelper.registerBlock(BLOCKS,
         "advanced_node_stabilizer",
         properties -> new NodeStabilizerBlock(true, properties),
         properties -> stoneDevice(properties)
     ));
-    public static final DeferredBlock<NodeTransducerBlock> NODE_TRANSDUCER = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<NodeTransducerBlock> NODE_TRANSDUCER = withItem(RegistryHelper.registerBlock(BLOCKS,
         "node_transducer",
         NodeTransducerBlock::new,
         properties -> stoneDevice(properties)
     ));
-    public static final DeferredBlock<WandPedestalBlock> WAND_RECHARGE_PEDESTAL = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<WandPedestalBlock> WAND_RECHARGE_PEDESTAL = withItem(RegistryHelper.registerBlock(BLOCKS,
         "wand_recharge_pedestal",
         WandPedestalBlock::new,
         properties -> stoneDevice(properties)
     ));
-    public static final DeferredBlock<RechargeFocusBlock> COMPOUND_RECHARGE_FOCUS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<RechargeFocusBlock> COMPOUND_RECHARGE_FOCUS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "compound_recharge_focus",
         RechargeFocusBlock::new,
         properties -> stoneDevice(properties)
     ));
-    public static final DeferredBlock<VisRelayBlock> VIS_RELAY = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<VisRelayBlock> VIS_RELAY = withItem(RegistryHelper.registerBlock(BLOCKS,
         "vis_relay",
         VisRelayBlock::new,
         properties -> properties
@@ -334,7 +338,7 @@ public final class ModBlocks {
             .noOcclusion()
             .lightLevel(state -> state.getValue(VisRelayBlock.CONNECTED) ? 10 : 2)
     ));
-    public static final DeferredBlock<NodeJarBlock> NODE_JAR = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<NodeJarBlock> NODE_JAR = RegistryHelper.registerBlock(BLOCKS,
         "node_jar",
         NodeJarBlock::new,
         properties -> properties
@@ -344,7 +348,7 @@ public final class ModBlocks {
             .noOcclusion()
             .lightLevel(state -> 11)
     );
-    public static final DeferredItem<NodeJarItem> NODE_JAR_ITEM = RegistryHelper.registerItem(ModItems.ITEMS, 
+    public static final DeferredItem<NodeJarItem> NODE_JAR_ITEM = RegistryHelper.registerItem(ModItems.ITEMS,
         "node_jar",
         properties -> new NodeJarItem(NODE_JAR.get(), properties),
         NodeJarItem::properties
@@ -356,12 +360,12 @@ public final class ModBlocks {
 
     public static final DeferredBlock<JarBlock> WARDED_JAR = withItem(RegistryHelper.registerBlock(BLOCKS, "warded_jar", properties -> new JarBlock(false, properties), ModBlocks::jar));
     public static final DeferredBlock<JarBlock> VOID_JAR = withItem(RegistryHelper.registerBlock(BLOCKS, "void_jar", properties -> new JarBlock(true, properties), ModBlocks::jar));
-    public static final DeferredItem<FilledJarItem> FILLED_JAR = RegistryHelper.registerItem(ModItems.ITEMS, 
+    public static final DeferredItem<FilledJarItem> FILLED_JAR = RegistryHelper.registerItem(ModItems.ITEMS,
         "filled_jar",
         properties -> new FilledJarItem(WARDED_JAR.get(), properties),
         properties -> properties.stacksTo(1)
     );
-    public static final DeferredItem<FilledJarItem> FILLED_VOID_JAR = RegistryHelper.registerItem(ModItems.ITEMS, 
+    public static final DeferredItem<FilledJarItem> FILLED_VOID_JAR = RegistryHelper.registerItem(ModItems.ITEMS,
         "filled_void_jar",
         properties -> new FilledJarItem(VOID_JAR.get(), properties),
         properties -> properties.stacksTo(1)
@@ -373,12 +377,12 @@ public final class ModBlocks {
     public static final DeferredBlock<TubeBlock> DIRECTIONAL_ESSENTIA_TUBE = tube("directional_essentia_tube", TubeBlock.Kind.ONEWAY);
     public static final DeferredBlock<EssentiaBufferBlock> ESSENTIA_BUFFER = withItem(RegistryHelper.registerBlock(BLOCKS, "essentia_buffer", EssentiaBufferBlock::new, ModBlocks::tubeProperties));
     public static final DeferredBlock<CentrifugeBlock> ALCHEMICAL_CENTRIFUGE = withItem(RegistryHelper.registerBlock(BLOCKS, "alchemical_centrifuge", CentrifugeBlock::new, ModBlocks::tubeProperties));
-    public static final DeferredBlock<EssentiaCrystallizerBlock> ESSENTIA_CRYSTALLIZER = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<EssentiaCrystallizerBlock> ESSENTIA_CRYSTALLIZER = withItem(RegistryHelper.registerBlock(BLOCKS,
         "essentia_crystallizer",
         EssentiaCrystallizerBlock::new,
         ModBlocks::tubeProperties
     ));
-    public static final DeferredBlock<EssentiaReservoirBlock> ESSENTIA_RESERVOIR = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<EssentiaReservoirBlock> ESSENTIA_RESERVOIR = withItem(RegistryHelper.registerBlock(BLOCKS,
         "essentia_reservoir",
         EssentiaReservoirBlock::new,
         properties -> metal(properties, 2.0F, 17.0F).noOcclusion()
@@ -386,40 +390,40 @@ public final class ModBlocks {
 
     public static final DeferredBlock<CrucibleBlock> CRUCIBLE = withItem(RegistryHelper.registerBlock(BLOCKS, "crucible", CrucibleBlock::new, ModBlocks::metalDevice));
     public static final DeferredBlock<AlembicBlock> ALEMBIC = withItem(RegistryHelper.registerBlock(BLOCKS, "alembic", AlembicBlock::new, ModBlocks::metalDevice));
-    public static final DeferredBlock<Block> ALCHEMICAL_CONSTRUCT = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, 
+    public static final DeferredBlock<Block> ALCHEMICAL_CONSTRUCT = withItem(RegistryHelper.registerSimpleBlock(BLOCKS,
         "alchemical_construct",
         properties -> metal(properties, 3.0F, 17.0F)
     ));
-    public static final DeferredBlock<Block> ADVANCED_ALCHEMICAL_CONSTRUCT = withItem(RegistryHelper.registerSimpleBlock(BLOCKS, 
+    public static final DeferredBlock<Block> ADVANCED_ALCHEMICAL_CONSTRUCT = withItem(RegistryHelper.registerSimpleBlock(BLOCKS,
         "advanced_alchemical_construct",
         properties -> metal(properties, 3.0F, 17.0F).lightLevel(state -> 11)
     ));
-    public static final DeferredBlock<ThaumatoriumBlock> THAUMATORIUM = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<ThaumatoriumBlock> THAUMATORIUM = RegistryHelper.registerBlock(BLOCKS,
         "thaumatorium",
         properties -> new ThaumatoriumBlock(false, properties),
         ModBlocks::metalDevice
     );
-    public static final DeferredBlock<ThaumatoriumBlock> THAUMATORIUM_TOP = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<ThaumatoriumBlock> THAUMATORIUM_TOP = RegistryHelper.registerBlock(BLOCKS,
         "thaumatorium_top",
         properties -> new ThaumatoriumBlock(true, properties),
         ModBlocks::metalDevice
     );
-    public static final DeferredBlock<MnemonicMatrixBlock> MNEMONIC_MATRIX = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<MnemonicMatrixBlock> MNEMONIC_MATRIX = withItem(RegistryHelper.registerBlock(BLOCKS,
         "mnemonic_matrix",
         MnemonicMatrixBlock::new,
         ModBlocks::metalDevice
     ));
-    public static final DeferredBlock<AlchemicalFurnaceBlock> ALCHEMICAL_FURNACE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<AlchemicalFurnaceBlock> ALCHEMICAL_FURNACE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "alchemical_furnace",
         AlchemicalFurnaceBlock::new,
         properties -> rock(properties, 3.0F, 25.0F).lightLevel(AlchemicalFurnaceBlock::lightLevel)
     ));
-    public static final DeferredBlock<AdvancedAlchemicalFurnaceBlock> ADVANCED_ALCHEMICAL_FURNACE = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<AdvancedAlchemicalFurnaceBlock> ADVANCED_ALCHEMICAL_FURNACE = RegistryHelper.registerBlock(BLOCKS,
         "advanced_alchemical_furnace",
         AdvancedAlchemicalFurnaceBlock::new,
         properties -> metalDevice(properties).lightLevel(AdvancedAlchemicalFurnaceBlock::lightLevel)
     );
-    public static final DeferredBlock<FluxGasBlock> FLUX_GAS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<FluxGasBlock> FLUX_GAS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "flux_gas",
         FluxGasBlock::new,
         properties -> properties
@@ -435,7 +439,7 @@ public final class ModBlocks {
             .isSuffocating((state, level, pos) -> false)
             .isViewBlocking((state, level, pos) -> false)
     ));
-    public static final DeferredBlock<FluxGooBlock> FLUX_GOO = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<FluxGooBlock> FLUX_GOO = withItem(RegistryHelper.registerBlock(BLOCKS,
         "flux_goo",
         FluxGooBlock::new,
         properties -> properties
@@ -450,49 +454,49 @@ public final class ModBlocks {
             .sound(SoundType.SLIME_BLOCK)
             .pushReaction(PushReaction.DESTROY)
     ));
-    public static final DeferredBlock<FluxScrubberBlock> FLUX_SCRUBBER = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<FluxScrubberBlock> FLUX_SCRUBBER = withItem(RegistryHelper.registerBlock(BLOCKS,
         "flux_scrubber",
         FluxScrubberBlock::new,
         properties -> stoneDevice(properties)
     ));
-    public static final DeferredBlock<BellowsBlock> ARCANE_BELLOWS = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<BellowsBlock> ARCANE_BELLOWS = withItem(RegistryHelper.registerBlock(BLOCKS,
         "arcane_bellows",
         BellowsBlock::new,
         properties -> wood(properties, 2.5F, 10.0F).noOcclusion()
     ));
 
-    public static final DeferredBlock<ArcaneWorkbenchBlock> ARCANE_WORKTABLE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<ArcaneWorkbenchBlock> ARCANE_WORKTABLE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "arcane_worktable",
         ArcaneWorkbenchBlock::new,
         ModBlocks::tableProperties
     ));
-    public static final DeferredBlock<DeconstructionTableBlock> DECONSTRUCTION_TABLE = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<DeconstructionTableBlock> DECONSTRUCTION_TABLE = withItem(RegistryHelper.registerBlock(BLOCKS,
         "deconstruction_table",
         DeconstructionTableBlock::new,
         ModBlocks::tableProperties
     ));
-    public static final DeferredBlock<VisChargeRelayBlock> VIS_CHARGE_RELAY = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<VisChargeRelayBlock> VIS_CHARGE_RELAY = withItem(RegistryHelper.registerBlock(BLOCKS,
         "vis_charge_relay",
         VisChargeRelayBlock::new,
         ModBlocks::metalDevice
     ));
 
-    public static final DeferredBlock<InfusionMatrixBlock> RUNIC_MATRIX = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<InfusionMatrixBlock> RUNIC_MATRIX = withItem(RegistryHelper.registerBlock(BLOCKS,
         "runic_matrix",
         InfusionMatrixBlock::new,
         properties -> stoneDevice(properties).lightLevel(state -> 10)
     ));
-    public static final DeferredBlock<PedestalBlock> ARCANE_PEDESTAL = withItem(RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<PedestalBlock> ARCANE_PEDESTAL = withItem(RegistryHelper.registerBlock(BLOCKS,
         "arcane_pedestal",
         PedestalBlock::new,
         properties -> stoneDevice(properties)
     ));
-    public static final DeferredBlock<InfusionPillarBlock> INFUSION_PILLAR = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<InfusionPillarBlock> INFUSION_PILLAR = RegistryHelper.registerBlock(BLOCKS,
         "infusion_pillar",
         properties -> new InfusionPillarBlock(false, properties),
         properties -> stoneDevice(properties)
     );
-    public static final DeferredBlock<InfusionPillarBlock> INFUSION_PILLAR_TOP = RegistryHelper.registerBlock(BLOCKS, 
+    public static final DeferredBlock<InfusionPillarBlock> INFUSION_PILLAR_TOP = RegistryHelper.registerBlock(BLOCKS,
         "infusion_pillar_top",
         properties -> new InfusionPillarBlock(true, properties),
         properties -> stoneDevice(properties)
@@ -500,13 +504,29 @@ public final class ModBlocks {
 
     public static final Map<String, DeferredBlock<CandleBlock>> CANDLES = candles();
 
+    public static final DeferredBlock<FocalManipulatorBlock> FOCAL_MANIPULATOR = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "focal_manipulator",
+        FocalManipulatorBlock::new,
+        properties -> stoneDevice(properties)
+    ));
+    public static final DeferredBlock<HoleBlock> HOLE = RegistryHelper.registerBlock(BLOCKS,
+        "hole",
+        HoleBlock::new,
+        properties -> properties.mapColor(MapColor.NONE).strength(-1.0F, 6000000.0F).lightLevel(state -> 10).noLootTable().noOcclusion().pushReaction(PushReaction.BLOCK)
+    );
+    public static final DeferredBlock<WardedBlock> WARDED_BLOCK = RegistryHelper.registerBlock(BLOCKS,
+        "warded_block",
+        WardedBlock::new,
+        properties -> properties.mapColor(MapColor.STONE).sound(SoundType.STONE).strength(-1.0F, 999.0F).noLootTable().isValidSpawn(Blocks::never).pushReaction(PushReaction.BLOCK)
+    );
+
     private ModBlocks() {
     }
 
     private static Map<String, DeferredBlock<CandleBlock>> candles() {
         Map<String, DeferredBlock<CandleBlock>> candles = new LinkedHashMap<>();
         for (String color : CANDLE_COLORS) {
-            candles.put(color, withItem(RegistryHelper.registerBlock(BLOCKS, 
+            candles.put(color, withItem(RegistryHelper.registerBlock(BLOCKS,
                 color + "_tallow_candle",
                 CandleBlock::new,
                 properties -> properties

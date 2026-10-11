@@ -14,6 +14,7 @@ import gen_loot
 import gen_phase4
 import gen_phase5
 import gen_phase6
+import gen_phase8
 import gen_villages
 import gen_world
 
@@ -45,7 +46,7 @@ BLOCK_MODELS = {}
 ITEM_MODELS = {}
 ITEM_IDS = set()
 TEXTURE_REFERENCES = set()
-MANIFEST = {"predicates": {}, "tints": {}, "builtin_entity": {}, "composite": {}, "armor_layers": {}}
+MANIFEST = {"predicates": {}, "tints": {}, "builtin_entity": {}, "composite": {}, "armor_layers": {}, "model_loaders": {}}
 NOTES = defaultdict(list)
 INJECTIONS = []
 TRADES = {}
@@ -158,6 +159,8 @@ def tint_manifest(tints):
             result[str(layer)] = {"constant": f"#{entry['value'] & 0xFFFFFF:06X}"}
         else:
             result[str(layer)] = {"source": entry["type"]}
+            if "default" in entry:
+                result[str(layer)]["default"] = entry["default"]
     return result
 
 
@@ -220,11 +223,11 @@ def special_item(name, base, model):
     write(ASSETS / "items" / f"{name}.json", {"model": {"type": "minecraft:special", "base": base, "model": model}})
 
 
-def view_select_item(name, base, model, views, fallback_view):
+def view_select_item(name, base, model, views, fallback_view, kind="minecraft:special"):
     ITEM_IDS.add(name)
     if profile.modern:
         def special(view):
-            return {"type": "minecraft:special", "base": base, "model": {**model, "view": view}}
+            return {"type": kind, "base": base, "model": {**model, "view": view}}
 
         write(ASSETS / "items" / f"{name}.json", {"model": {
             "type": "minecraft:select",
@@ -836,9 +839,10 @@ def recipes():
 SECTIONS = {
     "builtin_entity": "item id -> special renderer. The item model json is parent minecraft:builtin/entity (with the display transforms of a block item), so the item is drawn by a BlockEntityWithoutLevelRenderer: dispatch on the item id, create the renderer named in renderer (26.3 special model type id) with params. base_model is the 26.3 base model the special renderer was layered on (its textures are copied into the builtin/entity json for the particle). Entries with views_by_display_context are items whose renderer takes params.view: in renderByItem use views_by_display_context[ItemDisplayContext name] and fall back to fallback_view when the context is not listed (ground, fixed, head, gui of other kinds).",
     "composite": "item id -> list of parts drawn together. The item json is builtin/entity. The BlockEntityWithoutLevelRenderer must draw parts in order: item_model/block_model is a baked json model to load as an additional model (ModelEvent.RegisterAdditional) and render with the item transform, builtin_entity is a special renderer as in builtin_entity.",
-    "tints": "item id -> layer index -> colour source. constant is a fixed RGB for ItemColor of that layer (tintindex = layer index; block items use the tintindex of the block model elements). source is a tint source id: thaumcraft:aspect = colour of the first aspect of the stack component thaumcraft:aspects (white when empty); thaumcraft:research_note = colour of the research note component thaumcraft:research_note (0x999999 when absent). Register one ItemColor per item with these layers.",
+    "tints": "item id -> layer index -> colour source. constant is a fixed RGB for ItemColor of that layer (tintindex = layer index; block items use the tintindex of the block model elements). source is a tint source id: thaumcraft:aspect = colour of the first aspect of the stack component thaumcraft:aspects (white when empty); thaumcraft:research_note = colour of the research note component thaumcraft:research_note (0x999999 when absent). minecraft:dye = DyedItemColor of the stack with the recorded default color. Register one ItemColor per item with these layers.",
     "armor_layers": "armor id -> ArmorMaterial.Layer location and the generated texture.",
-    "predicates": "item id -> property overrides, empty for TC4 (every select/condition item of 26.3 is a builtin_entity view select).",
+    "predicates": "item id -> properties required by model overrides; vanilla bow pull and pulling have the same behavior as minecraft:bow.",
+    "model_loaders": "block id -> NeoForge geometry loader and fallback baked model.",
 }
 
 
@@ -897,8 +901,16 @@ def item_definition_models(definition):
             yield from item_definition_models(case["model"])
         if "fallback" in definition:
             yield from item_definition_models(definition["fallback"])
-    elif definition["type"] == "minecraft:special":
+    elif definition["type"] in ("minecraft:special", f"{NS}:special_owner"):
         yield definition["base"]
+    elif definition["type"] == "minecraft:condition":
+        yield from item_definition_models(definition["on_true"])
+        yield from item_definition_models(definition["on_false"])
+    elif definition["type"] == "minecraft:range_dispatch":
+        for entry in definition["entries"]:
+            yield from item_definition_models(entry["model"])
+        if "fallback" in definition:
+            yield from item_definition_models(definition["fallback"])
     elif definition["type"] == "minecraft:composite":
         for model in definition["models"]:
             yield from item_definition_models(model)
@@ -924,6 +936,7 @@ def validate_models():
         entries = content["variants"].values() if "variants" in content else [part["apply"] for part in content["multipart"]]
         for entry in entries:
             for variant in entry if isinstance(entry, list) else [entry]:
+                variant = variant.get("fallback", variant)
                 namespace, _, location = variant["model"].partition(":")
                 if namespace == NS and not (ASSETS / "models" / f"{location}.json").exists():
                     missing.append(f"{path.name}: {variant['model']}")
@@ -978,7 +991,9 @@ def main():
     gen_phase4.generate(ctx)
     gen_phase5.generate(ctx)
     gen_phase6.generate(ctx)
+    gen_phase8.generate(ctx)
     gen_curios.generate(ctx)
+    gen_phase5.recipes(ctx)
     write_tags()
     if profile.explicit_render_types:
         apply_render_types()

@@ -19,10 +19,13 @@ import thaumcraft.alchemy.ThaumatoriumTopBlockEntity;
 import thaumcraft.arcane.ArcaneWorkbenchBlockEntity;
 import thaumcraft.arcane.DeconstructionTableBlockEntity;
 import thaumcraft.arcane.VisChargeRelayBlockEntity;
+import thaumcraft.arcane.FocalManipulatorBlockEntity;
+import thaumcraft.blockentity.HoleBlockEntity;
 import thaumcraft.blockentity.ManaPodBlockEntity;
 import thaumcraft.blockentity.NodeJarBlockEntity;
 import thaumcraft.blockentity.ResearchTableBlockEntity;
 import thaumcraft.blockentity.WandPedestalBlockEntity;
+import thaumcraft.blockentity.WardedBlockEntity;
 import thaumcraft.blockentity.WardingStoneBlockEntity;
 import thaumcraft.essentia.CentrifugeBlockEntity;
 import thaumcraft.essentia.EssentiaBufferBlockEntity;
@@ -195,6 +198,19 @@ public final class ModBlockEntities {
     public static final Supplier<BlockEntityType<InfusionPillarBlockEntity>> INFUSION_PILLAR = BLOCK_ENTITIES.register(
         "infusion_pillar",
         () -> BlockEntityType.Builder.of(InfusionPillarBlockEntity::new, ModBlocks.INFUSION_PILLAR.get()).build(null)
+    );
+
+    public static final Supplier<BlockEntityType<FocalManipulatorBlockEntity>> FOCAL_MANIPULATOR = BLOCK_ENTITIES.register(
+        "focal_manipulator",
+        () -> BlockEntityType.Builder.of(FocalManipulatorBlockEntity::new, ModBlocks.FOCAL_MANIPULATOR.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<HoleBlockEntity>> HOLE = BLOCK_ENTITIES.register(
+        "hole",
+        () -> BlockEntityType.Builder.of(HoleBlockEntity::new, ModBlocks.HOLE.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<WardedBlockEntity>> WARDED = BLOCK_ENTITIES.register(
+        "warded_block",
+        () -> BlockEntityType.Builder.of(WardedBlockEntity::new, ModBlocks.WARDED_BLOCK.get()).build(null)
     );
 
     private ModBlockEntities() {

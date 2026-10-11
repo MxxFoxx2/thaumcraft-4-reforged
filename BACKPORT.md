@@ -9,11 +9,11 @@
 
 ## Last synced main commit
 
-`a4bd54f` (fix: crucible top uses the open texture in the world)
+`163651a` (phase 8 complete)
 
 ## Sync procedure
 
-1. `git log --reverse a4bd54f..main` in the worktree of this branch.
+1. `git log --reverse 163651a..main` in the worktree of this branch.
 2. A commit touching only resources, lang or `tools/`: `git cherry-pick`, then regenerate with `python3 tools/gen_resources.py --mc 1.21.1`.
 3. A commit with Java: `git show <sha> | python3 tools/backport/rewrite.py --target 1.21.1 | git apply -3`, resolve conflicts by hand, run `compileJava`.
 4. Commit with the same message, then update the sha above.
@@ -89,3 +89,13 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 - Item models: special items render through `client/render/TcItemRenderer` (`BlockEntityWithoutLevelRenderer`) by `tools/backport/item_models_1.21.1.json`, tints through `ItemColor`
 - Worldgen: patches (`count` + `offset` with `trapezoid` on 26.3) are written as `minecraft:random_patch` with `xz_spread` 7 and `y_spread` 3
 - Aspects: smelting recipes (`AbstractCookingRecipe`) are read separately because they are not `SingleItemRecipe` on 1.21.1; `minecraft:boat` and `minecraft:chest_boat` entities have entries in `tools/modern_aspects/entities.json`
+
+## Phase 8 validation (2026-10-11)
+
+- compileJava, check_seams.py, validate_ids.py --mc 1.21.1 pass; all 32 GameTests pass (29 ported, 3 backport regressions).
+- Dedicated server loads a normal TerraBlender world; focal manipulator and warded block placement, /reload, focus inventory and save-all pass without ERROR entries.
+- Armor materials are registered before registry events; robe/void robe materials have dyeable base and undyed overlay layers. Dye recipes are generated and the six robes support water cauldron washing.
+- compat/ItemStackTemplate preserves immutable item-stack components with value equality; raw ItemStack component values fail development validation.
+- GearMovementPayload relays forward input for server traveller boots/haste because vanilla 1.21.1 lacks getLastClientInput.
+- platform/CamouflagedBlockEntity owns ModelData/ModelProperty; only its two server-safe NeoForge model-data imports are exempted from the client-package seam rule.
+- Visual validation and two-client animation/synchronization checks remain pending.

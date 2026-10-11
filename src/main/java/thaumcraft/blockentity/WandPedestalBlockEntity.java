@@ -16,6 +16,7 @@ import thaumcraft.aspect.AspectList;
 import thaumcraft.node.Node;
 import thaumcraft.registry.ModBlockEntities;
 import thaumcraft.registry.ModBlocks;
+import thaumcraft.wand.VisStorage;
 import thaumcraft.wand.Wands;
 
 public class WandPedestalBlockEntity extends TcBlockEntity {
@@ -64,8 +65,8 @@ public class WandPedestalBlockEntity extends TcBlockEntity {
     }
 
     public AspectList getAspects() {
-        if (Wands.isWand(stack)) {
-            AspectList all = Wands.getAllVis(stack);
+        if (VisStorage.isStorage(stack)) {
+            AspectList all = VisStorage.getAllVis(stack);
             AspectList out = new AspectList();
             for (Aspect aspect : all.getAspectsSorted()) {
                 out.add(aspect, all.getAmount(aspect) / 100);
@@ -76,8 +77,8 @@ public class WandPedestalBlockEntity extends TcBlockEntity {
     }
 
     public int getComparatorSignal() {
-        if (Wands.isWand(stack)) {
-            float ratio = Wands.getAllVis(stack).visSize() / (Wands.getMaxVis(stack) * 6.0F);
+        if (VisStorage.isStorage(stack)) {
+            float ratio = VisStorage.getAllVis(stack).visSize() / (VisStorage.getMaxVis(stack) * 6.0F);
             return (int) Math.floor(ratio * 14.0F) + 1;
         }
         return 0;
@@ -104,10 +105,11 @@ public class WandPedestalBlockEntity extends TcBlockEntity {
             tickLevel.updateNeighborsAt(worldPosition, getBlockState().getBlock());
             somethingChanged = false;
         }
-        if (counter % 5 == 0 && !nodes.isEmpty() && !stack.isEmpty() && Wands.isWand(stack)) {
+        if (counter % 5 == 0 && !nodes.isEmpty() && !stack.isEmpty() && VisStorage.isStorage(stack)) {
             boolean compound = tickLevel.getBlockState(worldPosition.above()).is(ModBlocks.COMPOUND_RECHARGE_FOCUS.get());
-            int min = Wands.getCap(stack).tag().equals("iron") || Wands.getRod(stack).tag().equals("wood") ? 0 : 1;
-            AspectList room = Wands.getAspectsWithRoom(stack);
+            boolean wand = Wands.isWand(stack);
+            int min = wand && (Wands.getCap(stack).tag().equals("iron") || Wands.getRod(stack).tag().equals("wood")) ? 0 : 1;
+            AspectList room = VisStorage.getAspectsWithRoom(stack);
             boolean found = false;
             if (room.size() > 0) {
                 search:
@@ -116,9 +118,9 @@ public class WandPedestalBlockEntity extends TcBlockEntity {
                     if (entity instanceof Node node && !(entity instanceof NodeJarBlockEntity)) {
                         for (Aspect aspect : room.getAspects()) {
                             if (node.getAspects().getAmount(aspect) > min) {
-                                Wands.addVis(stack, aspect, 1, true);
+                                VisStorage.addVis(stack, aspect, 1, true);
                                 node.takeFromContainer(aspect, 1);
-                                somethingChanged = true;
+                                somethingChanged |= wand;
                                 found = true;
                                 setDraining(true, nodePos, aspect.getColor());
                                 break search;
@@ -130,9 +132,9 @@ public class WandPedestalBlockEntity extends TcBlockEntity {
                                     AspectList primals = AspectHelper.reduceToPrimals(new AspectList().add(aspect, 1));
                                     for (Aspect primal : room.getAspects()) {
                                         if (primals.getAmount(primal) > 0 && node.getAspects().getAmount(aspect) > min) {
-                                            Wands.addVis(stack, primal, 1, true);
+                                            VisStorage.addVis(stack, primal, 1, true);
                                             node.takeFromContainer(aspect, 1);
-                                            somethingChanged = true;
+                                            somethingChanged |= wand;
                                             found = true;
                                             setDraining(true, nodePos, aspect.getColor());
                                             break search;

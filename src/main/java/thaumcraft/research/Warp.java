@@ -1,11 +1,17 @@
 package thaumcraft.research;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import thaumcraft.item.gear.WarpingGear;
 import thaumcraft.network.WarpMessagePayload;
+import thaumcraft.platform.Baubles;
 import thaumcraft.platform.ModNetwork;
 
 public final class Warp {
+    private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
+
     private Warp() {
     }
 
@@ -34,5 +40,20 @@ public final class Warp {
     public static void set(ServerPlayer player, int amount, WarpType type) {
         Knowledge.get(player).setWarp(type, amount);
         Knowledge.sync(player);
+    }
+
+    public static int getFinalWarp(ItemStack stack, Player player) {
+        return !stack.isEmpty() && stack.getItem() instanceof WarpingGear gear ? gear.getWarp(stack, player) : 0;
+    }
+
+    public static int getWarpFromGear(Player player) {
+        int warp = getFinalWarp(player.getMainHandItem(), player);
+        for (EquipmentSlot slot : ARMOR_SLOTS) {
+            warp += getFinalWarp(player.getItemBySlot(slot), player);
+        }
+        for (ItemStack stack : Baubles.stacks(player)) {
+            warp += getFinalWarp(stack, player);
+        }
+        return warp;
     }
 }

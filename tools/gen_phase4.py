@@ -43,9 +43,9 @@ LEGACY_VIEWS = [
 ]
 
 
-def legacy_special_item(ctx, name, model, particle):
+def legacy_special_item(ctx, name, model, particle, kind="minecraft:special"):
     ctx.item_model(name, {"gui_light": "side", "textures": {"particle": ctx.ref(particle, "item")}})
-    ctx.view_select_item(name, ctx.ref(name, "item"), model, LEGACY_VIEWS, "entity")
+    ctx.view_select_item(name, ctx.ref(name, "item"), model, LEGACY_VIEWS, "entity", kind)
 
 
 def item_base_from_block(ctx, name):
@@ -177,7 +177,7 @@ def jar(ctx):
 
 
 def wands(ctx):
-    legacy_special_item(ctx, "wand", {"type": f"{NS}:wand"}, "wand_rod_greatwood")
+    legacy_special_item(ctx, "wand", {"type": f"{NS}:wand"}, "wand_rod_greatwood", f"{NS}:special_owner")
     for cap, texture in CAPS.items():
         ctx.generated_item(f"{cap}_wand_cap", texture)
     for rod, texture in RODS.items():

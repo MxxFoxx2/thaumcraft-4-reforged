@@ -1,6 +1,7 @@
 package thaumcraft.client.color;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -55,6 +56,15 @@ public final class ClientColorRegistration {
         tints.put("mana_bean", layer(0, AspectTint.INSTANCE));
         tints.put("research_notes", layer(1, ResearchNoteTint.INSTANCE));
         tints.put("discovery", layer(1, ResearchNoteTint.INSTANCE));
+        for (String path : List.of("robe_chestplate", "robe_leggings", "robe_boots", "void_robe_helmet", "void_robe_chestplate", "void_robe_leggings")) {
+            tints.put(path, (stack, tintIndex) -> tintIndex == 0 ? net.minecraft.world.item.component.DyedItemColor.getOrDefault(stack, 6961280) | 0xFF000000 : WHITE);
+        }
+        tints.put("apprentice_ring_air", constant(0xFFFF7E));
+        tints.put("apprentice_ring_earth", constant(0x56C000));
+        tints.put("apprentice_ring_fire", constant(0xFF5A01));
+        tints.put("apprentice_ring_water", constant(0x3CD4FC));
+        tints.put("apprentice_ring_order", constant(0xD5D4EC));
+        tints.put("apprentice_ring_entropy", constant(0x404040));
         return tints;
     }
 

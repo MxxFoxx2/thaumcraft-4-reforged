@@ -47,6 +47,12 @@ OUTSIDE_CLIENT = [
     "net.neoforged.neoforge.client.*",
 ]
 OUTSIDE_CLIENT_EXCEPT_FILES = ("Thaumcraft.java",)
+SERVER_SAFE_IMPORTS = {
+    "platform/CamouflagedBlockEntity.java": {
+        "net.neoforged.neoforge.client.model.data.ModelData",
+        "net.neoforged.neoforge.client.model.data.ModelProperty",
+    },
+}
 
 IMPORT_PATTERN = re.compile(r"^\s*import\s+(?:static\s+)?([\w.]+(?:\.\*)?)\s*;")
 
@@ -71,7 +77,7 @@ def violated_rule(relative, imported):
         return "outside client/platform/"
     if relative.startswith(GEOM) and not matches_any(imported, GEOM_ALLOWED):
         return "client/geom/ allows only java.*, org.joml.*, thaumcraft.client.geom.*"
-    if not in_client and relative not in OUTSIDE_CLIENT_EXCEPT_FILES and matches_any(imported, OUTSIDE_CLIENT):
+    if not in_client and relative not in OUTSIDE_CLIENT_EXCEPT_FILES and imported not in SERVER_SAFE_IMPORTS.get(relative, set()) and matches_any(imported, OUTSIDE_CLIENT):
         return "outside client/"
     return None
 

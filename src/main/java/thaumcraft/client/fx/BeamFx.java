@@ -114,6 +114,38 @@ public class BeamFx extends WorldFx {
         updated = true;
     }
 
+    protected void follow(double sx, double sy, double sz) {
+        moveX = sx;
+        moveY = sy;
+        moveZ = sz;
+        updated = true;
+    }
+
+    public void retarget(double tx, double ty, double tz) {
+        targetX = tx;
+        targetY = ty;
+        targetZ = tz;
+        while (maxAge - age < 4) {
+            maxAge++;
+        }
+    }
+
+    public double targetX() {
+        return targetX;
+    }
+
+    public double targetY() {
+        return targetY;
+    }
+
+    public double targetZ() {
+        return targetZ;
+    }
+
+    public float endMod() {
+        return endMod;
+    }
+
     public void setType(int type) {
         this.type = Math.clamp(type, 0, TEXTURES.length - 1);
     }

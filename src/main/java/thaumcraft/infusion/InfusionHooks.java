@@ -2,17 +2,18 @@ package thaumcraft.infusion;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.item.gear.RunicArmor;
 
 public final class InfusionHooks {
     private InfusionHooks() {
     }
 
     public static boolean isRunicArmor(ItemStack stack) {
-        return false;
+        return stack.getItem() instanceof RunicArmor;
     }
 
     public static int baseRunicCharge(ItemStack stack) {
-        return 0;
+        return stack.getItem() instanceof RunicArmor armor ? armor.getRunicCharge(stack) : 0;
     }
 
     public static int getHardening(ItemStack stack) {

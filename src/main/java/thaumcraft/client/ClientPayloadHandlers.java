@@ -13,7 +13,14 @@ import thaumcraft.network.AspectDiscoveryPayload;
 import thaumcraft.network.AspectPoolPayload;
 import thaumcraft.network.AspectTagsPayload;
 import thaumcraft.network.BeamPulsePayload;
+import thaumcraft.network.BlockBubbleFxPayload;
 import thaumcraft.network.BlockSparkleFxPayload;
+import thaumcraft.network.RunicChargePayload;
+import thaumcraft.network.ShieldFxPayload;
+import thaumcraft.network.ShockZapPayload;
+import thaumcraft.client.fx.ShieldRunesFx;
+import thaumcraft.client.hud.GearHud;
+import thaumcraft.client.platform.WorldFxRenderer;
 import thaumcraft.network.EssentiaSourceFxPayload;
 import thaumcraft.network.InfusionSourceFxPayload;
 import thaumcraft.network.NodeZapPayload;
@@ -38,6 +45,51 @@ public final class ClientPayloadHandlers {
         ClientNetwork.handle(EssentiaSourceFxPayload.TYPE, ClientPayloadHandlers::essentiaSource);
         ClientNetwork.handle(InfusionSourceFxPayload.TYPE, ClientPayloadHandlers::infusionSource);
         ClientNetwork.handle(BlockSparkleFxPayload.TYPE, ClientPayloadHandlers::blockSparkle);
+        ClientNetwork.handle(BlockBubbleFxPayload.TYPE, ClientPayloadHandlers::blockBubble);
+        ClientNetwork.handle(ShockZapPayload.TYPE, ClientPayloadHandlers::shockZap);
+        ClientNetwork.handle(RunicChargePayload.TYPE, (payload, player) -> GearHud.setRunic(payload.charge(), payload.max()));
+        ClientNetwork.handle(ShieldFxPayload.TYPE, ClientPayloadHandlers::shield);
+    }
+
+    private static void blockBubble(BlockBubbleFxPayload payload, Player player) {
+        Fx.get().blockBubble(player.level(), payload.pos(), payload.color());
+    }
+
+    private static void shockZap(ShockZapPayload payload, Player player) {
+        Entity source = player.level().getEntity(payload.sourceId());
+        Entity target = player.level().getEntity(payload.targetId());
+        if (source != null && target != null) {
+            Fx.get().shockZap(player.level(), source, target);
+        }
+    }
+
+    private static void shield(ShieldFxPayload payload, Player player) {
+        Level level = player.level();
+        Entity entity = level.getEntity(payload.entityId());
+        if (entity == null) {
+            return;
+        }
+        if (payload.target() >= 0) {
+            Entity target = level.getEntity(payload.target());
+            float pitch = 90.0F;
+            float yaw = 0.0F;
+            if (target != null) {
+                double dx = entity.getX() - target.getX();
+                double dy = (entity.getBoundingBox().minY + entity.getBoundingBox().maxY) / 2.0 - (target.getBoundingBox().minY + target.getBoundingBox().maxY) / 2.0;
+                double dz = entity.getZ() - target.getZ();
+                double horizontal = Math.sqrt(dx * dx + dz * dz);
+                yaw = (float) (Math.atan2(dz, dx) * 180.0 / Math.PI) - 90.0F;
+                pitch = (float) (-(Math.atan2(dy, horizontal) * 180.0 / Math.PI));
+            }
+            WorldFxRenderer.add(new ShieldRunesFx(level.getRandom(), entity, 8, yaw, pitch));
+        } else if (payload.target() == -1) {
+            WorldFxRenderer.add(new ShieldRunesFx(level.getRandom(), entity, 8, 0.0F, 90.0F));
+            WorldFxRenderer.add(new ShieldRunesFx(level.getRandom(), entity, 8, 0.0F, 270.0F));
+        } else if (payload.target() == -2) {
+            WorldFxRenderer.add(new ShieldRunesFx(level.getRandom(), entity, 8, 0.0F, 270.0F));
+        } else if (payload.target() == -3) {
+            WorldFxRenderer.add(new ShieldRunesFx(level.getRandom(), entity, 8, 0.0F, 90.0F));
+        }
     }
 
     private static void beamPulse(BeamPulsePayload payload, Player player) {

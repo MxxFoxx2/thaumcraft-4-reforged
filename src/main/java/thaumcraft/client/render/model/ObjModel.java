@@ -11,7 +11,10 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import thaumcraft.Thaumcraft;
+import thaumcraft.client.geom.QuadSink;
 
 public final class ObjModel {
     private static final Map<ResourceLocation, ObjModel> CACHE = new HashMap<>();
@@ -90,6 +93,18 @@ public final class ObjModel {
                     .setOverlay(OverlayTexture.NO_OVERLAY)
                     .setLight(light)
                     .setNormal(pose, vertex[5], vertex[6], vertex[7]);
+            }
+        }
+    }
+
+    public void renderAll(Matrix4f transform, QuadSink sink, int argb, int light) {
+        Vector3f position = new Vector3f();
+        for (List<float[][]> faces : groups.values()) {
+            for (float[][] face : faces) {
+                for (float[] vertex : face) {
+                    transform.transformPosition(vertex[0], vertex[1], vertex[2], position);
+                    sink.vertex(position.x, position.y, position.z, vertex[3], vertex[4], argb, light);
+                }
             }
         }
     }

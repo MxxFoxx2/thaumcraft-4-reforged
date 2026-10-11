@@ -41,6 +41,66 @@ public final class WandGeometry {
         box(sink, matrix, 20.0F, 2, 2, 2, 0, 0, light, argb);
     }
 
+    public static void focus(QuadSink sink, boolean staff, int argb, int light) {
+        Matrix4f matrix = new Matrix4f();
+        if (staff) {
+            matrix.translate(0.0F, 0.2F, 0.0F).translate(0.0F, -0.0475F, 0.0F).scale(0.525F, 0.5525F, 0.525F);
+        } else {
+            matrix.scale(0.5F, 0.5F, 0.5F);
+        }
+        box(sink, matrix, -5.0F, 6, 6, 6, 0, 0, light, argb);
+    }
+
+    public static void focusDepth(QuadSink sink, boolean staff, float u0, float v0, float u1, float v1, int light) {
+        Matrix4f matrix = new Matrix4f();
+        if (staff) {
+            matrix.translate(0.0F, 0.2F, 0.0F).translate(0.0F, -0.15F, 0.0F).scale(0.165F, 0.1765F, 0.165F);
+        } else {
+            matrix.translate(0.0F, -0.09F, 0.0F).scale(0.16F, 0.16F, 0.16F);
+        }
+        Vector3f point = new Vector3f();
+        for (int face = 0; face < 6; face++) {
+            int axis = face / 2;
+            float sign = face % 2 == 0 ? -0.5F : 0.5F;
+            Vector3f normal = new Vector3f(axis == 0 ? sign : 0.0F, axis == 1 ? sign : 0.0F, axis == 2 ? sign : 0.0F);
+            Vector3f u = axis == 1 ? new Vector3f(0.5F, 0.0F, 0.0F) : new Vector3f(0.0F, 0.5F, 0.0F);
+            Vector3f v = new Vector3f(normal).normalize().cross(u);
+            float[][] corners = {{-1.0F, -1.0F, u0, v1}, {1.0F, -1.0F, u1, v1}, {1.0F, 1.0F, u1, v0}, {-1.0F, 1.0F, u0, v0}};
+            for (float[] corner : corners) {
+                matrix.transformPosition(
+                    normal.x + u.x * corner[0] + v.x * corner[1],
+                    normal.y + u.y * corner[0] + v.y * corner[1],
+                    normal.z + u.z * corner[0] + v.z * corner[1],
+                    point
+                );
+                sink.vertex(point.x, point.y, point.z, corner[2], corner[3], 0xFFFFFFFF, light);
+            }
+        }
+    }
+
+    public static void focusOrnament(QuadSink sink, boolean staff, float u0, float v0, float u1, float v1, int light) {
+        Matrix4f base = new Matrix4f();
+        if (staff) {
+            base.translate(0.0F, 0.2F, 0.0F);
+        }
+        base.rotateX((float) Math.PI);
+        ornament(sink, new Matrix4f(base).translate(-0.25F, -0.1F, 0.0275F).scale(0.5F, 0.5F, 0.5F), u0, v0, u1, v1, light);
+        ornament(sink, new Matrix4f(base).rotateY((float) (Math.PI / 2.0)).translate(-0.25F, -0.1F, 0.0275F).scale(0.5F, 0.5F, 0.5F), u0, v0, u1, v1, light);
+    }
+
+    private static void ornament(QuadSink sink, Matrix4f matrix, float u0, float v0, float u1, float v1, int light) {
+        float depth = -0.1F;
+        Vector3f point = new Vector3f();
+        float[][] front = {{0.0F, 0.0F, 0.0F, u1, v1}, {1.0F, 0.0F, 0.0F, u0, v1}, {1.0F, 1.0F, 0.0F, u0, v0}, {0.0F, 1.0F, 0.0F, u1, v0}};
+        float[][] back = {{0.0F, 1.0F, depth, u1, v0}, {1.0F, 1.0F, depth, u0, v0}, {1.0F, 0.0F, depth, u0, v1}, {0.0F, 0.0F, depth, u1, v1}};
+        for (float[][] face : new float[][][] {front, back}) {
+            for (float[] corner : face) {
+                matrix.transformPosition(corner[0], corner[1], corner[2], point);
+                sink.vertex(point.x, point.y, point.z, corner[3], corner[4], 0xFFFFFFFF, light);
+            }
+        }
+    }
+
     public static void runes(QuadSink sink, boolean staff, boolean sceptre, boolean primalRunes, float ticks, int light) {
         Matrix4f matrix = new Matrix4f();
         if (staff) {

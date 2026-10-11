@@ -16,6 +16,8 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.hud.WandHud;
+import thaumcraft.client.hud.GearHud;
+import thaumcraft.client.wand.FocusRadial;
 
 @EventBusSubscriber(modid = Thaumcraft.MODID, value = Dist.CLIENT)
 public final class ItemRenderers {
@@ -71,7 +73,14 @@ public final class ItemRenderers {
     }
 
     @SubscribeEvent
+    static void wrapWandModels(ModelEvent.ModifyBakingResult event) {
+        event.getModels().replaceAll((id, model) -> id.id().equals(Thaumcraft.id("wand")) ? new WandItemModel(model) : model);
+    }
+
+    @SubscribeEvent
     static void registerGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, Thaumcraft.id("wand_hud"), WandHud::render);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, Thaumcraft.id("gear_hud"), GearHud::render);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, Thaumcraft.id("focus_radial"), FocusRadial::render);
     }
 }

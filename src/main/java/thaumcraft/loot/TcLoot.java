@@ -14,7 +14,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
+import thaumcraft.aspect.Aspect;
+import thaumcraft.registry.ModItems;
+import thaumcraft.wand.VisStorage;
 
 public final class TcLoot {
     private interface Entry {
@@ -35,6 +39,26 @@ public final class TcLoot {
         public ItemStack stack() {
             return PotionContents.createItemStack(item, potion);
         }
+    }
+
+    private record VisAmuletEntry(int weight) implements Entry {
+        @Override
+        public ItemStack stack() {
+            return lootAmulet().copy();
+        }
+    }
+
+    private static @Nullable ItemStack amulet;
+
+    private static ItemStack lootAmulet() {
+        if (amulet == null) {
+            RandomSource random = RandomSource.create();
+            amulet = new ItemStack(ModItems.VIS_AMULET.get());
+            for (Aspect aspect : Aspect.getPrimalAspects()) {
+                VisStorage.addVis(amulet, aspect, random.nextInt(5), true);
+            }
+        }
+        return amulet;
     }
 
     private static final String[] APPRENTICE_RINGS = {"air", "earth", "fire", "water", "order", "entropy"};
@@ -164,6 +188,8 @@ public final class TcLoot {
             add(result, "apprentice_ring_" + element, 1, 5, 1);
             add(result, "apprentice_ring_" + element, 1, 7, 2);
         }
+        result.get(1).add(new VisAmuletEntry(6));
+        result.get(2).add(new VisAmuletEntry(6));
         add(result, "protection_ring", 1, 5, 1, 2);
         add(result, "experience_bottle", 1, 5, 0);
         add(result, "experience_bottle", 1, 10, 1);

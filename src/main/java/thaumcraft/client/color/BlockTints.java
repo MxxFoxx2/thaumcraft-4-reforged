@@ -38,6 +38,15 @@ public final class BlockTints {
             ModBlocks.GREATWOOD_LEAVES.get()
         );
         event.register(constant(0x8899AA), ModBlocks.SILVERWOOD_LEAVES.get());
+        event.register((state, level, pos, tintIndex) -> {
+            if (level != null && pos != null && level.getBlockEntity(pos) instanceof thaumcraft.blockentity.WardedBlockEntity warded) {
+                var disguise = warded.getDisguise();
+                if (disguise != null && !(disguise.getBlock() instanceof thaumcraft.block.WardedBlock)) {
+                    return net.minecraft.client.Minecraft.getInstance().getBlockColors().getColor(disguise, level, pos, tintIndex);
+                }
+            }
+            return 0xFFFFFFFF;
+        }, ModBlocks.WARDED_BLOCK.get());
         for (int index = 0; index < ModBlocks.CANDLE_COLORS.length; index++) {
             Block candle = ModBlocks.CANDLES.get(ModBlocks.CANDLE_COLORS[index]).get();
             event.register(constant(ModBlocks.CANDLE_TINTS[index]), candle);

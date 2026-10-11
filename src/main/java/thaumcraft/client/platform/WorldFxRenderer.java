@@ -58,7 +58,7 @@ public final class WorldFxRenderer {
         float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
         Set<RenderType> used = new LinkedHashSet<>();
         for (WorldFx fx : List.copyOf(EFFECTS)) {
-            RenderType renderType = TcRenderTypes.byBlend(fx.texture(), fx.blendMode());
+            RenderType renderType = TcRenderTypes.byBlend(fx.texture(), fx.blendMode(), fx.depthTest());
             used.add(renderType);
             fx.render(new VertexQuadSink(pose, bufferSource.getBuffer(renderType)), partialTick, camera, yaw, pitch);
         }

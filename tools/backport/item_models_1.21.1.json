@@ -3,9 +3,10 @@
   "sections": {
     "builtin_entity": "item id -> special renderer. The item model json is parent minecraft:builtin/entity (with the display transforms of a block item), so the item is drawn by a BlockEntityWithoutLevelRenderer: dispatch on the item id, create the renderer named in renderer (26.3 special model type id) with params. base_model is the 26.3 base model the special renderer was layered on (its textures are copied into the builtin/entity json for the particle). Entries with views_by_display_context are items whose renderer takes params.view: in renderByItem use views_by_display_context[ItemDisplayContext name] and fall back to fallback_view when the context is not listed (ground, fixed, head, gui of other kinds).",
     "composite": "item id -> list of parts drawn together. The item json is builtin/entity. The BlockEntityWithoutLevelRenderer must draw parts in order: item_model/block_model is a baked json model to load as an additional model (ModelEvent.RegisterAdditional) and render with the item transform, builtin_entity is a special renderer as in builtin_entity.",
-    "tints": "item id -> layer index -> colour source. constant is a fixed RGB for ItemColor of that layer (tintindex = layer index; block items use the tintindex of the block model elements). source is a tint source id: thaumcraft:aspect = colour of the first aspect of the stack component thaumcraft:aspects (white when empty); thaumcraft:research_note = colour of the research note component thaumcraft:research_note (0x999999 when absent). Register one ItemColor per item with these layers.",
+    "tints": "item id -> layer index -> colour source. constant is a fixed RGB for ItemColor of that layer (tintindex = layer index; block items use the tintindex of the block model elements). source is a tint source id: thaumcraft:aspect = colour of the first aspect of the stack component thaumcraft:aspects (white when empty); thaumcraft:research_note = colour of the research note component thaumcraft:research_note (0x999999 when absent). minecraft:dye = DyedItemColor of the stack with the recorded default color. Register one ItemColor per item with these layers.",
     "armor_layers": "armor id -> ArmorMaterial.Layer location and the generated texture.",
-    "predicates": "item id -> property overrides, empty for TC4 (every select/condition item of 26.3 is a builtin_entity view select)."
+    "predicates": "item id -> properties required by model overrides; vanilla bow pull and pulling have the same behavior as minecraft:bow.",
+    "model_loaders": "block id -> NeoForge geometry loader and fallback baked model."
   },
   "nbt_keys": {
     "thaumcraft:wand_parts": "wand_parts",
@@ -14,7 +15,17 @@
     "thaumcraft:research_note": "research_note",
     "thaumcraft:aspects": "aspects"
   },
-  "predicates": {},
+  "predicates": {
+    "bone_bow": {
+      "minecraft:pull": {
+        "kind": "bow_pull",
+        "scale": 0.05
+      },
+      "minecraft:pulling": {
+        "kind": "using_item"
+      }
+    }
+  },
   "tints": {
     "air_infused_stone": {
       "0": {
@@ -204,6 +215,72 @@
       "1": {
         "source": "thaumcraft:research_note"
       }
+    },
+    "robe_chestplate": {
+      "0": {
+        "source": "minecraft:dye",
+        "default": 6961280
+      }
+    },
+    "robe_leggings": {
+      "0": {
+        "source": "minecraft:dye",
+        "default": 6961280
+      }
+    },
+    "robe_boots": {
+      "0": {
+        "source": "minecraft:dye",
+        "default": 6961280
+      }
+    },
+    "void_robe_helmet": {
+      "0": {
+        "source": "minecraft:dye",
+        "default": 6961280
+      }
+    },
+    "void_robe_chestplate": {
+      "0": {
+        "source": "minecraft:dye",
+        "default": 6961280
+      }
+    },
+    "void_robe_leggings": {
+      "0": {
+        "source": "minecraft:dye",
+        "default": 6961280
+      }
+    },
+    "apprentice_ring_air": {
+      "0": {
+        "constant": "#FFFF7E"
+      }
+    },
+    "apprentice_ring_earth": {
+      "0": {
+        "constant": "#56C000"
+      }
+    },
+    "apprentice_ring_fire": {
+      "0": {
+        "constant": "#FF5A01"
+      }
+    },
+    "apprentice_ring_water": {
+      "0": {
+        "constant": "#3CD4FC"
+      }
+    },
+    "apprentice_ring_order": {
+      "0": {
+        "constant": "#D5D4EC"
+      }
+    },
+    "apprentice_ring_entropy": {
+      "0": {
+        "constant": "#404040"
+      }
     }
   },
   "builtin_entity": {
@@ -342,6 +419,205 @@
       "layer_id": "thaumcraft:goggles",
       "texture": "thaumcraft:textures/models/armor/goggles_layer_1.png",
       "meaning": "ArmorMaterial.Layer(ResourceLocation thaumcraft:goggles) resolves to textures/models/armor/goggles_layer_1.png; the png is generated into the resources from the 26.3 humanoid equipment texture"
+    },
+    "thaumium": {
+      "layer_id": "thaumcraft:thaumium",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/thaumium_layer_1.png",
+          "dyeable": false
+        },
+        {
+          "layer": 2,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/thaumium_layer_2.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "void": {
+      "layer_id": "thaumcraft:void",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/void_layer_1.png",
+          "dyeable": false
+        },
+        {
+          "layer": 2,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/void_layer_2.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "robe": {
+      "layer_id": "thaumcraft:robe",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/robe_layer_1.png",
+          "dyeable": true
+        },
+        {
+          "layer": 1,
+          "suffix": "_overlay",
+          "texture": "thaumcraft:textures/models/armor/robe_layer_1_overlay.png",
+          "dyeable": false
+        },
+        {
+          "layer": 2,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/robe_layer_2.png",
+          "dyeable": true
+        },
+        {
+          "layer": 2,
+          "suffix": "_overlay",
+          "texture": "thaumcraft:textures/models/armor/robe_layer_2_overlay.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "void_robe": {
+      "layer_id": "thaumcraft:void_robe",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/void_robe_layer_1.png",
+          "dyeable": true
+        },
+        {
+          "layer": 1,
+          "suffix": "_overlay",
+          "texture": "thaumcraft:textures/models/armor/void_robe_layer_1_overlay.png",
+          "dyeable": false
+        },
+        {
+          "layer": 2,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/void_robe_layer_2.png",
+          "dyeable": true
+        },
+        {
+          "layer": 2,
+          "suffix": "_overlay",
+          "texture": "thaumcraft:textures/models/armor/void_robe_layer_2_overlay.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "boots_traveller": {
+      "layer_id": "thaumcraft:boots_traveller",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/boots_traveller_layer_1.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "hover_harness": {
+      "layer_id": "thaumcraft:hover_harness",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/hover_harness_layer_1.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "fortress": {
+      "layer_id": "thaumcraft:fortress",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/fortress_layer_1.png",
+          "dyeable": false
+        },
+        {
+          "layer": 2,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/fortress_layer_2.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "cultist_robe": {
+      "layer_id": "thaumcraft:cultist_robe",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/cultist_robe_layer_1.png",
+          "dyeable": false
+        },
+        {
+          "layer": 2,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/cultist_robe_layer_2.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "cultist_plate": {
+      "layer_id": "thaumcraft:cultist_plate",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/cultist_plate_layer_1.png",
+          "dyeable": false
+        },
+        {
+          "layer": 2,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/cultist_plate_layer_2.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "cultist_boots": {
+      "layer_id": "thaumcraft:cultist_boots",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/cultist_boots_layer_1.png",
+          "dyeable": false
+        }
+      ]
+    },
+    "cultist_leader": {
+      "layer_id": "thaumcraft:cultist_leader",
+      "layers": [
+        {
+          "layer": 1,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/cultist_leader_layer_1.png",
+          "dyeable": false
+        },
+        {
+          "layer": 2,
+          "suffix": "",
+          "texture": "thaumcraft:textures/models/armor/cultist_leader_layer_2.png",
+          "dyeable": false
+        }
+      ]
+    }
+  },
+  "model_loaders": {
+    "warded_block": {
+      "loader": "thaumcraft:warded",
+      "fallback": "minecraft:block/stone"
     }
   },
   "notes": {

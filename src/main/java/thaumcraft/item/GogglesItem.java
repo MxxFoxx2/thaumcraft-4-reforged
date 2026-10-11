@@ -12,13 +12,16 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.common.Tags;
 import thaumcraft.aspect.Aspect;
+import thaumcraft.item.gear.Goggles;
+import thaumcraft.item.gear.Repairable;
+import thaumcraft.item.gear.RunicArmor;
 import thaumcraft.node.Revealer;
 import thaumcraft.platform.ArmorSlot;
 import thaumcraft.platform.Registration;
 import thaumcraft.platform.TcArmorMaterial;
 import thaumcraft.wand.VisDiscountGear;
 
-public class GogglesItem extends ArmorItem implements Revealer, VisDiscountGear {
+public class GogglesItem extends ArmorItem implements Revealer, VisDiscountGear, Goggles, Repairable, RunicArmor {
     public static final TcArmorMaterial MATERIAL = new TcArmorMaterial(
         25, 1, 3, 2, 1, 25, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F, Tags.Items.INGOTS_GOLD, "goggles"
     );
@@ -45,5 +48,15 @@ public class GogglesItem extends ArmorItem implements Revealer, VisDiscountGear 
     @Override
     public boolean showNodes(ItemStack stack, LivingEntity entity) {
         return true;
+    }
+
+    @Override
+    public boolean showIngamePopups(ItemStack stack, LivingEntity entity) {
+        return true;
+    }
+
+    @Override
+    public int getRunicCharge(ItemStack stack) {
+        return 0;
     }
 }

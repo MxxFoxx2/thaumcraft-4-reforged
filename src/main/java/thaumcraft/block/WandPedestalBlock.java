@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import thaumcraft.blockentity.WandPedestalBlockEntity;
 import thaumcraft.registry.ModBlockEntities;
 import thaumcraft.registry.ModBlocks;
+import thaumcraft.wand.VisStorage;
 import thaumcraft.wand.Wands;
 
 public class WandPedestalBlock extends Block implements EntityBlock {
@@ -111,7 +112,7 @@ public class WandPedestalBlock extends Block implements EntityBlock {
             }
             return InteractionResult.SUCCESS;
         }
-        if (Wands.isWand(held)) {
+        if (VisStorage.isStorage(held)) {
             if (!level.isClientSide()) {
                 pedestal.setStack(held.copyWithCount(1));
                 held.shrink(1);

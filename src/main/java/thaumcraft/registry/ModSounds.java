@@ -43,6 +43,12 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> FIRELOOP = register("fireloop");
     public static final DeferredHolder<SoundEvent, SoundEvent> ICE = register("ice");
     public static final DeferredHolder<SoundEvent, SoundEvent> JACOBS = register("jacobs");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHOCK = register("shock");
+    public static final DeferredHolder<SoundEvent, SoundEvent> RUMBLE = register("rumble");
+    public static final DeferredHolder<SoundEvent, SoundEvent> RUNIC_SHIELD_EFFECT = register("runic_shield_effect");
+    public static final DeferredHolder<SoundEvent, SoundEvent> RUNIC_SHIELD_CHARGE = register("runic_shield_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WIND = register("wind");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SWING = register("swing");
 
     private ModSounds() {
     }

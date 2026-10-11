@@ -1,15 +1,19 @@
 package thaumcraft.client.fx;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.client.ParticleStatus;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import thaumcraft.alchemy.CrucibleBlockEntity;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.client.geom.LightningBolt;
@@ -18,6 +22,9 @@ import thaumcraft.client.platform.WorldFxRenderer;
 import thaumcraft.fx.FxProxy;
 
 public final class ClientFx implements FxProxy {
+    private static final int EXCAVATION_COLOR = 65382;
+    private final Map<Integer, WandBeamFx> beams = new HashMap<>();
+
     @Override
     public void beamPulse(Level level, Entity source, Entity target, int color) {
         BeamFx beam = new BeamFx(
@@ -213,5 +220,196 @@ public final class ClientFx implements FxProxy {
     @Override
     public void blockRunes(Level level, double x, double y, double z, float red, float green, float blue, int duration, float gravity) {
         WorldFxRenderer.add(new BlockRunesFx(level.getRandom(), x + 0.5, y + 0.5, z + 0.5, red, green, blue, duration, gravity));
+    }
+
+    private static float jitter(RandomSource random, float amount) {
+        return (random.nextFloat() - random.nextFloat()) * amount;
+    }
+
+    private static void wisp(Level level, double x, double y, double z, float size, int type, boolean shrink, float gravity) {
+        WispFx fx = new WispFx(level.getRandom(), x, y, z, size, type, null);
+        fx.shrink(shrink);
+        fx.gravity(gravity);
+        WorldFxRenderer.add(fx);
+    }
+
+    private static void wispTo(Level level, double x, double y, double z, double targetX, double targetY, double targetZ, float size, int type, boolean shrink, float gravity) {
+        WispFx fx = new WispFx(level.getRandom(), x, y, z, size, type, null);
+        fx.moveTo(targetX, targetY, targetZ);
+        fx.shrink(shrink);
+        fx.gravity(gravity);
+        WorldFxRenderer.add(fx);
+    }
+
+    private static void bolt(Level level, double x, double y, double z, double targetX, double targetY, double targetZ) {
+        BoltRenderer.add(new LightningBolt(x, y, z, targetX, targetY, targetZ, level.getRandom().nextLong(), 6, 0.5F, 8).defaultFractal().setType(2).setWidth(0.125F));
+    }
+
+    @Override
+    public void sparkle(Level level, float x, float y, float z, float size, int color, float gravity) {
+        RandomSource random = level.getRandom();
+        if (random.nextInt(6) < particleCount(2)) {
+            SparkleFx fx = new SparkleFx(random, x, y, z, size, color, 6);
+            fx.gravity(gravity);
+            WorldFxRenderer.add(fx);
+        }
+    }
+
+    @Override
+    public void shockBolt(Level level, Entity shooter, double x, double y, double z) {
+        boolean local = shooter == Minecraft.getInstance().player;
+        float yaw = shooter.getYRot() / 180.0F * (float) Math.PI;
+        double px = shooter.getX() - Mth.cos(yaw) * 0.06F;
+        double py = local ? shooter.getEyeY() - 0.06F : shooter.getY() + shooter.getBbHeight() / 2.0F + 0.25;
+        double pz = shooter.getZ() - Mth.sin(yaw) * 0.06F;
+        Vec3 look = shooter.getViewVector(1.0F);
+        bolt(level, px + look.x * 0.3, py + look.y * 0.3, pz + look.z * 0.3, x, y, z);
+    }
+
+    @Override
+    public void shockZap(Level level, Entity source, Entity target) {
+        bolt(
+            level,
+            source.getX(),
+            source.getY() + source.getBbHeight() / 2.0F,
+            source.getZ(),
+            target.getX(),
+            target.getY() + target.getBbHeight() / 2.0F,
+            target.getZ()
+        );
+    }
+
+    @Override
+    public void shockBurst(Level level, double x, double y, double z, float size) {
+        WorldFxRenderer.add(new BurstFx(level.getRandom(), x, y, z, size));
+    }
+
+    @Override
+    public void fireOrbTrail(Level level, double x, double y, double z, float scale) {
+        RandomSource random = level.getRandom();
+        GenericFx fx = new GenericFx(random, x, y, z, 0.0, 0.0, 0.0, false, 151, 9, 1, 7 + random.nextInt(5), 0, scale);
+        fx.color(1.0F, 1.0F, 1.0F);
+        fx.alpha(0.8F);
+        WorldFxRenderer.add(fx);
+    }
+
+    @Override
+    public void primalOrbTrail(Level level, Entity orb) {
+        RandomSource random = level.getRandom();
+        wisp(level, orb.getX() + jitter(random, 0.2F), orb.getY() + jitter(random, 0.2F), orb.getZ() + jitter(random, 0.2F), 0.1F, random.nextInt(6), true, 0.0F);
+    }
+
+    @Override
+    public void primalOrbBurst(Level level, double x, double y, double z) {
+        RandomSource random = level.getRandom();
+        for (int a = 0; a < 6; a++) {
+            for (int b = 0; b < 6; b++) {
+                float fx = jitter(random, 0.5F);
+                float fy = jitter(random, 0.5F);
+                float fz = jitter(random, 0.5F);
+                wispTo(level, x + fx, y + fy, z + fz, x + fx * 10.0F, y + fy * 10.0F, z + fz * 10.0F, 0.4F, b, true, 0.05F);
+            }
+        }
+    }
+
+    @Override
+    public void pechBlastTrail(Level level, Entity blast) {
+        RandomSource random = level.getRandom();
+        for (int a = 0; a < 3; a++) {
+            wisp(level, blast.getX() + jitter(random, 0.2F), blast.getY() + jitter(random, 0.2F), blast.getZ() + jitter(random, 0.2F), 0.3F, 3, true, 0.02F);
+            wisp(
+                level,
+                (blast.getX() + blast.xo) / 2.0 + jitter(random, 0.2F),
+                (blast.getY() + blast.yo) / 2.0 + jitter(random, 0.2F),
+                (blast.getZ() + blast.zo) / 2.0 + jitter(random, 0.2F),
+                0.3F,
+                2,
+                true,
+                0.02F
+            );
+            sparkle(level, (float) blast.getX() + jitter(random, 0.1F), (float) blast.getY() + jitter(random, 0.1F), (float) blast.getZ() + jitter(random, 0.1F), 1.5F, 5, 0.0F);
+        }
+    }
+
+    @Override
+    public void pechBlastBurst(Level level, double x, double y, double z) {
+        RandomSource random = level.getRandom();
+        int[] types = {3, 2, 0};
+        for (int a = 0; a < 9; a++) {
+            for (int type : types) {
+                float fx = jitter(random, 0.3F);
+                float fy = jitter(random, 0.3F);
+                float fz = jitter(random, 0.3F);
+                wispTo(level, x + fx, y + fy, z + fz, x + fx * 8.0F, y + fy * 8.0F, z + fz * 8.0F, 0.3F, type, true, 0.02F);
+            }
+        }
+    }
+
+    @Override
+    public void smokeSpiral(Level level, double x, double y, double z, float radius, int start, int minY, int color) {
+        WorldFxRenderer.add(new SmokeSpiralFx(level.getRandom(), x, y, z, radius, start, minY, color));
+    }
+
+    @Override
+    public void oreScan(Level level, BlockPos center, int range, long until) {
+        OreScanFx.start(level, center, range, until);
+    }
+
+    @Override
+    public void blockBubble(Level level, BlockPos pos, int color) {
+        RandomSource random = level.getRandom();
+        float red = (color >> 16 & 255) / 255.0F;
+        float green = (color >> 8 & 255) / 255.0F;
+        float blue = (color & 255) / 255.0F;
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+        for (int a = 0; a < particleCount(1); a++) {
+            crucibleBubble(level, x, y + random.nextFloat(), z + random.nextFloat(), red, green, blue);
+            crucibleBubble(level, x + 1, y + random.nextFloat(), z + random.nextFloat(), red, green, blue);
+            crucibleBubble(level, x + random.nextFloat(), y + random.nextFloat(), z, red, green, blue);
+            crucibleBubble(level, x + random.nextFloat(), y + random.nextFloat(), z + 1, red, green, blue);
+        }
+    }
+
+    @Override
+    public void excavationBeam(Level level, Entity source, double x, double y, double z, int impact) {
+        WandBeamFx beam = beams.get(source.getId());
+        if (beam != null && beam.isFor(source)) {
+            beam.retarget(x, y, z);
+        } else {
+            beam = new WandBeamFx(
+                level,
+                source,
+                x,
+                y,
+                z,
+                (EXCAVATION_COLOR >> 16 & 255) / 255.0F,
+                (EXCAVATION_COLOR >> 8 & 255) / 255.0F,
+                (EXCAVATION_COLOR & 255) / 255.0F,
+                8
+            );
+            beam.setType(2);
+            beam.setReverse(false);
+            WorldFxRenderer.add(beam);
+            beams.put(source.getId(), beam);
+        }
+        beam.setEndMod(impact > 0 ? 2.0F : 0.0F);
+        beam.setImpact(impact);
+        beams.values().removeIf(WandBeamFx::isDead);
+    }
+
+    @Override
+    public void excavationCrack(Level level, Entity source, BlockPos pos, BlockState state, int progress) {
+        level.destroyBlockProgress(source.getId(), pos, progress);
+    }
+
+    @Override
+    public void focalManipulatorSparkle(Level level, double x, double y, double z) {
+        RandomSource random = level.getRandom();
+        GenericFx fx = new GenericFx(random, x, y, z, 0.0, 0.0, 0.0, false, 112, 9, 1, 6 + random.nextInt(5), 0, 0.7F + random.nextFloat() * 0.4F);
+        fx.color(0.5F + random.nextFloat() * 0.4F, 1.0F - random.nextFloat() * 0.4F, 1.0F - random.nextFloat() * 0.4F);
+        fx.alpha(0.8F);
+        WorldFxRenderer.add(fx);
     }
 }

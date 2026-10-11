@@ -11,12 +11,14 @@ import thaumcraft.crafting.ConfigRecipes;
 import thaumcraft.essentia.EssentiaKeys;
 import thaumcraft.infusion.InfusionKeys;
 import thaumcraft.item.NodeJarKeys;
+import thaumcraft.item.tool.ToolKeys;
 import thaumcraft.network.ModPayloads;
 import thaumcraft.platform.Platform;
 import thaumcraft.registry.ModBlockEntities;
 import thaumcraft.registry.ModBlocks;
 import thaumcraft.registry.ModCapabilities;
 import thaumcraft.registry.ModCreativeTabs;
+import thaumcraft.registry.ModEntities;
 import thaumcraft.registry.ModFeatures;
 import thaumcraft.registry.ModItems;
 import thaumcraft.registry.ModMenus;
@@ -26,6 +28,9 @@ import thaumcraft.research.ConfigResearch;
 import thaumcraft.research.Knowledge;
 import thaumcraft.research.ResearchNoteKeys;
 import thaumcraft.wand.WandKeys;
+import thaumcraft.wand.focus.FocusKeys;
+import thaumcraft.item.armor.ArmorKeys;
+import thaumcraft.registry.ModRecipes;
 
 @Mod(Thaumcraft.MODID)
 public class Thaumcraft {
@@ -35,20 +40,25 @@ public class Thaumcraft {
     public Thaumcraft(IEventBus modEventBus, ModContainer modContainer) {
         AspectKeys.init();
         WandKeys.init();
+        FocusKeys.init();
+        ToolKeys.init();
         NodeJarKeys.init();
         EssentiaKeys.init();
         InfusionKeys.init();
+        ArmorKeys.init();
         ResearchNoteKeys.init();
         Knowledge.init();
         Platform.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        ModEntities.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
         ModSounds.register(modEventBus);
         ModFeatures.register(modEventBus);
         ModVillagers.register(modEventBus);
         ModMenus.register(modEventBus);
+        ModRecipes.register(modEventBus);
         ModCapabilities.register();
         ModPayloads.register();
         ConfigRecipes.init();

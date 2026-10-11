@@ -9,6 +9,9 @@ import thaumcraft.Thaumcraft;
 import thaumcraft.menu.AlchemicalFurnaceMenu;
 import thaumcraft.menu.ArcaneWorkbenchMenu;
 import thaumcraft.menu.DeconstructionTableMenu;
+import thaumcraft.menu.FocalManipulatorMenu;
+import thaumcraft.menu.FocusPouchMenu;
+import thaumcraft.menu.HoverHarnessMenu;
 import thaumcraft.menu.ResearchTableMenu;
 import thaumcraft.menu.ThaumatoriumMenu;
 import thaumcraft.platform.Menus;
@@ -21,6 +24,10 @@ public final class ModMenus {
     public static final DeferredHolder<MenuType<?>, MenuType<ThaumatoriumMenu>> THAUMATORIUM = MENUS.register("thaumatorium", () -> Menus.withPos(ThaumatoriumMenu::new));
     public static final DeferredHolder<MenuType<?>, MenuType<ArcaneWorkbenchMenu>> ARCANE_WORKBENCH = MENUS.register("arcane_workbench", () -> Menus.withPos(ArcaneWorkbenchMenu::new));
     public static final DeferredHolder<MenuType<?>, MenuType<DeconstructionTableMenu>> DECONSTRUCTION_TABLE = MENUS.register("deconstruction_table", () -> Menus.withPos(DeconstructionTableMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<FocalManipulatorMenu>> FOCAL_MANIPULATOR = MENUS.register("focal_manipulator", () -> Menus.withPos(FocalManipulatorMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<FocusPouchMenu>> FOCUS_POUCH = MENUS.register("focus_pouch", () -> Menus.simple(FocusPouchMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<HoverHarnessMenu>> HOVER_HARNESS = MENUS.register("hover_harness", () -> Menus.simple(HoverHarnessMenu::new));
 
     private ModMenus() {
     }

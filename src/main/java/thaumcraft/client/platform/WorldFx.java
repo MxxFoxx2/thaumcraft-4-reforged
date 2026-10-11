@@ -52,6 +52,10 @@ public abstract class WorldFx {
 
     public abstract int blendMode();
 
+    public boolean depthTest() {
+        return true;
+    }
+
     public void render(QuadSink sink, float partialTick, Vec3 camera) {
     }
 

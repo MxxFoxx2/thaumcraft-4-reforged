@@ -154,6 +154,10 @@
       "required": false
     },
     {
+      "id": "thaumcraft:focal_manipulator",
+      "required": false
+    },
+    {
       "id": "thaumcraft:golem_fetter",
       "required": false
     },

@@ -4,6 +4,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.component.Tool;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
@@ -21,6 +24,9 @@ import net.neoforged.neoforge.common.SimpleTier;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
+import thaumcraft.registry.ModItems;
+import net.minecraft.core.cauldron.CauldronInteraction;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
 public final class Registration {
     private static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, Thaumcraft.MODID);
@@ -31,6 +37,16 @@ public final class Registration {
 
     static void register(IEventBus bus) {
         ARMOR_MATERIALS.register(bus);
+        bus.addListener(Registration::commonSetup);
+    }
+
+    private static void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            for (var item : List.of(ModItems.ROBE_CHESTPLATE, ModItems.ROBE_LEGGINGS, ModItems.ROBE_BOOTS,
+                ModItems.VOID_ROBE_HELMET, ModItems.VOID_ROBE_CHESTPLATE, ModItems.VOID_ROBE_LEGGINGS)) {
+                CauldronInteraction.WATER.map().put(item.get(), CauldronInteraction.DYED_ITEM);
+            }
+        });
     }
 
     public static Tier tier(TcToolMaterial material) {
@@ -66,11 +82,21 @@ public final class Registration {
                 material.enchantability(),
                 material.equipSound(),
                 () -> Ingredient.of(material.repairItems()),
-                List.of(new ArmorMaterial.Layer(Thaumcraft.id(name))),
+                armorLayers(name),
                 material.toughness(),
                 material.knockbackResistance()
             ));
         });
+    }
+
+    private static List<ArmorMaterial.Layer> armorLayers(String name) {
+        if (name.equals("robe") || name.equals("void_robe")) {
+            return List.of(
+                new ArmorMaterial.Layer(Thaumcraft.id(name), "", true),
+                new ArmorMaterial.Layer(Thaumcraft.id(name), "_overlay", false)
+            );
+        }
+        return List.of(new ArmorMaterial.Layer(Thaumcraft.id(name)));
     }
 
     public static Item.Properties sword(Item.Properties properties, TcToolMaterial material, float attackDamage, float attackSpeed) {
@@ -82,6 +108,16 @@ public final class Registration {
 
     public static Item.Properties pickaxe(Item.Properties properties, TcToolMaterial material, float attackDamage, float attackSpeed) {
         return digger(properties, material, attackDamage, attackSpeed, BlockTags.MINEABLE_WITH_PICKAXE);
+    }
+
+    public static Item.Properties pickaxeAndShovel(Item.Properties properties, TcToolMaterial material, float attackDamage, float attackSpeed) {
+        var blocks = BuiltInRegistries.BLOCK;
+        Tool tool = new Tool(List.of(
+            Tool.Rule.deniesDrops(material.incorrectForDrops()),
+            Tool.Rule.minesAndDrops(BlockTags.MINEABLE_WITH_PICKAXE, material.miningSpeed()),
+            Tool.Rule.minesAndDrops(BlockTags.MINEABLE_WITH_SHOVEL, material.miningSpeed())
+        ), 1.0F, 1);
+        return pickaxe(properties, material, attackDamage, attackSpeed).component(DataComponents.TOOL, tool);
     }
 
     public static Item.Properties axe(Item.Properties properties, TcToolMaterial material, float attackDamage, float attackSpeed) {

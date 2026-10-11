@@ -1,9 +1,13 @@
 package thaumcraft.wand;
 
 import net.minecraft.world.item.ItemStack;
+import thaumcraft.compat.ItemStackTemplate;
+import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.registry.ModItems;
+import thaumcraft.wand.focus.FocusItem;
+import thaumcraft.wand.focus.FocusUpgradeType;
 
 public final class Wands {
     private Wands() {
@@ -105,5 +109,48 @@ public final class Wands {
         for (Aspect aspect : Aspect.getPrimalAspects()) {
             storeVis(stack, aspect, max);
         }
+    }
+
+    public static @Nullable FocusItem getFocus(ItemStack stack) {
+        ItemStackTemplate focus = WandKeys.FOCUS.get(stack);
+        return focus != null && focus.item().value() instanceof FocusItem item ? item : null;
+    }
+
+    public static ItemStack getFocusItem(ItemStack stack) {
+        ItemStackTemplate focus = WandKeys.FOCUS.get(stack);
+        return focus == null ? ItemStack.EMPTY : focus.create();
+    }
+
+    public static void setFocus(ItemStack stack, ItemStack focus) {
+        if (focus.isEmpty()) {
+            WandKeys.FOCUS.remove(stack);
+        } else {
+            WandKeys.FOCUS.set(stack, ItemStackTemplate.fromNonEmptyStack(focus.copyWithCount(1)));
+        }
+    }
+
+    public static int getFocusUpgrade(ItemStack stack, FocusUpgradeType type) {
+        FocusItem focus = getFocus(stack);
+        return focus == null ? 0 : focus.getUpgradeLevel(getFocusItem(stack), type);
+    }
+
+    public static int getFocusPotency(ItemStack stack) {
+        return getFocus(stack) == null ? 0 : getFocusUpgrade(stack, FocusUpgradeType.POTENCY) + (hasRunes(stack) ? 1 : 0);
+    }
+
+    public static int getFocusTreasure(ItemStack stack) {
+        return getFocusUpgrade(stack, FocusUpgradeType.TREASURE);
+    }
+
+    public static int getFocusFrugal(ItemStack stack) {
+        return getFocusUpgrade(stack, FocusUpgradeType.FRUGAL);
+    }
+
+    public static int getFocusEnlarge(ItemStack stack) {
+        return getFocusUpgrade(stack, FocusUpgradeType.ENLARGE);
+    }
+
+    public static int getFocusExtend(ItemStack stack) {
+        return getFocusUpgrade(stack, FocusUpgradeType.EXTEND);
     }
 }

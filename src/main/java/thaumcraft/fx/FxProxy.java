@@ -51,4 +51,49 @@ public interface FxProxy {
 
     default void blockRunes(Level level, double x, double y, double z, float red, float green, float blue, int duration, float gravity) {
     }
+
+    default void sparkle(Level level, float x, float y, float z, float size, int color, float gravity) {
+    }
+
+    default void shockBolt(Level level, Entity shooter, double x, double y, double z) {
+    }
+
+    default void shockZap(Level level, Entity source, Entity target) {
+    }
+
+    default void shockBurst(Level level, double x, double y, double z, float size) {
+    }
+
+    default void fireOrbTrail(Level level, double x, double y, double z, float scale) {
+    }
+
+    default void primalOrbTrail(Level level, Entity orb) {
+    }
+
+    default void primalOrbBurst(Level level, double x, double y, double z) {
+    }
+
+    default void pechBlastTrail(Level level, Entity blast) {
+    }
+
+    default void pechBlastBurst(Level level, double x, double y, double z) {
+    }
+
+    default void smokeSpiral(Level level, double x, double y, double z, float radius, int start, int minY, int color) {
+    }
+
+    default void oreScan(Level level, BlockPos center, int range, long until) {
+    }
+
+    default void blockBubble(Level level, BlockPos pos, int color) {
+    }
+
+    default void excavationBeam(Level level, Entity source, double x, double y, double z, int impact) {
+    }
+
+    default void excavationCrack(Level level, Entity source, BlockPos pos, BlockState state, int progress) {
+    }
+
+    default void focalManipulatorSparkle(Level level, double x, double y, double z) {
+    }
 }

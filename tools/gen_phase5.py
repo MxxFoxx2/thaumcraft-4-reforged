@@ -210,4 +210,3 @@ def recipes(ctx):
 def generate(ctx):
     tables(ctx)
     items(ctx)
-    recipes(ctx)

@@ -104,5 +104,9 @@
   "subtitles.thaumcraft.wispdead": "Огонёк угасает",
   "subtitles.thaumcraft.wisplive": "Гудение огонька",
   "subtitles.thaumcraft.write": "Скрип пера",
-  "subtitles.thaumcraft.zap": "Разряд энергии"
+  "subtitles.thaumcraft.zap": "Разряд энергии",
+  "tc.device.door_refuses": "Дверь не поддаётся.",
+  "tc.device.plate_all": "Теперь она срабатывает на всё.",
+  "tc.device.plate_not_you": "Теперь она срабатывает на всё, кроме вас.",
+  "tc.device.plate_only_you": "Теперь она срабатывает только на вас."
 }

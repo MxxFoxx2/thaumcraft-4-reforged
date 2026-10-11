@@ -34,7 +34,7 @@ import thaumcraft.wand.focus.FocusItem;
 public final class ArchitectOverlay {
     private static final ResourceLocation ARROWS = Thaumcraft.id("textures/misc/architect_arrows.png");
     private static final int LIGHT = 200;
-    private static final int[] CONNECTED = {
+    public static final int[] CONNECTED = {
         0, 0, 6, 6, 0, 0, 6, 6, 3, 3, 19, 15, 3, 3, 19, 15,
         1, 1, 18, 18, 1, 1, 13, 13, 2, 2, 23, 31, 2, 2, 27, 14,
         0, 0, 6, 6, 0, 0, 6, 6, 3, 3, 19, 15, 3, 3, 19, 15,

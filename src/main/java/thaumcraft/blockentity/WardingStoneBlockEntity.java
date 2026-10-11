@@ -6,9 +6,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import thaumcraft.registry.ModBlockEntities;
+import thaumcraft.registry.ModBlocks;
 
 public class WardingStoneBlockEntity extends TcBlockEntity {
     private int count;
@@ -36,5 +38,16 @@ public class WardingStoneBlockEntity extends TcBlockEntity {
             }
         }
         count++;
+        if (count % 100 == 0) {
+            placeAura(level, pos.above());
+            placeAura(level, pos.above(2));
+        }
+    }
+
+    private static void placeAura(Level level, BlockPos target) {
+        BlockState existing = level.getBlockState(target);
+        if (!existing.is(ModBlocks.ARCANE_LAMP_LIGHT.get()) && existing.canBeReplaced()) {
+            level.setBlock(target, ModBlocks.WARDING_AURA.get().defaultBlockState(), Block.UPDATE_ALL);
+        }
     }
 }

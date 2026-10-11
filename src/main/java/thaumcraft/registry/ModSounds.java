@@ -49,6 +49,8 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> RUNIC_SHIELD_CHARGE = register("runic_shield_charge");
     public static final DeferredHolder<SoundEvent, SoundEvent> WIND = register("wind");
     public static final DeferredHolder<SoundEvent, SoundEvent> SWING = register("swing");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DOORFAIL = register("doorfail");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BRAIN = register("brain");
 
     private ModSounds() {
     }

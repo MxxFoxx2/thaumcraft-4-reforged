@@ -29,6 +29,7 @@ public final class ThaumcraftClient {
     public ThaumcraftClient(IEventBus modEventBus, ModContainer container) {
         ClientPayloadHandlers.register();
         Fx.set(new ClientFx());
+        thaumcraft.device.MachineFx.set(new thaumcraft.client.fx.MachineClientFx());
         ResearchClientHooks.setBookOpener(ResearchBrowserScreen::open);
         ThaumometerClient.register();
         modEventBus.addListener(ThaumcraftClient::setup);
@@ -51,5 +52,7 @@ public final class ThaumcraftClient {
         event.register(ModMenus.FOCAL_MANIPULATOR.get(), FocalManipulatorScreen::new);
         event.register(ModMenus.FOCUS_POUCH.get(), FocusPouchScreen::new);
         event.register(ModMenus.HOVER_HARNESS.get(), HoverHarnessScreen::new);
+        event.register(ModMenus.ARCANE_SPA.get(), thaumcraft.client.screen.ArcaneSpaScreen::new);
+        event.register(ModMenus.ARCANE_BORE.get(), thaumcraft.client.screen.ArcaneBoreScreen::new);
     }
 }

@@ -13,7 +13,8 @@
     "thaumcraft:wand_vis": "wand_vis",
     "thaumcraft:wand_target": "wand_target",
     "thaumcraft:research_note": "research_note",
-    "thaumcraft:aspects": "aspects"
+    "thaumcraft:aspects": "aspects",
+    "thaumcraft:mirror_link": "mirror_link"
   },
   "predicates": {
     "bone_bow": {
@@ -23,6 +24,23 @@
       },
       "minecraft:pulling": {
         "kind": "using_item"
+      }
+    },
+    "magic_mirror": {
+      "thaumcraft:linked": {
+        "kind": "has_component",
+        "component": "thaumcraft:mirror_link"
+      }
+    },
+    "essentia_mirror": {
+      "thaumcraft:linked": {
+        "kind": "has_component",
+        "component": "thaumcraft:mirror_link"
+      }
+    },
+    "sinister_lodestone": {
+      "thaumcraft:sinister_lodestone_active": {
+        "kind": "sinister_node_in_range"
       }
     }
   },
@@ -281,6 +299,14 @@
       "0": {
         "constant": "#404040"
       }
+    },
+    "arcane_levitator": {
+      "0": {
+        "constant": "#00A000"
+      },
+      "1": {
+        "constant": "#EECCFF"
+      }
     }
   },
   "builtin_entity": {
@@ -397,6 +423,82 @@
       "renderer": "thaumcraft:arcane_bellows",
       "params": {},
       "base_model": "thaumcraft:item/arcane_bellows"
+    },
+    "air_crystal_cluster": {
+      "renderer": "thaumcraft:crystal_cluster",
+      "params": {
+        "kind": 0
+      },
+      "base_model": "thaumcraft:item/air_crystal_cluster"
+    },
+    "fire_crystal_cluster": {
+      "renderer": "thaumcraft:crystal_cluster",
+      "params": {
+        "kind": 1
+      },
+      "base_model": "thaumcraft:item/fire_crystal_cluster"
+    },
+    "water_crystal_cluster": {
+      "renderer": "thaumcraft:crystal_cluster",
+      "params": {
+        "kind": 2
+      },
+      "base_model": "thaumcraft:item/water_crystal_cluster"
+    },
+    "earth_crystal_cluster": {
+      "renderer": "thaumcraft:crystal_cluster",
+      "params": {
+        "kind": 3
+      },
+      "base_model": "thaumcraft:item/earth_crystal_cluster"
+    },
+    "order_crystal_cluster": {
+      "renderer": "thaumcraft:crystal_cluster",
+      "params": {
+        "kind": 4
+      },
+      "base_model": "thaumcraft:item/order_crystal_cluster"
+    },
+    "entropy_crystal_cluster": {
+      "renderer": "thaumcraft:crystal_cluster",
+      "params": {
+        "kind": 5
+      },
+      "base_model": "thaumcraft:item/entropy_crystal_cluster"
+    },
+    "mixed_crystal_cluster": {
+      "renderer": "thaumcraft:crystal_cluster",
+      "params": {
+        "kind": 6
+      },
+      "base_model": "thaumcraft:item/mixed_crystal_cluster"
+    },
+    "strange_crystals": {
+      "renderer": "thaumcraft:crystal_cluster",
+      "params": {
+        "kind": 7
+      },
+      "base_model": "thaumcraft:item/strange_crystals"
+    },
+    "hungry_chest": {
+      "renderer": "thaumcraft:hungry_chest",
+      "params": {},
+      "base_model": "thaumcraft:item/hungry_chest"
+    },
+    "banner": {
+      "renderer": "thaumcraft:banner",
+      "params": {},
+      "base_model": "thaumcraft:item/banner"
+    },
+    "arcane_bore_base": {
+      "renderer": "thaumcraft:arcane_bore_base",
+      "params": {},
+      "base_model": "thaumcraft:item/arcane_bore_base"
+    },
+    "arcane_bore": {
+      "renderer": "thaumcraft:arcane_bore",
+      "params": {},
+      "base_model": "thaumcraft:item/arcane_bore"
     }
   },
   "composite": {
@@ -409,6 +511,19 @@
         {
           "kind": "builtin_entity",
           "renderer": "thaumcraft:tube_valve",
+          "params": {}
+        }
+      ]
+    },
+    "brain_jar": {
+      "parts": [
+        {
+          "kind": "item_model",
+          "model": "thaumcraft:item/brain_jar_base"
+        },
+        {
+          "kind": "builtin_entity",
+          "renderer": "thaumcraft:brain_jar",
           "params": {}
         }
       ]
@@ -618,6 +733,58 @@
     "warded_block": {
       "loader": "thaumcraft:warded",
       "fallback": "minecraft:block/stone"
+    },
+    "warded_glass": {
+      "loader": "thaumcraft:warded_glass",
+      "models": [
+        "thaumcraft:block/warded_glass_1",
+        "thaumcraft:block/warded_glass_2",
+        "thaumcraft:block/warded_glass_3",
+        "thaumcraft:block/warded_glass_4",
+        "thaumcraft:block/warded_glass_5",
+        "thaumcraft:block/warded_glass_6",
+        "thaumcraft:block/warded_glass_7",
+        "thaumcraft:block/warded_glass_8",
+        "thaumcraft:block/warded_glass_9",
+        "thaumcraft:block/warded_glass_10",
+        "thaumcraft:block/warded_glass_11",
+        "thaumcraft:block/warded_glass_12",
+        "thaumcraft:block/warded_glass_13",
+        "thaumcraft:block/warded_glass_14",
+        "thaumcraft:block/warded_glass_15",
+        "thaumcraft:block/warded_glass_16",
+        "thaumcraft:block/warded_glass_17",
+        "thaumcraft:block/warded_glass_18",
+        "thaumcraft:block/warded_glass_19",
+        "thaumcraft:block/warded_glass_20",
+        "thaumcraft:block/warded_glass_21",
+        "thaumcraft:block/warded_glass_22",
+        "thaumcraft:block/warded_glass_23",
+        "thaumcraft:block/warded_glass_24",
+        "thaumcraft:block/warded_glass_25",
+        "thaumcraft:block/warded_glass_26",
+        "thaumcraft:block/warded_glass_27",
+        "thaumcraft:block/warded_glass_28",
+        "thaumcraft:block/warded_glass_29",
+        "thaumcraft:block/warded_glass_30",
+        "thaumcraft:block/warded_glass_31",
+        "thaumcraft:block/warded_glass_32",
+        "thaumcraft:block/warded_glass_33",
+        "thaumcraft:block/warded_glass_34",
+        "thaumcraft:block/warded_glass_35",
+        "thaumcraft:block/warded_glass_36",
+        "thaumcraft:block/warded_glass_37",
+        "thaumcraft:block/warded_glass_38",
+        "thaumcraft:block/warded_glass_39",
+        "thaumcraft:block/warded_glass_40",
+        "thaumcraft:block/warded_glass_41",
+        "thaumcraft:block/warded_glass_42",
+        "thaumcraft:block/warded_glass_43",
+        "thaumcraft:block/warded_glass_44",
+        "thaumcraft:block/warded_glass_45",
+        "thaumcraft:block/warded_glass_46",
+        "thaumcraft:block/warded_glass_47"
+      ]
     }
   },
   "notes": {

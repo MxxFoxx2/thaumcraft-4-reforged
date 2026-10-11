@@ -27,6 +27,15 @@ import thaumcraft.blockentity.ResearchTableBlockEntity;
 import thaumcraft.blockentity.WandPedestalBlockEntity;
 import thaumcraft.blockentity.WardedBlockEntity;
 import thaumcraft.blockentity.WardingStoneBlockEntity;
+import thaumcraft.device.BannerBlockEntity;
+import thaumcraft.device.BrainJarBlockEntity;
+import thaumcraft.device.HungryChestBlockEntity;
+import thaumcraft.device.OwnedBlockEntity;
+import thaumcraft.device.ArcaneBoreBaseBlockEntity;
+import thaumcraft.device.ArcaneBoreBlockEntity;
+import thaumcraft.device.ArcaneSpaBlockEntity;
+import thaumcraft.device.InfernalFurnaceBlockEntity;
+import thaumcraft.device.InfernalFurnaceNozzleBlockEntity;
 import thaumcraft.essentia.CentrifugeBlockEntity;
 import thaumcraft.essentia.EssentiaBufferBlockEntity;
 import thaumcraft.essentia.EssentiaCrystallizerBlockEntity;
@@ -211,6 +220,88 @@ public final class ModBlockEntities {
     public static final Supplier<BlockEntityType<WardedBlockEntity>> WARDED = BLOCK_ENTITIES.register(
         "warded_block",
         () -> BlockEntityType.Builder.of(WardedBlockEntity::new, ModBlocks.WARDED_BLOCK.get()).build(null)
+    );
+
+    public static final Supplier<BlockEntityType<thaumcraft.device.MirrorBlockEntity>> MAGIC_MIRROR = BLOCK_ENTITIES.register(
+        "magic_mirror",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.MirrorBlockEntity::new, ModBlocks.MAGIC_MIRROR.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.EssentiaMirrorBlockEntity>> ESSENTIA_MIRROR = BLOCK_ENTITIES.register(
+        "essentia_mirror",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.EssentiaMirrorBlockEntity::new, ModBlocks.ESSENTIA_MIRROR.get()).build(null)
+    );
+
+    public static final Supplier<BlockEntityType<thaumcraft.device.NitorLightBlockEntity>> NITOR_LIGHT = BLOCK_ENTITIES.register(
+        "nitor_light",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.NitorLightBlockEntity::new, ModBlocks.NITOR_LIGHT.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.WardingAuraBlockEntity>> WARDING_AURA = BLOCK_ENTITIES.register(
+        "warding_aura",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.WardingAuraBlockEntity::new, ModBlocks.WARDING_AURA.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.ArcaneLampBlockEntity>> ARCANE_LAMP = BLOCK_ENTITIES.register(
+        "arcane_lamp",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.ArcaneLampBlockEntity::new, ModBlocks.ARCANE_LAMP.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.LampOfGrowthBlockEntity>> LAMP_OF_GROWTH = BLOCK_ENTITIES.register(
+        "lamp_of_growth",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.LampOfGrowthBlockEntity::new, ModBlocks.LAMP_OF_GROWTH.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.LampOfFertilityBlockEntity>> LAMP_OF_FERTILITY = BLOCK_ENTITIES.register(
+        "lamp_of_fertility",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.LampOfFertilityBlockEntity::new, ModBlocks.LAMP_OF_FERTILITY.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.ItemGrateBlockEntity>> ITEM_GRATE = BLOCK_ENTITIES.register(
+        "item_grate",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.ItemGrateBlockEntity::new, ModBlocks.ITEM_GRATE.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.ArcaneEarBlockEntity>> ARCANE_EAR = BLOCK_ENTITIES.register(
+        "arcane_ear",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.ArcaneEarBlockEntity::new, ModBlocks.ARCANE_EAR.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.ArcaneLevitatorBlockEntity>> ARCANE_LEVITATOR = BLOCK_ENTITIES.register(
+        "arcane_levitator",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.ArcaneLevitatorBlockEntity::new, ModBlocks.ARCANE_LEVITATOR.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<thaumcraft.device.CrystalClusterBlockEntity>> CRYSTAL_CLUSTER = BLOCK_ENTITIES.register(
+        "crystal_cluster",
+        () -> BlockEntityType.Builder.of(thaumcraft.device.CrystalClusterBlockEntity::new, ModBlocks.AIR_CRYSTAL_CLUSTER.get(), ModBlocks.FIRE_CRYSTAL_CLUSTER.get(), ModBlocks.WATER_CRYSTAL_CLUSTER.get(), ModBlocks.EARTH_CRYSTAL_CLUSTER.get(), ModBlocks.ORDER_CRYSTAL_CLUSTER.get(), ModBlocks.ENTROPY_CRYSTAL_CLUSTER.get(), ModBlocks.MIXED_CRYSTAL_CLUSTER.get(), ModBlocks.STRANGE_CRYSTALS.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<OwnedBlockEntity>> OWNED = BLOCK_ENTITIES.register(
+        "owned",
+        () -> BlockEntityType.Builder.of(OwnedBlockEntity::new, ModBlocks.WARDED_GLASS.get(), ModBlocks.ARCANE_DOOR.get(), ModBlocks.ARCANE_PRESSURE_PLATE.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<HungryChestBlockEntity>> HUNGRY_CHEST = BLOCK_ENTITIES.register(
+        "hungry_chest",
+        () -> BlockEntityType.Builder.of(HungryChestBlockEntity::new, ModBlocks.HUNGRY_CHEST.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<BrainJarBlockEntity>> BRAIN_JAR = BLOCK_ENTITIES.register(
+        "brain_jar",
+        () -> BlockEntityType.Builder.of(BrainJarBlockEntity::new, ModBlocks.BRAIN_JAR.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<BannerBlockEntity>> BANNER = BLOCK_ENTITIES.register(
+        "banner",
+        () -> BlockEntityType.Builder.of(BannerBlockEntity::new, ModBlocks.BANNER.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<InfernalFurnaceBlockEntity>> INFERNAL_FURNACE = BLOCK_ENTITIES.register(
+        "infernal_furnace",
+        () -> BlockEntityType.Builder.of(InfernalFurnaceBlockEntity::new, ModBlocks.INFERNAL_FURNACE.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<InfernalFurnaceNozzleBlockEntity>> INFERNAL_FURNACE_NOZZLE = BLOCK_ENTITIES.register(
+        "infernal_furnace_nozzle",
+        () -> BlockEntityType.Builder.of(InfernalFurnaceNozzleBlockEntity::new, ModBlocks.INFERNAL_FURNACE.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<ArcaneBoreBaseBlockEntity>> ARCANE_BORE_BASE = BLOCK_ENTITIES.register(
+        "arcane_bore_base",
+        () -> BlockEntityType.Builder.of(ArcaneBoreBaseBlockEntity::new, ModBlocks.ARCANE_BORE_BASE.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<ArcaneBoreBlockEntity>> ARCANE_BORE = BLOCK_ENTITIES.register(
+        "arcane_bore",
+        () -> BlockEntityType.Builder.of(ArcaneBoreBlockEntity::new, ModBlocks.ARCANE_BORE.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<ArcaneSpaBlockEntity>> ARCANE_SPA = BLOCK_ENTITIES.register(
+        "arcane_spa",
+        () -> BlockEntityType.Builder.of(ArcaneSpaBlockEntity::new, ModBlocks.ARCANE_SPA.get()).build(null)
     );
 
     private ModBlockEntities() {

@@ -9,13 +9,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.essentia.EssentiaKeys;
+import thaumcraft.registry.ModBlocks;
 
 public final class AlchemyHooks {
     private AlchemyHooks() {
     }
 
     public static boolean isNitor(BlockGetter level, BlockPos pos, BlockState state) {
-        return false;
+        return state.is(ModBlocks.NITOR_LIGHT.get());
     }
 
     public static boolean spawnThaumicSlime(ServerLevel level, BlockPos pos, int size) {

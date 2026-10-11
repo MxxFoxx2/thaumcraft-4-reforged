@@ -1,0 +1,25 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:item_exists",
+      "item": "thaumcraft:item_grate"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:iron_bars"
+    },
+    "T": {
+      "item": "minecraft:oak_trapdoor"
+    }
+  },
+  "pattern": [
+    "#",
+    "T"
+  ],
+  "result": {
+    "id": "thaumcraft:item_grate"
+  }
+}

@@ -9,11 +9,11 @@
 
 ## Last synced main commit
 
-`163651a` (phase 8 complete)
+`057ddba` (phases 8–9 complete at `cd26a9c`, plus generated robe dye recipes)
 
 ## Sync procedure
 
-1. `git log --reverse 163651a..main` in the worktree of this branch.
+1. `git log --reverse 057ddba..main` in the worktree of this branch.
 2. A commit touching only resources, lang or `tools/`: `git cherry-pick`, then regenerate with `python3 tools/gen_resources.py --mc 1.21.1`.
 3. A commit with Java: `git show <sha> | python3 tools/backport/rewrite.py --target 1.21.1 | git apply -3`, resolve conflicts by hand, run `compileJava`.
 4. Commit with the same message, then update the sha above.
@@ -82,7 +82,7 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 - Curios: slot ids `necklace`, `ring` (size raised to 2 by `data/curios/curios/slots/ring.json` with `ADD`), `belt`; `Baubles` slot order 0 necklace, 1-2 ring, 3 belt; `platform/BaublesCurios` registers every `Bauble` item as a curio in common setup
 - Data attachments: `DataAttachments.SyncPayload` instead of `.sync()`, player attachments are resent on login, respawn and dimension change
 - Village trades: `world/village/VillageTrades` (`VillagerTradesEvent`), the whole pool is added to every level 1-5 and vanilla picks 2, same tables as the `villager_trade` data on `main`; `tools/backport/trades.json` is the manifest written by the generator
-- GameTests: names are `thaumcraft.<class>.<method>`; relative Y is one higher than on `main` (1.21.1 puts the structure block layer at relative Y 0); `runGameTestServer` leaves a flat `run/world`, delete it before `runServer`
+- GameTests: names are `thaumcraft.<class>.<method>`; relative Y is one higher than on `main` (1.21.1 puts the structure block layer at relative Y 0); `runGameTestServer` uses `level-name` from `run/server.properties`; use separate names for GameTests and normal server worlds
 - Tools from `Registration` use the `TOOL` component on a plain `Item` (no right-click block actions); fast food eats in 0.8 s instead of 0.5 s; goggles extend `ArmorItem` with the armor layer `textures/models/armor/goggles_layer_1.png`
 - Blocks: `PlantSoil.PLAINS` uses `BlockTags.DIRT`; no `getEntityInsideCollisionShape`; workbench result slot without `safeClone`; bellows speed up furnaces through `CookTime`
 - Rendering: `WorldFx` draws in `RenderLevelStageEvent` (`AFTER_PARTICLES`) instead of vanilla particles; translucent layer order follows call order instead of `order(n)`; REPEAT sampler is the default; GUI `nextStratum` became `flush`, tooltips draw immediately; the first person sleeve is always drawn
@@ -99,3 +99,12 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 - GearMovementPayload relays forward input for server traveller boots/haste because vanilla 1.21.1 lacks getLastClientInput.
 - platform/CamouflagedBlockEntity owns ModelData/ModelProperty; only its two server-safe NeoForge model-data imports are exempted from the client-package seam rule.
 - Visual validation and two-client animation/synchronization checks remain pending.
+
+## Phase 9 validation (2026-10-11)
+
+- `build` passes; all 60 GameTests pass (57 ported tests and 3 backport regressions). `check_seams.py` checks 654 files; `validate_ids.py --mc 1.21.1` reports zero problems.
+- Resource generation produces 1129 JSON files for 1.21.1. The isolated modern profile still generates 1393 JSON files.
+- Dedicated server creates a normal TerraBlender world, places devices, reloads data and saves without ERROR entries. After a full server restart, focal manipulator focus, warded block disguise, hungry chest and bore inventories, spa water (1000 mB), brain jar XP (17), and banner color/aspect are retained. The bore needs its base; redstone pauses spa fluid consumption during the persistence check.
+- `SidedInvWrapper` marks a container changed before setting its slot in 1.21.1; the grate delivers inserted items from `setItem` as well. The open/closed grate GameTest verifies insertion, dropped item count, collisions and redstone closure.
+- Block entity renderers use the 1.21.1 direct rendering API. Warded disguises use `ModelData`; connected warded glass uses a custom baked-model loader and 47 variants. Special device items use `BlockEntityWithoutLevelRenderer`; mirrors/lodestone use legacy item predicates.
+- `runClient` completes resource loading without Thaumcraft errors or missing models/textures. Vanilla sound/shader warnings and focus texture mipmap reductions remain in the development log. In-world visual checks and two-client animation/synchronization checks remain pending.

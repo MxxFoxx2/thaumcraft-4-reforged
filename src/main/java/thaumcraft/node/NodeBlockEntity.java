@@ -36,6 +36,7 @@ import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectHelper;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.blockentity.TcBlockEntity;
+import thaumcraft.fx.Fx;
 import thaumcraft.network.NodeZapPayload;
 import thaumcraft.platform.BiomeEdit;
 import thaumcraft.platform.ModNetwork;
@@ -322,6 +323,8 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
             if (change) {
                 sync();
             }
+        } else if (nodeType == NodeType.DARK && count % 50 == 0) {
+            Fx.get().sinisterNode(tickLevel, worldPosition);
         }
     }
 

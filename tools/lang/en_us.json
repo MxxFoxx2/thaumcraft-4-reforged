@@ -104,5 +104,9 @@
   "subtitles.thaumcraft.wispdead": "Wisp fades",
   "subtitles.thaumcraft.wisplive": "Wisp hums",
   "subtitles.thaumcraft.write": "Quill scratches",
-  "subtitles.thaumcraft.zap": "Energy zaps"
+  "subtitles.thaumcraft.zap": "Energy zaps",
+  "tc.device.door_refuses": "The door refuses to budge.",
+  "tc.device.plate_all": "It will now trigger on everything.",
+  "tc.device.plate_not_you": "It will now trigger on everything except you.",
+  "tc.device.plate_only_you": "It will now trigger on just you."
 }

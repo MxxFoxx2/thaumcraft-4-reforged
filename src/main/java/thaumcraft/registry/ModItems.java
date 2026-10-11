@@ -8,6 +8,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumcraft.Thaumcraft;
+import thaumcraft.device.ArcaneKeyItem;
+import thaumcraft.device.OwnedBlockEntity;
 import thaumcraft.essentia.PhialItem;
 import thaumcraft.item.AspectContainerItem;
 import thaumcraft.item.CrystalEssenceItem;
@@ -92,7 +94,7 @@ public final class ModItems {
     }
 
     public static final DeferredItem<Item> ALUMENTUM = RegistryHelper.registerSimpleItem(ITEMS, "alumentum", properties -> Registration.fuel(properties, 6400));
-    public static final DeferredItem<Item> NITOR = RegistryHelper.registerSimpleItem(ITEMS, "nitor");
+    public static final DeferredItem<Item> NITOR = RegistryHelper.registerItem(ITEMS, "nitor", properties -> new net.minecraft.world.item.BlockItem(ModBlocks.NITOR_LIGHT.get(), properties));
     public static final DeferredItem<Item> THAUMIUM_INGOT = RegistryHelper.registerSimpleItem(ITEMS, "thaumium_ingot");
     public static final DeferredItem<Item> QUICKSILVER = RegistryHelper.registerSimpleItem(ITEMS, "quicksilver");
     public static final DeferredItem<Item> MAGIC_TALLOW = RegistryHelper.registerSimpleItem(ITEMS, "magic_tallow");
@@ -137,11 +139,11 @@ public final class ModItems {
     public static final DeferredItem<Item> BEEF_NUGGET = nugget("beef_nugget");
     public static final DeferredItem<Item> PORK_NUGGET = nugget("pork_nugget");
     public static final DeferredItem<Item> FISH_NUGGET = nugget("fish_nugget");
-    public static final DeferredItem<Item> TRIPLE_MEAT_TREAT = RegistryHelper.registerSimpleItem(ITEMS, 
+    public static final DeferredItem<Item> TRIPLE_MEAT_TREAT = RegistryHelper.registerSimpleItem(ITEMS,
         "triple_meat_treat",
         properties -> Registration.food(properties, 6, 0.8F, true, 1.6F, new MobEffectInstance(MobEffects.REGENERATION, 100, 0), 0.66F)
     );
-    public static final DeferredItem<Item> ZOMBIE_BRAIN = RegistryHelper.registerItem(ITEMS, 
+    public static final DeferredItem<Item> ZOMBIE_BRAIN = RegistryHelper.registerItem(ITEMS,
         "zombie_brain",
         ZombieBrainItem::new,
         properties -> Registration.food(properties, 4, 0.2F, false, 1.6F, new MobEffectInstance(MobEffects.HUNGER, 600, 0), 0.8F)
@@ -278,6 +280,13 @@ public final class ModItems {
     public static final DeferredItem<VisAmuletItem> VIS_STONE = RegistryHelper.registerItem(ITEMS, "vis_stone", properties -> new VisAmuletItem(properties, true), properties -> properties.stacksTo(1).rarity(Rarity.UNCOMMON));
     public static final DeferredItem<VisAmuletItem> VIS_AMULET = RegistryHelper.registerItem(ITEMS, "vis_amulet", properties -> new VisAmuletItem(properties, false), properties -> properties.stacksTo(1).rarity(Rarity.RARE));
     public static final DeferredItem<HoverGirdleItem> THAUMOSTATIC_GIRDLE = RegistryHelper.registerItem(ITEMS, "thaumostatic_girdle", HoverGirdleItem::new, properties -> properties.stacksTo(1).rarity(Rarity.RARE));
+
+
+    public static final DeferredItem<ArcaneKeyItem> IRON_ARCANE_KEY = RegistryHelper.registerItem(ITEMS, "iron_arcane_key", properties -> new ArcaneKeyItem(properties, OwnedBlockEntity.IRON), properties -> properties.rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<ArcaneKeyItem> GOLD_ARCANE_KEY = RegistryHelper.registerItem(ITEMS, "gold_arcane_key", properties -> new ArcaneKeyItem(properties, OwnedBlockEntity.GOLD), properties -> properties.rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<thaumcraft.device.HandMirrorItem> HAND_MIRROR = RegistryHelper.registerItem(ITEMS, "hand_mirror", thaumcraft.device.HandMirrorItem::new, properties -> properties.stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<thaumcraft.device.ResonatorItem> ESSENTIA_RESONATOR = RegistryHelper.registerItem(ITEMS, "essentia_resonator", thaumcraft.device.ResonatorItem::new, properties -> properties.stacksTo(1).rarity(Rarity.UNCOMMON));
+    public static final DeferredItem<Item> SINISTER_LODESTONE = RegistryHelper.registerItem(ITEMS, "sinister_lodestone", Item::new, properties -> properties.stacksTo(1).rarity(Rarity.RARE));
 
 
     private ModItems() {

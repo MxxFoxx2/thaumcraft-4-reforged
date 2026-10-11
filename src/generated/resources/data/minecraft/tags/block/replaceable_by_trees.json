@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "thaumcraft:arcane_lamp_light",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:warding_aura",
+      "required": false
+    }
+  ]
+}

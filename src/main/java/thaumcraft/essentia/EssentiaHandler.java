@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectSource;
+import thaumcraft.device.EssentiaMirrorBlockEntity;
 import thaumcraft.network.EssentiaSourceFxPayload;
 import thaumcraft.platform.ModNetwork;
 
@@ -42,7 +43,7 @@ public final class EssentiaHandler {
             if (!(level.getBlockEntity(source) instanceof AspectSource sourceTile)) {
                 break;
             }
-            if (sourceTile.takeFromContainer(aspect, 1)) {
+            if (!(ignoreMirror && sourceTile instanceof EssentiaMirrorBlockEntity) && sourceTile.takeFromContainer(aspect, 1)) {
                 if (level instanceof ServerLevel serverLevel) {
                     BlockPos position = tile.getBlockPos();
                     ModNetwork.sendToNear(
@@ -101,6 +102,7 @@ public final class EssentiaHandler {
             SOURCES_DELAY.remove(tileLocation);
         }
         BlockPos origin = tileLocation.pos();
+        BlockEntity requester = level.getBlockEntity(origin);
         List<BlockPos> sourceList = new ArrayList<>();
         int start = 0;
         Direction scanDirection = direction;
@@ -122,7 +124,7 @@ public final class EssentiaHandler {
                     } else {
                         target = origin.offset(depth * scanDirection.getStepX(), first, second);
                     }
-                    if (level.hasChunkAt(target) && level.getBlockEntity(target) instanceof AspectSource) {
+                    if (level.hasChunkAt(target) && level.getBlockEntity(target) instanceof AspectSource candidate && !isLinkedBack(requester, candidate, tileLocation)) {
                         sourceList.add(target);
                     }
                 }
@@ -133,6 +135,12 @@ public final class EssentiaHandler {
         } else {
             SOURCES.put(tileLocation, sourceList);
         }
+    }
+
+    private static boolean isLinkedBack(@Nullable BlockEntity requester, AspectSource candidate, GlobalPos requesterLocation) {
+        return requester instanceof EssentiaMirrorBlockEntity
+            && candidate instanceof EssentiaMirrorBlockEntity mirror
+            && requesterLocation.equals(mirror.getLink());
     }
 
     public static void refreshSources(BlockEntity tile) {

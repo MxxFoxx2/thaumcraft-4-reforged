@@ -65,6 +65,7 @@ public final class ClientColorRegistration {
         tints.put("apprentice_ring_water", constant(0x3CD4FC));
         tints.put("apprentice_ring_order", constant(0xD5D4EC));
         tints.put("apprentice_ring_entropy", constant(0x404040));
+        tints.put("arcane_levitator", (stack, layer) -> layer == 0 ? 0xFF00A000 : 0xFFEECCFF);
         return tints;
     }
 

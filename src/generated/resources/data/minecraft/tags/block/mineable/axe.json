@@ -6,7 +6,27 @@
       "required": false
     },
     {
+      "id": "thaumcraft:arcane_bore",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:arcane_bore_base",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:arcane_ear",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:arcane_levitator",
+      "required": false
+    },
+    {
       "id": "thaumcraft:arcane_worktable",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:banner",
       "required": false
     },
     {
@@ -27,6 +47,10 @@
     },
     {
       "id": "thaumcraft:greatwood_stairs",
+      "required": false
+    },
+    {
+      "id": "thaumcraft:hungry_chest",
       "required": false
     },
     {

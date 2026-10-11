@@ -329,18 +329,30 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
                     boolean found;
                     if (block == ModBlocks.AIR_INFUSED_STONE.get()) {
                         found = attempt(Aspect.AIR, 20, random);
+                    } else if (block == ModBlocks.AIR_CRYSTAL_CLUSTER.get()) {
+                        found = attempt(Aspect.AIR, 10, random);
                     } else if (block instanceof BaseFireBlock || state.getFluidState().is(FluidTags.LAVA) || block == ModBlocks.FIRE_INFUSED_STONE.get()) {
                         found = attempt(Aspect.FIRE, 20, random);
+                    } else if (block == ModBlocks.FIRE_CRYSTAL_CLUSTER.get()) {
+                        found = attempt(Aspect.FIRE, 10, random);
                     } else if (isGround(block) || block == ModBlocks.EARTH_INFUSED_STONE.get()) {
                         found = attempt(Aspect.EARTH, 20, random);
+                    } else if (block == ModBlocks.EARTH_CRYSTAL_CLUSTER.get()) {
+                        found = attempt(Aspect.EARTH, 10, random);
                     } else if (block == Blocks.WATER) {
                         found = attempt(Aspect.WATER, 15, random);
                     } else if (block == ModBlocks.WATER_INFUSED_STONE.get()) {
                         found = attempt(Aspect.WATER, 20, random);
+                    } else if (block == ModBlocks.WATER_CRYSTAL_CLUSTER.get()) {
+                        found = attempt(Aspect.WATER, 10, random);
                     } else if (isCircuits(block) || block == ModBlocks.ORDER_INFUSED_STONE.get()) {
                         found = attempt(Aspect.ORDER, 20, random);
+                    } else if (block == ModBlocks.ORDER_CRYSTAL_CLUSTER.get()) {
+                        found = attempt(Aspect.ORDER, 10, random);
                     } else if (block == ModBlocks.ENTROPY_INFUSED_STONE.get()) {
                         found = attempt(Aspect.ENTROPY, 20, random);
+                    } else if (block == ModBlocks.ENTROPY_CRYSTAL_CLUSTER.get()) {
+                        found = attempt(Aspect.ENTROPY, 10, random);
                     } else {
                         found = false;
                     }

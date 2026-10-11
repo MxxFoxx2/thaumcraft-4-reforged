@@ -262,6 +262,12 @@ def build_key_map(id_map):
     for entry in id_map["blocks"]:
         if entry.get("skip") or not entry.get("lang"):
             continue
+        if "color" in entry.get("state", {}):
+            key_map[entry["lang"]] = f"block.thaumcraft.{entry['id']}.{entry['state']['color']}"
+            continue
+        if entry["id"] in block_ids:
+            key_map.setdefault(entry["lang"], None)
+            continue
         key_map[entry["lang"]] = f"block.thaumcraft.{entry['id']}"
         block_ids.add(entry["id"])
     for entry in id_map["items"]:

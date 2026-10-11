@@ -17,6 +17,8 @@ import thaumcraft.Thaumcraft;
 public class TcItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final ModelResourceLocation VALVE_BASE = ModelResourceLocation.standalone(Thaumcraft.id("item/essentia_valve_base"));
 
+    public static final ModelResourceLocation BRAIN_JAR_BASE = ModelResourceLocation.standalone(Thaumcraft.id("item/brain_jar_base"));
+
     public TcItemRenderer(BlockEntityRenderDispatcher dispatcher, EntityModelSet entityModelSet) {
         super(dispatcher, entityModelSet);
     }
@@ -42,6 +44,23 @@ public class TcItemRenderer extends BlockEntityWithoutLevelRenderer {
             case "alembic" -> AlchemySpecialRenderers.alembic(poseStack, buffers, light);
             case "flux_scrubber" -> AlchemySpecialRenderers.fluxScrubber(poseStack, buffers, light);
             case "arcane_bellows" -> AlchemySpecialRenderers.bellows(poseStack, buffers, light);
+            case "air_crystal_cluster" -> thaumcraft.client.render.device.DeviceSpecialRenderers.crystalCluster(buffers, poseStack, light, 0);
+            case "fire_crystal_cluster" -> thaumcraft.client.render.device.DeviceSpecialRenderers.crystalCluster(buffers, poseStack, light, 1);
+            case "water_crystal_cluster" -> thaumcraft.client.render.device.DeviceSpecialRenderers.crystalCluster(buffers, poseStack, light, 2);
+            case "earth_crystal_cluster" -> thaumcraft.client.render.device.DeviceSpecialRenderers.crystalCluster(buffers, poseStack, light, 3);
+            case "order_crystal_cluster" -> thaumcraft.client.render.device.DeviceSpecialRenderers.crystalCluster(buffers, poseStack, light, 4);
+            case "entropy_crystal_cluster" -> thaumcraft.client.render.device.DeviceSpecialRenderers.crystalCluster(buffers, poseStack, light, 5);
+            case "mixed_crystal_cluster" -> thaumcraft.client.render.device.DeviceSpecialRenderers.crystalCluster(buffers, poseStack, light, 6);
+            case "strange_crystals" -> thaumcraft.client.render.device.DeviceSpecialRenderers.crystalCluster(buffers, poseStack, light, 7);
+            case "hungry_chest" -> thaumcraft.client.render.device.WardedSpecialRenderers.hungryChest(buffers, poseStack, light);
+            case "banner" -> thaumcraft.client.render.device.WardedSpecialRenderers.banner(stack, buffers, poseStack, light);
+            case "arcane_bore_base" -> thaumcraft.client.render.device.MachineSpecialRenderers.boreBase(buffers, poseStack, light);
+            case "arcane_bore" -> thaumcraft.client.render.device.MachineSpecialRenderers.bore(buffers, poseStack, light);
+            case "brain_jar" -> {
+                BakedModel model = Minecraft.getInstance().getModelManager().getModel(BRAIN_JAR_BASE);
+                Minecraft.getInstance().getItemRenderer().renderModelLists(model, stack, light, overlay, poseStack, buffers.getBuffer(ItemBlockRenderTypes.getRenderType(stack, true)));
+                thaumcraft.client.render.device.WardedSpecialRenderers.brainJar(buffers, poseStack, light);
+            }
             case "essentia_valve" -> {
                 BakedModel model = Minecraft.getInstance().getModelManager().getModel(VALVE_BASE);
                 Minecraft.getInstance().getItemRenderer().renderModelLists(

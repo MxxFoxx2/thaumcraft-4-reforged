@@ -40,7 +40,20 @@ public final class ItemRenderers {
         "alembic",
         "flux_scrubber",
         "arcane_bellows",
-        "essentia_valve"
+        "essentia_valve",
+        "air_crystal_cluster",
+        "fire_crystal_cluster",
+        "water_crystal_cluster",
+        "earth_crystal_cluster",
+        "order_crystal_cluster",
+        "entropy_crystal_cluster",
+        "mixed_crystal_cluster",
+        "strange_crystals",
+        "hungry_chest",
+        "brain_jar",
+        "banner",
+        "arcane_bore_base",
+        "arcane_bore"
     );
     private static TcItemRenderer renderer;
 
@@ -70,6 +83,7 @@ public final class ItemRenderers {
     @SubscribeEvent
     static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
         event.register(TcItemRenderer.VALVE_BASE);
+        event.register(TcItemRenderer.BRAIN_JAR_BASE);
     }
 
     @SubscribeEvent

@@ -14,11 +14,12 @@ public final class AspectVisibility {
 
     public static boolean isScanned(ItemStack stack) {
         Player player = Minecraft.getInstance().player;
-        return player != null && !stack.isEmpty() && Knowledge.get(player).isScanned(ScanKind.OBJECT, ScanManager.itemKey(stack));
+        return player != null && !stack.isEmpty()
+            && (player.isCreative() || Knowledge.get(player).isScanned(ScanKind.OBJECT, ScanManager.itemKey(stack)));
     }
 
     public static boolean isKnown(Aspect aspect) {
         Player player = Minecraft.getInstance().player;
-        return player != null && Knowledge.get(player).hasDiscoveredAspect(aspect);
+        return player != null && (player.isCreative() || Knowledge.get(player).hasDiscoveredAspect(aspect));
     }
 }

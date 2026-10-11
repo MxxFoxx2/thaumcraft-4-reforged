@@ -30,6 +30,10 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 - Item models: `items/*.json` client item definitions do not exist; the generator writes `models/item` with `overrides`, special renderers go through `BlockEntityWithoutLevelRenderer` + `IClientItemExtensions`, tints through `RegisterColorHandlersEvent.Item`
 - Data attachments: no `.sync()`, `DataAttachments` sends its own payload
 
+## Intentional changes from TC4
+
+- Inventory aspect previews show all available aspect icons and amounts in creative mode without scanning. Survival still requires scanning and aspect discovery. This only changes visibility; player knowledge is not modified. Shared with `main`.
+
 ## rewrite.py rules (1.21.1)
 
 - Imports: `Identifier` to `ResourceLocation`, `EntitySpawnReason` to `MobSpawnType`, `EntityTypes` to `EntityType`, `ItemUseAnimation` to `UseAnim`, `VegetationBlock` to `BushBlock`, `ARGB` to `FastColor` (`FastColor.ARGB32.*`), `org.jspecify.annotations.Nullable` to `javax.annotation.Nullable`, `ValueInput`/`ValueOutput` to `thaumcraft.compat.*`

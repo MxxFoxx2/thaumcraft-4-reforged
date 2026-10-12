@@ -110,11 +110,16 @@ class Profile:
             "table": table,
         }
 
-    def spawn_modifier(self, biomes, entity, weight):
+    def spawn_modifier(self, biomes, entity, weight, min_count=1, max_count=1):
+        count = min_count if min_count == max_count else {
+            "type": "minecraft:uniform",
+            "min_inclusive": min_count,
+            "max_inclusive": max_count,
+        }
         return {
             "type": "neoforge:add_spawns",
             "biomes": biomes,
-            "spawners": {"type": entity, "count": 1, "weight": weight},
+            "spawners": {"type": entity, "count": count, "weight": weight},
         }
 
     def feature_modifier(self, biomes, feature, step):
@@ -250,11 +255,11 @@ class Profile1211(Legacy):
             element["neoforge_data"] = {"block_light": light, "sky_light": light}
         return element
 
-    def spawn_modifier(self, biomes, entity, weight):
+    def spawn_modifier(self, biomes, entity, weight, min_count=1, max_count=1):
         return {
             "type": "neoforge:add_spawns",
             "biomes": biomes,
-            "spawners": {"type": entity, "weight": weight, "minCount": 1, "maxCount": 1},
+            "spawners": {"type": entity, "weight": weight, "minCount": min_count, "maxCount": max_count},
         }
 
     def _condition(self, condition):
@@ -334,11 +339,11 @@ class Profile1192(Legacy):
     def smelting_result(self, item, count):
         return item
 
-    def spawn_modifier(self, biomes, entity, weight):
+    def spawn_modifier(self, biomes, entity, weight, min_count=1, max_count=1):
         return {
             "type": "forge:add_spawns",
             "biomes": biomes,
-            "spawners": {"type": entity, "weight": weight, "minCount": 1, "maxCount": 1},
+            "spawners": {"type": entity, "weight": weight, "minCount": min_count, "maxCount": max_count},
         }
 
     def feature_modifier(self, biomes, feature, step):

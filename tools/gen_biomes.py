@@ -102,7 +102,7 @@ def spawns(categories):
     by_category = {}
     for category in CATEGORIES:
         by_category[category] = [
-            {"type": f"minecraft:{name}", "count": count, "weight": weight}
+            {"type": name if ":" in name else f"minecraft:{name}", "count": count, "weight": weight}
             for name, weight, count in categories.get(category, [])
         ]
     return {"argument": {"spawn_costs": {}, "spawns_by_category": by_category}, "modifier": "overlay"}
@@ -222,7 +222,8 @@ def generate(ctx):
     placed("tainted_trees", "minecraft:oak", surface_trees(2))
     placed("eerie_flowers", "minecraft:flower_default", patch(1, "MOTION_BLOCKING", 64))
     placed("eerie_grass", profile.vanilla_feature("minecraft:grass"), patch(2, "WORLD_SURFACE_WG", 32))
-    placed("tainted_grass", profile.vanilla_feature("minecraft:grass"), patch(2, "WORLD_SURFACE_WG", 32))
+    feature("taint_decoration", {"type": f"{NS}:taint_decoration"})
+    placed("taint_decoration", f"{NS}:taint_decoration", [])
 
     def features(vegetal, ground=True):
         steps = [[] for _ in range(STEPS)]
@@ -332,11 +333,11 @@ def generate(ctx):
         0.5,
         0.5,
         {
-            "minecraft:gameplay/natural_mob_spawns": spawns({}),
+            "minecraft:gameplay/natural_mob_spawns": spawns({"monster": [(f"{NS}:taintacle", 1, 1)]}),
             "minecraft:visual/sky_color": hex_color(0x7C44FF),
         },
         {"water_color": hex_color(0xCC1188), "grass_color": hex_color(0x6D4189), "foliage_color": hex_color(0x7C6D87)},
-        features([f"{NS}:tainted_trees", f"{NS}:tainted_grass"]),
+        features([f"{NS}:tainted_trees", f"{NS}:taint_decoration"]),
     )
 
     biome(

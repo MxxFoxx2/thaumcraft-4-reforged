@@ -22,6 +22,23 @@ ID_PATTERN = re.compile(r'"(#?minecraft:[a-z0-9_./]+)"')
 LOOT_TYPES = ["loot_condition_type", "loot_function_type", "loot_pool_entry_type", "loot_number_provider_type", "enchantment_level_based_value_type"]
 BONUS_FORMULAS = {"minecraft:uniform_bonus_count", "minecraft:binomial_with_bonus_count", "minecraft:ore_drops"}
 BUILTIN_MODELS = {"builtin/entity", "builtin/generated"}
+ITEM_MODEL_TYPES = {
+    "minecraft:empty", "minecraft:model", "minecraft:range_dispatch", "minecraft:special",
+    "minecraft:composite", "minecraft:bundle/selected_item", "minecraft:select",
+    "minecraft:condition",
+}
+ITEM_MODEL_PROPERTIES = {
+    "minecraft:custom_model_data", "minecraft:bundle/fullness", "minecraft:damage", "minecraft:cooldown",
+    "minecraft:time", "minecraft:compass", "minecraft:crossbow/pull", "minecraft:use_cycle",
+    "minecraft:use_duration", "minecraft:count", "minecraft:main_hand", "minecraft:charge_type",
+    "minecraft:trim_material", "minecraft:block_state", "minecraft:display_context", "minecraft:local_time",
+    "minecraft:context_entity_type", "minecraft:context_dimension", "minecraft:component", "minecraft:using_item",
+    "minecraft:broken", "minecraft:damaged", "minecraft:fishing_rod/cast", "minecraft:has_component",
+    "minecraft:bundle/has_selected_item", "minecraft:selected", "minecraft:carried", "minecraft:extended_view",
+    "minecraft:keybind_down", "minecraft:view_entity",
+}
+LOOT_NUMBER_PROVIDER_TYPES = {"minecraft:constant", "minecraft:uniform", "minecraft:binomial", "minecraft:score", "minecraft:storage"}
+ITEM_MODEL_TINT_TYPES = {"minecraft:constant", "minecraft:dye"}
 
 
 def curl(url):
@@ -50,9 +67,9 @@ def fetch(version):
     return directory
 
 
-def run_reports(directory, version):
-    reports = directory / "reports"
-    registries = reports / "reports" / "registries.json"
+def run_reports(directory, version, reports_directory=None):
+    reports = reports_directory / "reports" if reports_directory and not (reports_directory / "registries.json").exists() else reports_directory or directory / "reports"
+    registries = reports / ("registries.json" if reports_directory else "reports/registries.json")
     if not registries.exists():
         reports.mkdir(exist_ok=True)
         command = [f"/opt/homebrew/opt/{JAVA_HOMES[version]}/bin/java", "-DbundlerMainClass=net.minecraft.data.Main", "-jar", "server.jar", "--reports", "--output", "reports"]
@@ -132,17 +149,25 @@ def read_nbt(data):
 
 
 class Validator:
-    def __init__(self, version, out):
+    def __init__(self, version, out, reports_directory=None, server_jar=None, client_jar=None):
         self.version = version
         self.out = out
         self.problems = []
-        directory = fetch(version)
-        registries = run_reports(directory, version)
-        self.registry = {name.split(":", 1)[1]: set(content["entries"]) for name, content in registries.items()}
-        server = jar_names(directory / "server.jar")
-        client = jar_names(directory / "client.jar")
+        directory = None if reports_directory and server_jar and client_jar else fetch(version)
+        registries = run_reports(directory, version, Path(reports_directory) if reports_directory else None)
+        self.registry = {
+            name.split(":", 1)[1]: set(entries if isinstance(entries, list) else entries.keys())
+            for name, content in registries.items()
+            for entries in [content["entries"]]
+        }
+        server = jar_names(Path(server_jar) if server_jar else directory / "server.jar")
+        client = jar_names(Path(client_jar) if client_jar else directory / "client.jar")
         self.models = {name[len("assets/minecraft/models/"):-5] for name in client if name.startswith("assets/minecraft/models/") and name.endswith(".json")}
         self.textures = {name[len("assets/minecraft/textures/"):-4] for name in client if name.startswith("assets/minecraft/textures/") and name.endswith(".png")}
+        self.models = {"minecraft:" + model for model in self.models}
+        self.textures = {"minecraft:" + texture for texture in self.textures}
+        self.models |= self.asset_ids(out, "models", ".json")
+        self.textures |= self.asset_ids(out, "textures", ".png")
         profile = mcformat.PROFILES[version]
         self.loot_tables = datapack_ids(server, [profile.loot_folder])
         self.enchantments = datapack_ids(server, ["enchantment"]) | self.registry.get("enchantment", set())
@@ -158,14 +183,90 @@ class Validator:
         self.loot_registry = set()
         for name in LOOT_TYPES:
             self.loot_registry |= self.registry.get(name, set())
+        self.loot_condition_literals = set()
+        self.loot_table_types = set()
+        with zipfile.ZipFile(Path(server_jar) if server_jar else directory / "server.jar") as archive:
+            for name in archive.namelist():
+                if name.startswith("META-INF/versions/") and name.endswith(".jar"):
+                    with zipfile.ZipFile(io.BytesIO(archive.read(name))) as nested:
+                        self.collect_loot_condition_literals(nested, self.loot_condition_literals)
+                        self.collect_loot_table_types(nested, self.loot_table_types)
+            self.collect_loot_condition_literals(archive, self.loot_condition_literals)
+            self.collect_loot_table_types(archive, self.loot_table_types)
         self.flat = set()
         for entries in self.registry.values():
             self.flat |= entries
+        reports_root = Path(reports_directory) if reports_directory else directory / "reports"
+        if not (reports_root / "datapack.json").exists():
+            reports_root = reports_root / "reports"
+        datapack_report = reports_root / "datapack.json"
+        if datapack_report.exists():
+            for registry, metadata in json.loads(datapack_report.read_text(encoding="utf-8")).get("registries", {}).items():
+                if metadata.get("elements"):
+                    folder = registry.split(":", 1)[-1]
+                    prefix = f"data/minecraft/{folder}/"
+                    self.flat |= {
+                        "minecraft:" + name[len(prefix):-5]
+                        for name in server
+                        if name.startswith(prefix) and name.endswith(".json")
+                    }
         self.flat |= self.loot_tables | self.enchantments
         self.flat |= datapack_ids(server, ["worldgen/placed_feature", "worldgen/configured_feature", "worldgen/configured_carver", "worldgen/biome", "worldgen/structure", "worldgen/template_pool"])
+        self.block_states = {}
+        if reports_directory:
+            reports_root = Path(reports_directory)
+            blocks_file = reports_root / "blocks.json"
+            if not blocks_file.exists():
+                blocks_file = reports_root / "reports/blocks.json"
+            if blocks_file.exists():
+                self.block_states = json.loads(blocks_file.read_text(encoding="utf-8"))
 
     def report(self, source, value, expected):
         self.problems.append((source, value, expected))
+
+    @staticmethod
+    def asset_ids(directory, folder, suffix):
+        result = set()
+        for path in directory.glob(f"assets/*/{folder}/**/*{suffix}"):
+            parts = path.relative_to(directory).parts
+            result.add(parts[1] + ":" + Path(*parts[3:]).with_suffix("").as_posix())
+        return result
+
+    @staticmethod
+    def collect_loot_condition_literals(archive, result):
+        for name in archive.namelist():
+            if not (name.startswith("data/minecraft/loot_table/") and name.endswith(".json")):
+                continue
+            try:
+                root = json.loads(archive.read(name))
+            except (KeyError, json.JSONDecodeError):
+                continue
+
+            def visit(value):
+                if isinstance(value, dict):
+                    condition = value.get("condition")
+                    if isinstance(condition, str):
+                        result.add(condition)
+                    for child in value.values():
+                        visit(child)
+                elif isinstance(value, list):
+                    for child in value:
+                        visit(child)
+
+            visit(root)
+
+    @staticmethod
+    def collect_loot_table_types(archive, result):
+        for name in archive.namelist():
+            if not (name.startswith("data/minecraft/loot_table/") and name.endswith(".json")):
+                continue
+            try:
+                root = json.loads(archive.read(name))
+            except (KeyError, json.JSONDecodeError):
+                continue
+            loot_type = root.get("type")
+            if isinstance(loot_type, str):
+                result.add(loot_type)
 
     def check(self, source, value, kind):
         if kind == "item":
@@ -181,13 +282,25 @@ class Validator:
         elif kind == "enchantment":
             known = value in self.enchantments
         elif kind == "model":
-            known = value.split(":", 1)[1] in self.models | BUILTIN_MODELS
+            known = value in self.models or value.split(":", 1)[1] in BUILTIN_MODELS
         elif kind == "texture":
-            known = value.split(":", 1)[1] in self.textures
+            known = value in self.textures
         elif kind == "skip":
             known = True
         elif kind == "loot_registry":
-            known = value in self.loot_registry
+            known = value in self.loot_registry or value in self.loot_condition_literals
+        elif kind == "loot_number_provider":
+            known = value in LOOT_NUMBER_PROVIDER_TYPES
+        elif kind == "item_model_type":
+            known = value in ITEM_MODEL_TYPES
+        elif kind == "item_model_property":
+            known = value in ITEM_MODEL_PROPERTIES
+        elif kind == "item_model_tint":
+            known = value in ITEM_MODEL_TINT_TYPES
+        elif kind == "recipe_serializer":
+            known = value in self.registry.get("recipe_serializer", set())
+        elif kind == "loot_table_type":
+            known = value in self.loot_table_types
         elif kind.startswith("tag:"):
             known = value in self.tags[kind[4:]]
         else:
@@ -209,6 +322,10 @@ class Validator:
                 self.walk(source, entry, keys, file_kind)
         elif isinstance(value, dict):
             for key, entry in value.items():
+                if key == "tag" and value.get("type") == "minecraft:matching_block_tag" and isinstance(entry, str):
+                    tag = entry if entry.startswith("#") else "#" + entry
+                    self.check(source, tag, "tag:block")
+                    continue
                 if key == "name" and value.get("type") == "minecraft:loot_table":
                     key = "value"
                 self.walk(source, entry, keys + [key], file_kind)
@@ -216,7 +333,7 @@ class Validator:
     def classify(self, value, keys, file_kind):
         key = keys[-1] if keys else ""
         if value.startswith("#"):
-            if file_kind == "other" and key == "tag":
+            if "matching_block_tag" in keys or (file_kind == "other" and key == "tag"):
                 return "tag:block"
             if file_kind == "block_tag" or key in ("blocks", "block"):
                 return "tag:block"
@@ -224,7 +341,7 @@ class Validator:
                 return "tag:biome"
             return "tag:item"
         if file_kind == "recipe":
-            return "skip" if key == "type" else "item"
+            return ("recipe_serializer" if value.startswith("minecraft:") else "skip") if key == "type" else "item"
         if file_kind == "item_tag":
             return "item"
         if file_kind == "block_tag":
@@ -235,7 +352,20 @@ class Validator:
             if key in ("parent", "model"):
                 return "model"
             return "flat"
+        if file_kind == "item_model":
+            if key == "type":
+                if "tints" in keys:
+                    return "item_model_tint"
+                if value in ITEM_MODEL_TINT_TYPES:
+                    return "item_model_tint"
+                return "item_model_type"
+            if key == "property":
+                return "item_model_property"
+            if key in ("model", "base") and ":" in value:
+                return "model"
         if file_kind == "loot":
+            if key == "type" and len(keys) == 1:
+                return "loot_table_type"
             if key == "name":
                 return "item"
             if key == "value":
@@ -249,12 +379,16 @@ class Validator:
             if key == "formula":
                 return "skip" if value in BONUS_FORMULAS else "flat"
             if key == "type" and len(keys) > 1:
+                if value in LOOT_NUMBER_PROVIDER_TYPES:
+                    return "loot_number_provider"
                 return "loot_registry"
             if key == "type":
                 return "skip"
             return "flat"
         if key in ("enchantment", "exclusive_set") and file_kind != "recipe":
             return "enchantment"
+        if file_kind == "blockstate" and key == "model":
+            return "model"
         return "flat"
 
     def check_json(self, path):
@@ -268,12 +402,67 @@ class Validator:
             file_kind = "item_tag"
         elif "/" + profile.loot_folder + "/" in "/" + relative:
             file_kind = "loot"
-        elif relative.startswith("assets/") and ("/models/" in relative or "/blockstates/" in relative):
+        elif "/blockstates/" in "/" + relative:
+            file_kind = "blockstate"
+        elif relative.startswith("assets/") and "/models/" in relative:
             file_kind = "model"
+        elif relative.startswith("assets/") and "/items/" in relative:
+            file_kind = "item_model"
         else:
             file_kind = "other"
         content = json.loads(path.read_text(encoding="utf-8"))
         self.walk(relative, content, [], file_kind)
+        if file_kind == "blockstate":
+            self.check_blockstate(relative, content)
+
+    def check_blockstate(self, relative, content):
+        asset_path = relative.split("/blockstates/", 1)[1]
+        namespace = relative.split("/", 2)[1]
+        block_id = f"{namespace}:{Path(asset_path).with_suffix('').as_posix()}"
+        report = self.block_states.get(block_id)
+        if report is None:
+            return
+        properties = report.get("properties", {})
+        for selector in content.get("variants", {}):
+            self.check_state_selector(relative, block_id, selector, properties)
+        for part in content.get("multipart", []):
+            when = part.get("when", {})
+            self.check_state_condition(relative, block_id, when, properties)
+
+    def check_state_selector(self, source, block_id, selector, properties):
+        if not selector:
+            return
+        values = {}
+        for property_value in selector.split(","):
+            name, separator, value = property_value.partition("=")
+            if not separator:
+                self.report(source, selector, f"valid {block_id} block-state selector")
+                return
+            values[name] = value.split("|")
+        self.check_state_properties(source, block_id, values, properties)
+
+    def check_state_properties(self, source, block_id, values, properties):
+        for name, expected_values in values.items():
+            if name not in properties:
+                self.report(source, f"{block_id}[{name}]", "block-state property")
+                continue
+            candidates = expected_values.split("|") if isinstance(expected_values, str) else expected_values
+            for value in candidates:
+                if value not in properties[name]:
+                    self.report(source, f"{block_id}[{name}={value}]", "block-state property value")
+
+    def check_state_condition(self, source, block_id, condition, properties):
+        if isinstance(condition, list):
+            for part in condition:
+                self.check_state_condition(source, block_id, part, properties)
+            return
+        if not isinstance(condition, dict):
+            return
+        for operator in ("AND", "OR"):
+            if operator in condition:
+                self.check_state_condition(source, block_id, condition[operator], properties)
+                return
+        self.check_state_properties(source, block_id, condition, properties)
 
     def check_structure(self, path):
         relative = path.relative_to(self.out).as_posix()
@@ -297,10 +486,14 @@ class Validator:
 
     def check_aspects(self, path):
         text = path.read_text(encoding="utf-8")
-        for value in ID_PATTERN.findall(text):
-            if not value.startswith("#") and value in self.registry["entity_type"]:
-                continue
-            self.check(path.name, value, "tag:item" if value.startswith("#") else "item")
+        for match in ID_PATTERN.finditer(text):
+            value = match.group(1)
+            line = text[:match.start()].rsplit("\n", 1)[-1]
+            if re.search(r"\bentity\s*\(\s*$", line):
+                kind = "entity"
+            else:
+                kind = "tag:item" if value.startswith("#") else "item"
+            self.check(path.name, value, kind)
 
     def run(self, aspects):
         for path in sorted(self.out.rglob("*.json")):
@@ -317,15 +510,18 @@ def main():
     parser.add_argument("--aspects", help="ConfigAspects.java to check (default: the committed one)")
     parser.add_argument("--no-aspects", action="store_true")
     parser.add_argument("--fetch-only", action="store_true")
+    parser.add_argument("--reports-dir", help="Minecraft data-generator reports directory")
+    parser.add_argument("--server-jar", help="Vanilla server jar including its bundled server")
+    parser.add_argument("--client-jar", help="Vanilla client jar for model and texture IDs")
     profile = mcformat.init(parser=parser)
-    if profile.modern:
-        raise SystemExit("validation needs a vanilla server jar, use --mc 1.21.1 or --mc 1.19.2")
     args, _ = parser.parse_known_args()
+    if profile.modern and not (args.reports_dir and args.server_jar and args.client_jar):
+        raise SystemExit("validation needs a vanilla server jar, use --mc 1.21.1 or --mc 1.19.2")
     if args.fetch_only:
         print(fetch(profile.name))
         return
     aspects = None if args.no_aspects else Path(args.aspects) if args.aspects else ASPECTS
-    problems = Validator(profile.name, mcformat.out_root).run(aspects)
+    problems = Validator(profile.name, mcformat.out_root, args.reports_dir, args.server_jar, args.client_jar).run(aspects)
     for source, value, expected in problems:
         print(f"{source}: {value} (expected {expected})")
     print(f"{profile.name}: {len(problems)} problem(s)")

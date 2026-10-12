@@ -170,6 +170,29 @@ def convert_villager_textures():
         (zombie / f"{name}.png.mcmeta").write_text(meta)
 
 
+def convert_effect_icons():
+    from PIL import Image
+
+    atlas = Image.open(ASSETS / "textures" / "misc" / "potions.png").convert("RGBA")
+    icons = {
+        "taint_poison": (3, 1),
+        "vis_exhaust": (5, 1),
+        "warp_ward": (3, 2),
+        "death_gaze": (4, 2),
+        "sun_scorned": (6, 2),
+        "thaumarhia": (7, 2),
+        "unnatural_hunger": (7, 1),
+        "blurred_vision": (5, 2),
+        "infectious_vis_exhaust": (6, 1),
+    }
+    destination = ASSETS / "textures" / "mob_effect"
+    destination.mkdir(parents=True, exist_ok=True)
+    for name, (column, row) in icons.items():
+        left = column * 18
+        top = row * 18
+        atlas.crop((left, top, left + 18, top + 18)).save(destination / f"{name}.png")
+
+
 def convert_textures():
     counts = Counter()
     for old_dir, new_dir in TEXTURE_DIRS.items():
@@ -416,6 +439,7 @@ def main():
 
     clean_targets()
     texture_counts = convert_textures()
+    convert_effect_icons()
     sound_files, sounds = convert_sounds()
     id_map = load_id_map(Path(arguments.id_map))
     results, prefixes, uncovered, unmatched, escape_stats = convert_lang(id_map)

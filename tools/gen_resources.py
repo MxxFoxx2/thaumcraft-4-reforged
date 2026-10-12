@@ -19,6 +19,7 @@ import gen_phase9_devices
 import gen_phase9_warded
 import gen_phase9_machines
 import gen_phase9_mirrors
+import gen_phase10_11
 import gen_villages
 import gen_world
 
@@ -1002,6 +1003,7 @@ def main():
     gen_phase9_machines.generate(ctx)
     gen_phase9_mirrors.generate(ctx)
     gen_curios.generate(ctx)
+    gen_phase10_11.generate(ctx)
     gen_phase5.recipes(ctx)
     write_tags()
     if profile.explicit_render_types:

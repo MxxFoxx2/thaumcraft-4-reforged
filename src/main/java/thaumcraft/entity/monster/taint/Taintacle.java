@@ -96,7 +96,7 @@ public class Taintacle extends Monster implements TaintedMob {
     }
 
     @Override
-    public boolean canBeCollidedWith(@Nullable Entity other) {
+    public boolean canBeCollidedWith() {
         return true;
     }
 
@@ -116,7 +116,7 @@ public class Taintacle extends Monster implements TaintedMob {
     }
 
     @Override
-    public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -196,9 +196,9 @@ public class Taintacle extends Monster implements TaintedMob {
             return;
         }
         this.attackTime = 40 + level.getRandom().nextInt(20);
-        TaintacleTiny tiny = ModEntities.TAINTACLE_TINY.get().create(level, MobSpawnType.TRIGGERED);
+        TaintacleTiny tiny = ModEntities.TAINTACLE_TINY.get().create(level);
         if (tiny != null) {
-            tiny.absSnapTo(victim.getX() + level.getRandom().nextFloat() - level.getRandom().nextFloat(), victim.getY(),
+            tiny.absMoveTo(victim.getX() + level.getRandom().nextFloat() - level.getRandom().nextFloat(), victim.getY(),
                 victim.getZ() + level.getRandom().nextFloat() - level.getRandom().nextFloat(), 0.0F, 0.0F);
             if (level.addFreshEntity(tiny)) {
                 this.playSound(ModSounds.TENTACLE.get(), this.getSoundVolume(), this.getVoicePitch());
@@ -213,7 +213,7 @@ public class Taintacle extends Monster implements TaintedMob {
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
-        this.spawnAtLocation(level, new ItemStack(level.getRandom().nextBoolean() ? ModItems.TAINTED_GOO.get() : ModItems.TAINT_TENDRIL.get()));
+        this.spawnAtLocation(new ItemStack(level.getRandom().nextBoolean() ? ModItems.TAINTED_GOO.get() : ModItems.TAINT_TENDRIL.get()));
     }
 
     @Nullable

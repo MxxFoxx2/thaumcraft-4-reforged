@@ -79,9 +79,9 @@ public class TaintBlock extends Block {
             if (kind == Kind.CRUST && level.isEmptyBlock(pos.above()) && random.nextInt(200) == 0) {
                 AABB nearbySwarmer = new AABB(pos).inflate(16.0);
                 if (level.getEntitiesOfClass(TaintSwarmer.class, nearbySwarmer).isEmpty()) {
-                    TaintSwarmer swarmer = ModEntities.TAINT_SPORE_SWARMER.get().create(level, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+                    TaintSwarmer swarmer = ModEntities.TAINT_SPORE_SWARMER.get().create(level);
                     if (swarmer != null) {
-                        swarmer.absSnapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+                        swarmer.absMoveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
                         if (level.addFreshEntity(swarmer)) {
                             level.removeBlock(pos, false);
                             level.playSound(null, pos, thaumcraft.registry.ModSounds.ROOTS.get(), net.minecraft.sounds.SoundSource.BLOCKS, 0.1F, 0.9F + random.nextFloat() * 0.2F);

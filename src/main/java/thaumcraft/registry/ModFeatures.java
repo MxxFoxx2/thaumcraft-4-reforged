@@ -15,7 +15,7 @@ public final class ModFeatures {
 
     public static final Supplier<ThaumcraftWorldGenFeature> WORLD_GENERATION = FEATURES.register("world_generation", ThaumcraftWorldGenFeature::new);
     public static final Supplier<MagicalForestDecorationFeature> MAGICAL_FOREST_DECORATION = FEATURES.register("magical_forest_decoration", MagicalForestDecorationFeature::new);
-    public static final Supplier<TaintDecorationFeature> TAINT_DECORATION = FEATURES.register("taint_decoration", TaintDecorationFeature::new);
+    public static final Supplier<Feature<?>> TAINT_DECORATION = FEATURES.register("taint_decoration", TaintDecorationFeature::new);
 
     private ModFeatures() {
     }

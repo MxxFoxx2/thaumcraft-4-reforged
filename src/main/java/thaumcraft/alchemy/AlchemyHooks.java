@@ -29,7 +29,7 @@ public final class AlchemyHooks {
     }
 
     public static boolean spawnThaumicSlime(ServerLevel level, Vec3 position, int size) {
-        ThaumicSlime slime = ModEntities.THAUMIC_SLIME.get().create(level, MobSpawnType.TRIGGERED);
+        ThaumicSlime slime = ModEntities.THAUMIC_SLIME.get().create(level);
         if (slime == null) {
             return false;
         }

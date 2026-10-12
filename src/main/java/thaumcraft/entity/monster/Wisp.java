@@ -18,6 +18,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -43,7 +44,7 @@ import thaumcraft.platform.ModNetwork;
 import thaumcraft.registry.ModItems;
 import thaumcraft.registry.ModSounds;
 
-public class Wisp extends Mob implements Enemy {
+public class Wisp extends FlyingMob implements Enemy {
     private static final EntityDataAccessor<String> DATA_TYPE = SynchedEntityData.defineId(Wisp.class, EntityDataSerializers.STRING);
     private static final TargetingConditions AGGRO_TARGETING = TargetingConditions.forCombat().range(16.0).ignoreLineOfSight();
     private static final net.minecraft.resources.ResourceKey<Biome> EERIE = net.minecraft.resources.ResourceKey.create(Registries.BIOME, thaumcraft.Thaumcraft.id("eerie"));
@@ -93,7 +94,7 @@ public class Wisp extends Mob implements Enemy {
 
     @Override
     public void travel(Vec3 input) {
-        this.travelFlying(input, 0.02F);
+        super.travel(input);
     }
 
     @Override
@@ -172,8 +173,9 @@ public class Wisp extends Mob implements Enemy {
     }
 
     @Override
-    protected void customServerAiStep(ServerLevel level) {
-        super.customServerAiStep(level);
+    protected void customServerAiStep() {
+        if (!(this.level() instanceof ServerLevel level)) return;
+        super.customServerAiStep();
         if (this.getAspect() == null) {
             this.chooseAspect(level);
         }
@@ -325,18 +327,20 @@ public class Wisp extends Mob implements Enemy {
         }
         ItemStack essence = new ItemStack(ModItems.WISP_ESSENCE.get());
         AspectKeys.ASPECTS.set(essence, new AspectList().add(aspect, 2));
-        this.spawnAtLocation(level, essence);
+        this.spawnAtLocation(essence);
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putString("Type", this.entityData.get(DATA_TYPE));
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.entityData.set(DATA_TYPE, input.getStringOr("Type", ""));
     }
 }

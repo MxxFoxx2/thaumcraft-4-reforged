@@ -80,8 +80,9 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
     }
 
     @Override
-    protected void customServerAiStep(ServerLevel level) {
-        super.customServerAiStep(level);
+    protected void customServerAiStep() {
+        if (!(this.level() instanceof ServerLevel level)) return;
+        super.customServerAiStep();
         if (level.getDifficulty() == Difficulty.PEACEFUL) {
             this.discard();
             return;
@@ -131,7 +132,7 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
 
     private void spitAt(Player target) {
         this.spitCounter = 101;
-        ThaumicSlime spit = ModEntities.THAUMIC_SLIME.get().create(this.level(), MobSpawnType.TRIGGERED);
+        ThaumicSlime spit = ModEntities.THAUMIC_SLIME.get().create(this.level());
         if (spit != null && this.level() instanceof ServerLevel level) {
             spit.setSlimeSize(1);
             double y = this.getBoundingBox().getCenter().y;
@@ -224,7 +225,7 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
         double x = this.getX() + (this.random.nextDouble() * 2.0 - 1.0) * this.getBbWidth() * 0.5;
         double y = this.getY();
         double z = this.getZ() + (this.random.nextDouble() * 2.0 - 1.0) * this.getBbWidth() * 0.5;
-        this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, net.minecraft.world.item.Items.SLIME_BALL), x, y, z,
+        this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SLIME_BALL)), x, y, z,
             (this.random.nextDouble() * 2.0 - 1.0) * 0.08 * size, this.random.nextDouble() * 0.08 * size,
             (this.random.nextDouble() * 2.0 - 1.0) * 0.08 * size);
     }
@@ -236,7 +237,7 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
             int count = (int) Math.sqrt(this.getSlimeSize());
             if (count > 1) {
                 for (int index = 0; index < count; index++) {
-                    ThaumicSlime child = ModEntities.THAUMIC_SLIME.get().create(level, MobSpawnType.TRIGGERED);
+                    ThaumicSlime child = ModEntities.THAUMIC_SLIME.get().create(level);
                     if (child != null) {
                         float offsetX = (index % 2 - 0.5F) * count / 4.0F;
                         float offsetZ = (index / 2 - 0.5F) * count / 4.0F;
@@ -255,7 +256,7 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource damageSource, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, damageSource, recentlyHit);
         if (this.getSlimeSize() < 3 && this.random.nextInt(3) == 0) {
-            this.spawnAtLocation(level, new net.minecraft.world.item.ItemStack(ModItems.TAINTED_GOO.get()));
+            this.spawnAtLocation(new net.minecraft.world.item.ItemStack(ModItems.TAINTED_GOO.get()));
         }
     }
 
@@ -275,14 +276,16 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putInt("Size", this.getSlimeSize() - 1);
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.setSlimeSize(input.getIntOr("Size", 0) + 1);
     }
 }

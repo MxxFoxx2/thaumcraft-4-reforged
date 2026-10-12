@@ -135,7 +135,7 @@ public class TaintedSheep extends TaintedAnimalMonster implements IShearable {
     public List<ItemStack> onSheared(Player player, ItemStack item, Level level, BlockPos pos) {
         this.setSheared(true);
         int count = 1 + this.random.nextInt(3);
-        return List.of(new ItemStack(Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.BLACK), count));
+        return List.of(new ItemStack(Blocks.BLACK_WOOL, count));
     }
 
     @Override
@@ -145,14 +145,16 @@ public class TaintedSheep extends TaintedAnimalMonster implements IShearable {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putBoolean("Sheared", this.isSheared());
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.setSheared(input.getBooleanOr("Sheared", false));
     }
 

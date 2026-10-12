@@ -42,20 +42,17 @@ public class TaintedChicken extends TaintedAnimalMonster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.CHICKEN_SOUNDS.get(net.minecraft.world.entity.animal.chicken.ChickenSoundVariants.SoundSet.CLASSIC)
-            .adultSounds().ambientSound().value();
+        return SoundEvents.CHICKEN_AMBIENT;
     }
 
     @Override
     protected SoundEvent getHurtSound(net.minecraft.world.damagesource.DamageSource source) {
-        return SoundEvents.CHICKEN_SOUNDS.get(net.minecraft.world.entity.animal.chicken.ChickenSoundVariants.SoundSet.CLASSIC)
-            .adultSounds().hurtSound().value();
+        return SoundEvents.CHICKEN_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.CHICKEN_SOUNDS.get(net.minecraft.world.entity.animal.chicken.ChickenSoundVariants.SoundSet.CLASSIC)
-            .adultSounds().deathSound().value();
+        return SoundEvents.CHICKEN_DEATH;
     }
 
     @Override
@@ -105,7 +102,7 @@ public class TaintedChicken extends TaintedAnimalMonster {
     }
 
     @Override
-    public boolean causeFallDamage(double fallDistance, float multiplier, net.minecraft.world.damagesource.DamageSource source) {
+    public boolean causeFallDamage(float fallDistance, float multiplier, net.minecraft.world.damagesource.DamageSource source) {
         return false;
     }
 

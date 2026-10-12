@@ -82,7 +82,7 @@ public class BrainyZombie extends Zombie {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         for (int index = 0; index < 3; index++) {
             if (this.random.nextBoolean()) {
-                this.spawnAtLocation(level, new ItemStack(Items.ROTTEN_FLESH));
+                this.spawnAtLocation(new ItemStack(Items.ROTTEN_FLESH));
             }
         }
         int looting = 0;
@@ -93,7 +93,7 @@ public class BrainyZombie extends Zombie {
             );
         }
         if (this.random.nextInt(10) - looting <= 4) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.ZOMBIE_BRAIN.get()), 1.5F);
+            this.spawnAtLocation(new ItemStack(ModItems.ZOMBIE_BRAIN.get()), 1.5F);
         }
     }
 

@@ -51,14 +51,14 @@ public class TaintSpore extends Monster implements TaintedMob {
     }
 
     public static @Nullable TaintSpore create(ServerLevel level, BlockPos stalkPos) {
-        TaintSpore spore = ModEntities.TAINT_SPORE.get().create(level, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+        TaintSpore spore = ModEntities.TAINT_SPORE.get().create(level);
         if (spore == null) {
             return null;
         }
         spore.stalkPos = stalkPos.immutable();
         spore.entityData.set(DATA_ATTACHED, true);
         spore.setNoAi(true);
-        spore.absSnapTo(stalkPos.getX() + 0.5, stalkPos.getY() + 1.0, stalkPos.getZ() + 0.5, 0.0F, 0.0F);
+        spore.absMoveTo(stalkPos.getX() + 0.5, stalkPos.getY() + 1.0, stalkPos.getZ() + 0.5, 0.0F, 0.0F);
         return spore;
     }
 
@@ -113,7 +113,7 @@ public class TaintSpore extends Monster implements TaintedMob {
     }
 
     @Override
-    public boolean canBeCollidedWith(@Nullable Entity other) {
+    public boolean canBeCollidedWith() {
         return true;
     }
 
@@ -163,7 +163,7 @@ public class TaintSpore extends Monster implements TaintedMob {
                 this.burstIntoSpiders();
                 return;
             }
-            this.absSnapTo(this.stalkPos.getX() + 0.5, this.stalkPos.getY() + 1.0, this.stalkPos.getZ() + 0.5, this.getYRot(), this.getXRot());
+            this.absMoveTo(this.stalkPos.getX() + 0.5, this.stalkPos.getY() + 1.0, this.stalkPos.getZ() + 0.5, this.getYRot(), this.getXRot());
             this.setDeltaMovement(Vec3.ZERO);
             return;
         }
@@ -197,11 +197,11 @@ public class TaintSpore extends Monster implements TaintedMob {
         int count = size / 3 + level.getRandom().nextInt(size / 2 + 1);
         level.playSound(null, this.blockPosition(), ModSounds.GORE.get(), SoundSource.HOSTILE, 1.0F, 0.9F + level.getRandom().nextFloat() * 0.1F);
         for (int index = 0; index < count; index++) {
-            TaintSpider spider = ModEntities.TAINT_SPIDER.get().create(level, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+            TaintSpider spider = ModEntities.TAINT_SPIDER.get().create(level);
             if (spider == null) {
                 continue;
             }
-            spider.absSnapTo(this.getX() + level.getRandom().nextFloat() - level.getRandom().nextFloat(), this.getY() + level.getRandom().nextFloat(),
+            spider.absMoveTo(this.getX() + level.getRandom().nextFloat() - level.getRandom().nextFloat(), this.getY() + level.getRandom().nextFloat(),
                 this.getZ() + level.getRandom().nextFloat() - level.getRandom().nextFloat(), level.getRandom().nextFloat() * 360.0F, 0.0F);
             level.addFreshEntity(spider);
         }
@@ -212,13 +212,14 @@ public class TaintSpore extends Monster implements TaintedMob {
     }
 
     @Override
-    public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource source) {
         return false;
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putInt("SporeSize", this.getSporeSize());
         output.putInt("GrowthTicks", this.growthTicks);
         output.putBoolean("Attached", this.entityData.get(DATA_ATTACHED));
@@ -226,8 +227,9 @@ public class TaintSpore extends Monster implements TaintedMob {
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.setSporeSize(input.getIntOr("SporeSize", 2));
         this.growthTicks = input.getIntOr("GrowthTicks", 0);
         this.entityData.set(DATA_ATTACHED, input.getBooleanOr("Attached", false));

@@ -50,7 +50,7 @@ public final class WarpEvents {
         if (shouldSkipWarpEvents(player, ResearchConfig.WUSS_MODE)) {
             return;
         }
-        ServerLevel level = player.level();
+        ServerLevel level = (ServerLevel) player.level();
         PlayerKnowledge knowledge = Knowledge.get(player);
         int actualWarp = Warp.get(player, WarpType.PERMANENT) + Warp.get(player, WarpType.STICKY);
         int warp = Math.max(0, Warp.total(player) + Warp.getWarpFromGear(player));
@@ -126,7 +126,7 @@ public final class WarpEvents {
             applyEffect(player, ModEffects.DEATH_GAZE, 6000, amplifier);
             whisper(player, 4);
         } else if (effect <= 60) {
-            WarpEncounterHooks.spawnMindSpiders(player.level(), player, true, Math.min(50, warp));
+            WarpEncounterHooks.spawnMindSpiders((ServerLevel) player.level(), player, true, Math.min(50, warp));
             whisper(player, 7);
         } else if (effect <= 64) {
             whisper(player, 13);
@@ -148,7 +148,7 @@ public final class WarpEvents {
         } else if (effect <= 88) {
             return;
         } else if (effect <= 92) {
-            WarpEncounterHooks.spawnMindSpiders(player.level(), player, false, Math.min(50, warp));
+            WarpEncounterHooks.spawnMindSpiders((ServerLevel) player.level(), player, false, Math.min(50, warp));
             whisper(player, 7);
         } else {
             spawnMist(player, Math.min(8, warp / 15));
@@ -158,7 +158,7 @@ public final class WarpEvents {
     private static void spawnMist(ServerPlayer player, int guardians) {
         ModNetwork.sendToPlayer(player, new WarpEventPayload(1));
         if (guardians > 0) {
-            WarpEncounterHooks.spawnGuardians(player.level(), player, guardians);
+            WarpEncounterHooks.spawnGuardians((ServerLevel) player.level(), player, guardians);
         }
         whisper(player, 6);
     }
@@ -217,14 +217,15 @@ public final class WarpEvents {
             if (living.hasEffect(MobEffects.WITHER) || !player.hasLineOfSight(living)) {
                 continue;
             }
-            if (living instanceof Player && !player.level().isPvpAllowed()) {
+            if (living instanceof Player && !player.getServer().isPvpAllowed()) {
                 continue;
             }
             Vec3 target = new Vec3(living.getX(), living.getBoundingBox().minY + living.getBbHeight() / 2.0, living.getZ());
             if (!isWithinDeathGazeCone(look, player.getEyePosition(), target, range)) {
                 continue;
             }
-            living.setLastHurtByPlayer(player, 100);
+            living.setLastHurtByPlayer(player);
+            living.lastHurtByPlayerTime = 100;
             if (living instanceof Mob mob) {
                 mob.setTarget(player);
             }

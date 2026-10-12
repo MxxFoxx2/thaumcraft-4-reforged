@@ -6,10 +6,10 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.LivingEntity;
 import javax.annotation.Nullable;
 import thaumcraft.registry.ModEntities;
-import net.minecraft.world.entity.animal.chicken.Chicken;
-import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.npc.Villager;
 
@@ -34,11 +34,11 @@ public final class TaintMobFactory {
         } else {
             return null;
         }
-        Entity replacement = replacementType.create(original.level(), MobSpawnType.CONVERSION);
+        Entity replacement = replacementType.create(original.level());
         if (replacement == null) {
             return null;
         }
-        replacement.absSnapTo(original.getX(), original.getY(), original.getZ(), original.getYRot(), 0.0F);
+        replacement.absMoveTo(original.getX(), original.getY(), original.getZ(), original.getYRot(), 0.0F);
         replacement.setDeltaMovement(original.getDeltaMovement());
         replacement.setCustomName(original.getCustomName());
         replacement.setCustomNameVisible(original.isCustomNameVisible());

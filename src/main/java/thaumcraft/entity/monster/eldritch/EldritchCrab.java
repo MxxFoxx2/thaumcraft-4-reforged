@@ -65,7 +65,7 @@ public class EldritchCrab extends Monster {
     }
 
     @Override
-    protected int getBaseExperienceReward(ServerLevel level) {
+    protected int getBaseExperienceReward() {
         return 6;
     }
 
@@ -129,11 +129,11 @@ public class EldritchCrab extends Monster {
     }
 
     public static @Nullable EldritchCrab spawnFromInhabitedZombie(ServerLevel level, InhabitedZombie zombie) {
-        EldritchCrab crab = ModEntities.ELDRITCH_CRAB.get().create(level, MobSpawnType.CONVERSION);
+        EldritchCrab crab = ModEntities.ELDRITCH_CRAB.get().create(level);
         if (crab == null) {
             return null;
         }
-        crab.snapTo(zombie.getX(), zombie.getY() + zombie.getEyeHeight(), zombie.getZ(), zombie.getYRot(), zombie.getXRot());
+        crab.absMoveTo(zombie.getX(), zombie.getY() + zombie.getEyeHeight(), zombie.getZ(), zombie.getYRot(), zombie.getXRot());
         crab.setHelm(true);
         return level.addFreshEntity(crab) ? crab : null;
     }
@@ -155,7 +155,7 @@ public class EldritchCrab extends Monster {
             }
             if (this.mountedAttackCooldown <= 0) {
                 this.mountedAttackCooldown = 10 + this.random.nextInt(10);
-                this.doHurtTarget(level, vehicle);
+                this.doHurtTarget(vehicle);
                 if (this.getVehicle() == vehicle && this.random.nextFloat() < 0.2F) {
                     this.stopRiding();
                 }
@@ -168,7 +168,7 @@ public class EldritchCrab extends Monster {
         boolean hurt = super.hurt(source, damage);
         if (this.hasHelm() && this.getHealth() / this.getMaxHealth() <= 0.5F) {
             this.setHelm(false);
-            this.spawnItemParticles(new ItemStack(ModItems.CRIMSON_CULT_CHESTPLATE.get()), 20);
+            this.level().addParticle(new net.minecraft.core.particles.ItemParticleOption(net.minecraft.core.particles.ParticleTypes.ITEM, new ItemStack(ModItems.CRIMSON_CULT_CHESTPLATE.get())), this.getX(), this.getY() + this.getBbHeight() * 0.5, this.getZ(), 0.0, 0.1, 0.0);
         }
         return hurt;
     }
@@ -210,8 +210,8 @@ public class EldritchCrab extends Monster {
     }
 
     @Override
-    public boolean doHurtTarget(ServerLevel level, Entity target) {
-        boolean hit = super.doHurtTarget(level, target);
+    public boolean doHurtTarget(Entity target) {
+        boolean hit = super.doHurtTarget(target);
         if (hit) {
             this.playSound(ModSounds.CRAB_CLAW.get(), 1.0F, 0.9F + this.random.nextFloat() * 0.2F);
         }
@@ -229,7 +229,7 @@ public class EldritchCrab extends Monster {
             )
             : 0;
         if (recentlyHit && (this.random.nextInt(3) == 0 || this.random.nextInt(1 + looting) > 0)) {
-            this.spawnAtLocation(level, new ItemStack(Items.ENDER_PEARL));
+            this.spawnAtLocation(new ItemStack(Items.ENDER_PEARL));
         }
     }
 
@@ -239,14 +239,16 @@ public class EldritchCrab extends Monster {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putByte("Flags", this.entityData.get(DATA_FLAGS));
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.entityData.set(DATA_FLAGS, input.getByteOr("Flags", (byte) 0));
         this.updateArmorAndSpeed();
     }

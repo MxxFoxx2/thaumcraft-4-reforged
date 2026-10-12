@@ -89,9 +89,10 @@ public final class ModFluids {
         }
 
         @Override
-        public void tick(ServerLevel level, BlockPos pos, BlockState blockState, FluidState fluidState) {
-            if (blockState.getBlock() instanceof LiquidDeathBlock) {
-                blockState.tick(level, pos, level.getRandom());
+        public void tick(Level level, BlockPos pos, FluidState fluidState) {
+            if (level instanceof ServerLevel serverLevel) {
+                BlockState state = level.getBlockState(pos);
+                if (state.getBlock() instanceof LiquidDeathBlock) state.tick(serverLevel, pos, level.getRandom());
             }
         }
 

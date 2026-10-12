@@ -21,17 +21,18 @@ public final class WarpMobEffect extends MobEffect {
     }
 
     @Override
-    public boolean applyEffectTick(ServerLevel level, LivingEntity entity, int amplifier) {
+    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+        ServerLevel level = entity.level() instanceof ServerLevel serverLevel ? serverLevel : null;
         switch (kind) {
-            case SUN_SCORNED -> applySunScorned(level, entity);
-            case THAUMARHIA -> applyThaumarhia(level, entity);
+            case SUN_SCORNED -> { if (level != null) applySunScorned(level, entity); }
+            case THAUMARHIA -> { if (level != null) applyThaumarhia(level, entity); }
             case UNNATURAL_HUNGER -> {
                 if (entity instanceof Player player) {
                     player.causeFoodExhaustion(0.025F * (amplifier + 1));
                 }
             }
-            case TAINT_POISON -> applyTaintPoison(level, entity);
-            case INFECTIOUS_VIS_EXHAUST -> spreadVisExhaust(level, entity, amplifier);
+            case TAINT_POISON -> { if (level != null) applyTaintPoison(level, entity); }
+            case INFECTIOUS_VIS_EXHAUST -> { if (level != null) spreadVisExhaust(level, entity, amplifier); }
             case BLURRED_VISION, DEATH_GAZE, VIS_EXHAUST, WARP_WARD -> {
             }
         }

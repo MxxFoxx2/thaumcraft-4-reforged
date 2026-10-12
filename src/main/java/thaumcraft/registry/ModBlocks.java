@@ -103,12 +103,12 @@ public final class ModBlocks {
     public static final DeferredBlock<PurifyingFluidBlock> PURIFYING_FLUID = RegistryHelper.registerBlock(BLOCKS,
         "purifying_fluid",
         properties -> new PurifyingFluidBlock(ModFluids.PURIFYING_FLUID.get(), properties),
-        properties -> properties.mapColor(MapColor.WATER).replaceable().noCollision().strength(100.0F).pushReaction(PushReaction.DESTROY).lightLevel(state -> 10).noLootTable().liquid().sound(SoundType.EMPTY)
+        properties -> properties.mapColor(MapColor.WATER).replaceable().noCollission().strength(100.0F).pushReaction(PushReaction.DESTROY).lightLevel(state -> 10).noLootTable().liquid().sound(SoundType.EMPTY)
     );
     public static final DeferredBlock<LiquidDeathBlock> LIQUID_DEATH = RegistryHelper.registerBlock(BLOCKS,
         "liquid_death",
         properties -> new LiquidDeathBlock(ModFluids.LIQUID_DEATH.get(), properties),
-        properties -> properties.mapColor(MapColor.COLOR_PURPLE).replaceable().noCollision().strength(100.0F).pushReaction(PushReaction.DESTROY).lightLevel(state -> 8).noLootTable().liquid().sound(SoundType.EMPTY)
+        properties -> properties.mapColor(MapColor.COLOR_PURPLE).replaceable().noCollission().strength(100.0F).pushReaction(PushReaction.DESTROY).lightLevel(state -> 8).noLootTable().liquid().sound(SoundType.EMPTY)
     );
 
     public static final String[] CANDLE_COLORS = {
@@ -719,12 +719,12 @@ public final class ModBlocks {
     public static final DeferredItem<thaumcraft.device.MirrorItem> MAGIC_MIRROR_ITEM = RegistryHelper.registerItem(ModItems.ITEMS,
         "magic_mirror",
         properties -> new thaumcraft.device.MirrorItem(MAGIC_MIRROR.get(), properties),
-        properties -> properties.useBlockDescriptionPrefix().rarity(net.minecraft.world.item.Rarity.UNCOMMON)
+        properties -> properties.rarity(net.minecraft.world.item.Rarity.UNCOMMON)
     );
     public static final DeferredItem<thaumcraft.device.MirrorItem> ESSENTIA_MIRROR_ITEM = RegistryHelper.registerItem(ModItems.ITEMS,
         "essentia_mirror",
         properties -> new thaumcraft.device.MirrorItem(ESSENTIA_MIRROR.get(), properties),
-        properties -> properties.useBlockDescriptionPrefix().rarity(net.minecraft.world.item.Rarity.UNCOMMON)
+        properties -> properties.rarity(net.minecraft.world.item.Rarity.UNCOMMON)
     );
 
     private static DeferredBlock<thaumcraft.device.CrystalClusterBlock> crystalCluster(String name, int kind) {

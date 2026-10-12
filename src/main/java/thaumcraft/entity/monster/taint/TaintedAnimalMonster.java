@@ -152,7 +152,7 @@ public abstract class TaintedAnimalMonster extends Monster implements TaintedMob
     protected void dropTaintResource(ServerLevel level, int chanceDenominator, float gooChance) {
         if (level.getRandom().nextInt(chanceDenominator) == 0) {
             Item item = level.getRandom().nextFloat() < gooChance ? ModItems.TAINTED_GOO.get() : ModItems.TAINT_TENDRIL.get();
-            this.spawnAtLocation(level, new ItemStack(item));
+            this.spawnAtLocation(new ItemStack(item));
         }
     }
 }

@@ -113,7 +113,7 @@ public class TaintSwarm extends Monster implements TaintedMob {
     }
 
     @Override
-    public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(float fallDistance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -141,7 +141,7 @@ public class TaintSwarm extends Monster implements TaintedMob {
         if (this.attackTime <= 0 && this.distanceTo(this.target) < 3.0 && verticalOverlap(this, this.target)) {
             this.attackTime = 10 + this.random.nextInt(5);
             Vec3 movement = this.target.getDeltaMovement();
-            if (this.target.hurtServer((ServerLevel) this.level(), this.level().damageSources().source(ModDamageTypes.SWARM, this),
+            if (this.target.hurt(this.level().damageSources().source(ModDamageTypes.SWARM, this),
                 (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
                 this.target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0));
             }
@@ -203,21 +203,23 @@ public class TaintSwarm extends Monster implements TaintedMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         if (level.getRandom().nextBoolean()) {
-            this.spawnAtLocation(level, ModItems.TAINTED_GOO.get());
+            this.spawnAtLocation(ModItems.TAINTED_GOO.get());
         }
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putByte("Flags", this.entityData.get(DATA_FLAGS));
         output.putInt("DamageBonus", this.damageBonus);
         output.storeNullable("FlightTarget", BlockPos.CODEC, this.flightTarget);
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.entityData.set(DATA_FLAGS, input.getByteOr("Flags", (byte) 0));
         this.setDamageBonus(input.getIntOr("DamageBonus", 0));
         this.flightTarget = input.read("FlightTarget", BlockPos.CODEC).orElse(null);

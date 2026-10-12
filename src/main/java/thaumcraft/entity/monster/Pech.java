@@ -353,7 +353,7 @@ public class Pech extends Monster implements RangedAttackMob, net.minecraft.worl
         boolean hard = level.getDifficulty() == Difficulty.HARD;
         if (level.hasChunkAt(pos)) {
             factor += Mth.clamp((float) level.getChunkAt(pos).getInhabitedTime() / 3600000.0F, 0.0F, 1.0F) * (hard ? 1.0F : 0.75F);
-            factor += level.getMoonBrightness(pos) * 0.25F;
+            factor += level.getMoonBrightness() * 0.25F;
         }
         if (level.getDifficulty() == Difficulty.EASY || level.getDifficulty() == Difficulty.PEACEFUL) {
             factor *= level.getDifficulty().getId() / 2.0F;
@@ -387,8 +387,9 @@ public class Pech extends Monster implements RangedAttackMob, net.minecraft.worl
     }
 
     @Override
-    protected void customServerAiStep(ServerLevel level) {
-        super.customServerAiStep(level);
+    protected void customServerAiStep() {
+        if (!(this.level() instanceof ServerLevel level)) return;
+        super.customServerAiStep();
         if (this.getAnger() > 0) {
             this.setAnger(this.getAnger() - 1);
             if (this.getTarget() == null) {
@@ -440,7 +441,8 @@ public class Pech extends Monster implements RangedAttackMob, net.minecraft.worl
     }
 
     @Override
-    public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
+    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
+        ServerLevel level = (ServerLevel) this.level();
         if (source.getEntity() instanceof Player player) {
             for (Pech neighbor : level.getEntitiesOfClass(Pech.class, this.getBoundingBox().inflate(32.0, 16.0, 32.0))) {
                 neighbor.becomeAngryAt(player);
@@ -560,20 +562,20 @@ public class Pech extends Monster implements RangedAttackMob, net.minecraft.worl
         super.dropCustomDeathLoot(level, source, recentlyHit);
         for (ItemStack stack : this.loot) {
             if (!stack.isEmpty() && this.random.nextFloat() < 0.88F) {
-                this.spawnAtLocation(level, stack.copy(), 1.5F);
+                this.spawnAtLocation(stack.copy(), 1.5F);
             }
         }
         for (int index = 0; index < 1 + this.getLootingLevel(source); index++) {
             if (this.random.nextBoolean()) {
-                this.spawnAtLocation(level, ManaBeanItem.withAspect(Aspect.getPrimalAspects().get(this.random.nextInt(6))), 1.5F);
+                this.spawnAtLocation(ManaBeanItem.withAspect(Aspect.getPrimalAspects().get(this.random.nextInt(6))), 1.5F);
             }
         }
         int looting = this.getLootingLevel(source);
         if (this.random.nextInt(10) < 1 + looting) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.GOLD_COIN.get()), 1.5F);
+            this.spawnAtLocation(new ItemStack(ModItems.GOLD_COIN.get()), 1.5F);
         }
         if (recentlyHit && this.random.nextInt(200) - looting < 5) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.KNOWLEDGE_FRAGMENT.get()), 1.5F);
+            this.spawnAtLocation(new ItemStack(ModItems.KNOWLEDGE_FRAGMENT.get()), 1.5F);
         }
     }
 
@@ -587,8 +589,9 @@ public class Pech extends Monster implements RangedAttackMob, net.minecraft.worl
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putByte("PechType", this.entityData.get(DATA_TYPE));
         output.putInt("Anger", this.entityData.get(DATA_ANGER));
         output.putBoolean("Tamed", this.isTamed());
@@ -596,8 +599,9 @@ public class Pech extends Monster implements RangedAttackMob, net.minecraft.worl
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.entityData.set(DATA_TYPE, input.getByteOr("PechType", (byte) 0));
         this.entityData.set(DATA_ANGER, input.getIntOr("Anger", 0));
         this.entityData.set(DATA_TAMED, input.getBooleanOr("Tamed", false));

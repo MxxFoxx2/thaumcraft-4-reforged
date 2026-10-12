@@ -6,7 +6,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.item.Item;
+import thaumcraft.registry.ModItems;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -15,9 +17,14 @@ import thaumcraft.entity.TaintedMob;
 import thaumcraft.registry.ModBlocks;
 import thaumcraft.taint.TaintBiomes;
 
-public class BottleTaint extends ThrowableProjectile {
+public class BottleTaint extends ThrowableItemProjectile {
     public BottleTaint(EntityType<? extends BottleTaint> type, Level level) {
         super(type, level);
+    }
+
+    @Override
+    protected Item getDefaultItem() {
+        return ModItems.BOTTLED_TAINT.get();
     }
 
     @Override
@@ -27,6 +34,7 @@ public class BottleTaint extends ThrowableProjectile {
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+        super.defineSynchedData(entityData);
     }
 
     @Override

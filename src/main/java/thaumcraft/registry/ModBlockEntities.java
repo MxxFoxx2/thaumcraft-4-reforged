@@ -306,7 +306,7 @@ public final class ModBlockEntities {
     );
     public static final Supplier<BlockEntityType<EtherealBloomBlockEntity>> ETHEREAL_BLOOM = BLOCK_ENTITIES.register(
         "ethereal_bloom",
-        () -> new BlockEntityType<>(EtherealBloomBlockEntity::new, ModBlocks.ETHEREAL_BLOOM.get())
+        () -> BlockEntityType.Builder.of(EtherealBloomBlockEntity::new, ModBlocks.ETHEREAL_BLOOM.get()).build(null)
     );
 
     private ModBlockEntities() {

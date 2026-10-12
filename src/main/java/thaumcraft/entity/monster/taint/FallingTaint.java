@@ -23,7 +23,7 @@ public class FallingTaint extends Entity {
     }
 
     public static boolean fall(ServerLevel level, BlockPos source, BlockPos target, BlockState state) {
-        FallingTaint falling = ModEntities.FALLING_TAINT.get().create(level, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+        FallingTaint falling = ModEntities.FALLING_TAINT.get().create(level);
         if (falling == null || !level.hasChunkAt(source) || !level.hasChunkAt(target)) {
             return false;
         }
@@ -46,7 +46,7 @@ public class FallingTaint extends Entity {
     }
 
     @Override
-    public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float damage) {
+    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float damage) {
         return false;
     }
 
@@ -76,13 +76,15 @@ public class FallingTaint extends Entity {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
         output.store("BlockState", BlockState.CODEC, this.getBlockState());
         output.putInt("Age", this.age);
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
         this.setBlockState(input.read("BlockState", BlockState.CODEC).orElse(net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()));
         this.age = input.getIntOr("Age", 0);
     }

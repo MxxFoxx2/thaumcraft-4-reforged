@@ -378,7 +378,7 @@ public final class ConfigAspects extends AspectRegistrar {
         entity("minecraft:squid", tags().add(Aspect.BEAST, 2).add(Aspect.WATER, 2));
         entity("minecraft:wolf", tags().add(Aspect.BEAST, 3).add(Aspect.EARTH, 3));
         entity("minecraft:bat", tags().add(Aspect.BEAST, 1).add(Aspect.FLIGHT, 1).add(Aspect.AIR, 1));
-        entity("minecraft:oak_boat", tags().add(Aspect.MECHANISM, 2).add(Aspect.WATER, 2));
+        entity("minecraft:boat", tags().add(Aspect.MECHANISM, 2).add(Aspect.WATER, 2));
         entity("minecraft:spider", tags().add(Aspect.BEAST, 3).add(Aspect.ENTROPY, 2));
         entity("minecraft:slime", tags().add(Aspect.SLIME, 2).add(Aspect.WATER, 2));
         entity("minecraft:ghast", tags().add(Aspect.UNDEAD, 3).add(Aspect.FIRE, 2));

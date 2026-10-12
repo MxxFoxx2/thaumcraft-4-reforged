@@ -33,7 +33,7 @@ public class TaintSpider extends Spider implements TaintedMob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
         if (level.getRandom().nextInt(6) == 0) {
-            this.spawnAtLocation(level, level.getRandom().nextBoolean() ? ModItems.TAINTED_GOO.get() : ModItems.TAINT_TENDRIL.get());
+            this.spawnAtLocation(level.getRandom().nextBoolean() ? ModItems.TAINTED_GOO.get() : ModItems.TAINT_TENDRIL.get());
         }
     }
 }

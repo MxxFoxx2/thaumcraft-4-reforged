@@ -40,32 +40,34 @@ public abstract class Cultist extends Monster {
             : 0;
         int roll = this.random.nextInt(10);
         if (roll == 0) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.KNOWLEDGE_FRAGMENT.get()));
+            this.spawnAtLocation(new ItemStack(ModItems.KNOWLEDGE_FRAGMENT.get()));
         } else if (roll == 1) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.VOID_SEED.get()));
+            this.spawnAtLocation(new ItemStack(ModItems.VOID_SEED.get()));
         } else if (roll <= 3 + looting) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.GOLD_COIN.get()));
+            this.spawnAtLocation(new ItemStack(ModItems.GOLD_COIN.get()));
         }
         if (recentlyHit && this.random.nextInt(200) == 0) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.CRIMSON_RITES.get()));
+            this.spawnAtLocation(new ItemStack(ModItems.CRIMSON_RITES.get()));
         }
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
-        if (this.hasHome() && this.getHomeRadius() > 0) {
-            output.putInt("HomeRadius", this.getHomeRadius());
-            output.putInt("HomeX", this.getHomePosition().getX());
-            output.putInt("HomeY", this.getHomePosition().getY());
-            output.putInt("HomeZ", this.getHomePosition().getZ());
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
+        if (this.hasRestriction() && (int) this.getRestrictRadius() > 0) {
+            output.putInt("HomeRadius", (int) this.getRestrictRadius());
+            output.putInt("HomeX", this.getRestrictCenter().getX());
+            output.putInt("HomeY", this.getRestrictCenter().getY());
+            output.putInt("HomeZ", this.getRestrictCenter().getZ());
         }
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
-        input.getInt("HomeRadius").ifPresent(radius -> this.setHomeTo(
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
+        input.getInt("HomeRadius").ifPresent(radius -> this.restrictTo(
             new net.minecraft.core.BlockPos(input.getIntOr("HomeX", 0), input.getIntOr("HomeY", 0), input.getIntOr("HomeZ", 0)),
             radius
         ));

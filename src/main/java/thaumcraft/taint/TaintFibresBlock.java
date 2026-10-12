@@ -5,14 +5,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import thaumcraft.effect.EffectHooks;
@@ -96,21 +94,21 @@ public class TaintFibresBlock extends Block {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, @org.jspecify.annotations.Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
         if (!level.isClientSide() && TaintSpread.onlyAdjacentToTaint(level, pos)) {
             level.removeBlock(pos, false);
         }
-        super.neighborChanged(state, level, pos, neighborBlock, orientation, movedByPiston);
+        super.neighborChanged(state, level, pos, neighborBlock, neighborPos, movedByPiston);
     }
 
     @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (!level.isClientSide() && entity instanceof LivingEntity living && !(living instanceof thaumcraft.entity.TaintedMob)
             && !living.getType().builtInRegistryHolder().is(net.minecraft.tags.EntityTypeTags.UNDEAD)
             && level.getRandom().nextInt(living instanceof net.minecraft.world.entity.player.Player ? 1000 : 500) == 0) {
             EffectHooks.applyTaintPoison(living, living instanceof net.minecraft.world.entity.player.Player ? 80 : 160, 0);
         }
-        super.entityInside(state, level, pos, entity, effectApplier, isPrecise);
+        super.entityInside(state, level, pos, entity);
     }
 
     @Override

@@ -79,14 +79,16 @@ public class GiantBrainyZombie extends BrainyZombie {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putFloat("Anger", this.getAnger());
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.setAnger(input.getFloatOr("Anger", 1.0F));
     }
 
@@ -94,7 +96,7 @@ public class GiantBrainyZombie extends BrainyZombie {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         for (int index = 0; index < 12; index++) {
             if (this.random.nextBoolean()) {
-                this.spawnAtLocation(level, new ItemStack(Items.ROTTEN_FLESH, 2));
+                this.spawnAtLocation(new ItemStack(Items.ROTTEN_FLESH, 2));
             }
         }
         int looting = 0;
@@ -106,7 +108,7 @@ public class GiantBrainyZombie extends BrainyZombie {
             );
         }
         if (this.random.nextInt(10) - looting <= 4) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.ZOMBIE_BRAIN.get()), 2.0F);
+            this.spawnAtLocation(new ItemStack(ModItems.ZOMBIE_BRAIN.get()), 2.0F);
         }
         if (recentlyHit && this.random.nextInt(200) - looting < 5) {
             ItemStack rare = switch (this.random.nextInt(4)) {
@@ -115,7 +117,7 @@ public class GiantBrainyZombie extends BrainyZombie {
                 case 2 -> new ItemStack(Items.POTATO);
                 default -> new ItemStack(ModItems.AMBER.get());
             };
-            this.spawnAtLocation(level, rare, 2.0F);
+            this.spawnAtLocation(rare, 2.0F);
         }
     }
 }

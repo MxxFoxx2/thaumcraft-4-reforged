@@ -45,7 +45,7 @@ public class InhabitedZombie extends Zombie {
     public @Nullable SpawnGroupData finalizeSpawn(
         ServerLevelAccessor level,
         DifficultyInstance difficulty,
-        net.minecraft.world.entity.EntitySpawnReason spawnReason,
+        net.minecraft.world.entity.MobSpawnType spawnReason,
         @Nullable SpawnGroupData spawnGroupData
     ) {
         SpawnGroupData result = super.finalizeSpawn(level, difficulty, spawnReason, spawnGroupData);
@@ -68,7 +68,7 @@ public class InhabitedZombie extends Zombie {
     protected void tickDeath() {
         if (this.level() instanceof ServerLevel serverLevel && this.deathTime == 0) {
             EldritchCrab.spawnFromInhabitedZombie(serverLevel, this);
-            this.dropExperience(serverLevel, this.getLastHurtByPlayer());
+            this.dropExperience(this.lastHurtByPlayer);
             serverLevel.sendParticles(
                 ParticleTypes.EXPLOSION,
                 this.getX(),
@@ -84,11 +84,6 @@ public class InhabitedZombie extends Zombie {
             return;
         }
         super.tickDeath();
-    }
-
-    @Override
-    public boolean killedEntity(ServerLevel level, LivingEntity entity, DamageSource source) {
-        return true;
     }
 
     @Override

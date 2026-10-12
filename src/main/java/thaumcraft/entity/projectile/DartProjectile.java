@@ -16,7 +16,7 @@ public class DartProjectile extends AbstractArrow {
 
     public DartProjectile(EntityType<? extends DartProjectile> type, Level level) {
         super(type, level);
-        this.setBaseDamage(2.0);
+        this.setBaseDamage(1.0);
         this.pickup = Pickup.DISALLOWED;
     }
 

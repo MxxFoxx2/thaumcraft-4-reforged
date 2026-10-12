@@ -24,7 +24,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
+import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -124,20 +124,22 @@ public class CultistCleric extends Cultist implements RangedAttackMob {
     }
 
     @Override
-    public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
+    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
         this.setRitualist(false);
         return super.hurt(source, amount);
     }
 
     @Override
-    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putByte("Flags", this.entityData.get(DATA_FLAGS));
     }
 
     @Override
-    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.entityData.set(DATA_FLAGS, input.getByteOr("Flags", (byte) 0));
     }
 

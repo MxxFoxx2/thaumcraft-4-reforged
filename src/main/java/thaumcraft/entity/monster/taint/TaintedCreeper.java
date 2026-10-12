@@ -22,7 +22,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.feline.Ocelot;
+import net.minecraft.world.entity.animal.Ocelot;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -111,7 +111,7 @@ public class TaintedCreeper extends Monster implements TaintedMob {
     }
 
     @Override
-    public boolean causeFallDamage(double fallDistance, float damageModifier, DamageSource damageSource) {
+    public boolean causeFallDamage(float fallDistance, float damageModifier, DamageSource damageSource) {
         boolean damaged = super.causeFallDamage(fallDistance, damageModifier, damageSource);
         this.taintFuse += (int) (fallDistance * 1.5);
         if (this.taintFuse > 25) {
@@ -126,15 +126,17 @@ public class TaintedCreeper extends Monster implements TaintedMob {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putInt("TaintFuse", this.taintFuse);
         output.putInt("TaintSwellDirection", this.getSwellDirection());
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.taintFuse = input.getIntOr("TaintFuse", 0);
         this.oldTaintFuse = this.taintFuse;
         this.entityData.set(DATA_SWELL_DIRECTION, input.getIntOr("TaintSwellDirection", -1));
@@ -143,7 +145,7 @@ public class TaintedCreeper extends Monster implements TaintedMob {
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         super.dropCustomDeathLoot(level, source, recentlyHit);
-        this.spawnAtLocation(level, new ItemStack(level.getRandom().nextBoolean() ? ModItems.TAINTED_GOO.get() : ModItems.TAINT_TENDRIL.get()));
+        this.spawnAtLocation(new ItemStack(level.getRandom().nextBoolean() ? ModItems.TAINTED_GOO.get() : ModItems.TAINT_TENDRIL.get()));
     }
 
     private void infectExplosionArea(ServerLevel level) {

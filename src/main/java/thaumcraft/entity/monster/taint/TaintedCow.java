@@ -5,7 +5,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.cow.CowSoundVariants;
 import net.minecraft.world.level.Level;
 
 public class TaintedCow extends TaintedAnimalMonster {
@@ -19,17 +18,17 @@ public class TaintedCow extends TaintedAnimalMonster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.COW_SOUNDS.get(CowSoundVariants.SoundSet.CLASSIC).ambientSound().value();
+        return SoundEvents.COW_AMBIENT;
     }
 
     @Override
     protected SoundEvent getHurtSound(net.minecraft.world.damagesource.DamageSource source) {
-        return SoundEvents.COW_SOUNDS.get(CowSoundVariants.SoundSet.CLASSIC).hurtSound().value();
+        return SoundEvents.COW_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.COW_SOUNDS.get(CowSoundVariants.SoundSet.CLASSIC).deathSound().value();
+        return SoundEvents.COW_DEATH;
     }
 
     @Override

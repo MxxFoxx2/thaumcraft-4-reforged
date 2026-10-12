@@ -66,11 +66,11 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
     }
 
     public static boolean spawnForWarp(ServerLevel level, ServerPlayer player, BlockPos pos) {
-        EldritchGuardian guardian = ModEntities.ELDRITCH_GUARDIAN.get().create(level, MobSpawnType.TRIGGERED);
+        EldritchGuardian guardian = ModEntities.ELDRITCH_GUARDIAN.get().create(level);
         if (guardian == null) {
             return false;
         }
-        guardian.snapTo(pos.getX(), pos.getY(), pos.getZ(), level.getRandom().nextFloat() * 360.0F, 0.0F);
+        guardian.absMoveTo(pos.getX(), pos.getY(), pos.getZ(), level.getRandom().nextFloat() * 360.0F, 0.0F);
         guardian.setTarget(player);
         return level.noCollision(guardian) && !level.containsAnyLiquid(guardian.getBoundingBox()) && level.addFreshEntity(guardian);
     }
@@ -90,7 +90,7 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
     }
 
     @Override
-    protected int getBaseExperienceReward(ServerLevel level) {
+    protected int getBaseExperienceReward() {
         return 20;
     }
 
@@ -101,7 +101,7 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
 
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
-        return !this.hasHome();
+        return !this.hasRestriction();
     }
 
     @Override
@@ -110,8 +110,9 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
     }
 
     @Override
-    public boolean doHurtTarget(ServerLevel level, Entity target) {
-        boolean hit = super.doHurtTarget(level, target);
+    public boolean doHurtTarget(Entity target) {
+        boolean hit = super.doHurtTarget(target);
+        if (!(this.level() instanceof ServerLevel level)) return hit;
         if (hit && this.getMainHandItem().isEmpty() && this.isOnFire()) {
             int difficulty = level.getDifficulty().getId();
             if (difficulty > 0 && this.random.nextFloat() < difficulty * 0.3F) {
@@ -126,12 +127,12 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
         if (this.random.nextBoolean()) {
             var essence = new net.minecraft.world.item.ItemStack(ModItems.WISP_ESSENCE.get());
             AspectTooltips.setSingle(essence, Aspect.UNDEAD, 2);
-            this.spawnAtLocation(level, essence);
+            this.spawnAtLocation(essence);
         }
         if (this.random.nextBoolean()) {
             var essence = new net.minecraft.world.item.ItemStack(ModItems.WISP_ESSENCE.get());
             AspectTooltips.setSingle(essence, Aspect.ELDRITCH, 2);
-            this.spawnAtLocation(level, essence);
+            this.spawnAtLocation(essence);
         }
         super.dropCustomDeathLoot(level, source, recentlyHit);
     }
@@ -192,20 +193,22 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
-        if (this.hasHome() && this.getHomeRadius() > 0) {
-            output.putInt("HomeD", this.getHomeRadius());
-            output.putInt("HomeX", this.getHomePosition().getX());
-            output.putInt("HomeY", this.getHomePosition().getY());
-            output.putInt("HomeZ", this.getHomePosition().getZ());
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
+        if (this.hasRestriction() && (int) this.getRestrictRadius() > 0) {
+            output.putInt("HomeD", (int) this.getRestrictRadius());
+            output.putInt("HomeX", this.getRestrictCenter().getX());
+            output.putInt("HomeY", this.getRestrictCenter().getY());
+            output.putInt("HomeZ", this.getRestrictCenter().getZ());
         }
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
-        input.getInt("HomeD").ifPresent(radius -> this.setHomeTo(
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
+        input.getInt("HomeD").ifPresent(radius -> this.restrictTo(
             new BlockPos(input.getIntOr("HomeX", 0), input.getIntOr("HomeY", 0), input.getIntOr("HomeZ", 0)),
             radius
         ));

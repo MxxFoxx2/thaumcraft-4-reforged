@@ -98,7 +98,7 @@ public class GolemOrb extends ThrowableProjectile {
 
     @Override
     public boolean hurt(DamageSource source, float damage) {
-        if (this.isInvulnerableToBase(source) || source.getEntity() == null) {
+        if (this.isInvulnerableTo(source) || source.getEntity() == null) {
             return false;
         }
         this.markHurt();

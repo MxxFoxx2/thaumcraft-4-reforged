@@ -2,12 +2,18 @@ package thaumcraft.registry;
 
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 import thaumcraft.Thaumcraft;
 import thaumcraft.device.ArcaneKeyItem;
 import thaumcraft.device.OwnedBlockEntity;
@@ -116,6 +122,31 @@ public final class ModItems {
     public static final DeferredItem<Item> VOID_METAL_INGOT = RegistryHelper.registerSimpleItem(ITEMS, "void_metal_ingot");
     public static final DeferredItem<Item> VOID_SEED = RegistryHelper.registerSimpleItem(ITEMS, "void_seed");
     public static final DeferredItem<Item> GOLD_COIN = RegistryHelper.registerSimpleItem(ITEMS, "gold_coin");
+
+    public static final DeferredItem<SpawnEggItem> BRAINY_ZOMBIE_SPAWN_EGG = spawnEgg("brainy_zombie_spawn_egg", ModEntities.BRAINY_ZOMBIE, 0xFFC0FF, 0x008000);
+    public static final DeferredItem<SpawnEggItem> GIANT_BRAINY_ZOMBIE_SPAWN_EGG = spawnEgg("giant_brainy_zombie_spawn_egg", ModEntities.GIANT_BRAINY_ZOMBIE, 0xFFC0FF, 0x004000);
+    public static final DeferredItem<SpawnEggItem> WISP_SPAWN_EGG = spawnEgg("wisp_spawn_egg", ModEntities.WISP, 0xFFC0FF, 0xFFFFFF);
+    public static final DeferredItem<SpawnEggItem> FIRE_BAT_SPAWN_EGG = spawnEgg("fire_bat_spawn_egg", ModEntities.FIREBAT, 0xFFC0FF, 0xC00000);
+    public static final DeferredItem<SpawnEggItem> PECH_SPAWN_EGG = spawnEgg("pech_spawn_egg", ModEntities.PECH, 0xFFC0FF, 0x400040);
+    public static final DeferredItem<SpawnEggItem> MIND_SPIDER_SPAWN_EGG = spawnEgg("mind_spider_spawn_egg", ModEntities.MIND_SPIDER, 0xAAAAAA, 0x404040);
+    public static final DeferredItem<SpawnEggItem> ELDRITCH_GUARDIAN_SPAWN_EGG = spawnEgg("eldritch_guardian_spawn_egg", ModEntities.ELDRITCH_GUARDIAN, 0x222222, 0x404040);
+    public static final DeferredItem<SpawnEggItem> CULTIST_KNIGHT_SPAWN_EGG = spawnEgg("cultist_knight_spawn_egg", ModEntities.CULTIST_KNIGHT, 0xFF5055, 0x000080);
+    public static final DeferredItem<SpawnEggItem> CULTIST_CLERIC_SPAWN_EGG = spawnEgg("cultist_cleric_spawn_egg", ModEntities.CULTIST_CLERIC, 0xFF5055, 0x800000);
+    public static final DeferredItem<SpawnEggItem> ELDRITCH_CRAB_SPAWN_EGG = spawnEgg("eldritch_crab_spawn_egg", ModEntities.ELDRITCH_CRAB, 0x555555, 0x550000);
+    public static final DeferredItem<SpawnEggItem> INHABITED_ZOMBIE_SPAWN_EGG = spawnEgg("inhabited_zombie_spawn_egg", ModEntities.INHABITED_ZOMBIE, 0x557755, 0x550000);
+    public static final DeferredItem<SpawnEggItem> THAUMIC_SLIME_SPAWN_EGG = spawnEgg("thaumic_slime_spawn_egg", ModEntities.THAUMIC_SLIME, 0xFFC0FF, 0xFF80FF);
+    public static final DeferredItem<SpawnEggItem> TAINT_SPIDER_SPAWN_EGG = spawnEgg("taint_spider_spawn_egg", ModEntities.TAINT_SPIDER, 0xFFC0FF, 0x404040);
+    public static final DeferredItem<SpawnEggItem> TAINTACLE_SPAWN_EGG = spawnEgg("taintacle_spawn_egg", ModEntities.TAINTACLE, 0xFFC0FF, 0x800080);
+    public static final DeferredItem<SpawnEggItem> TAINTACLE_SMALL_SPAWN_EGG = spawnEgg("taintacle_small_spawn_egg", ModEntities.TAINTACLE_TINY, 0xFFC0FF, 0x800090);
+    public static final DeferredItem<SpawnEggItem> TAINT_SPORE_SPAWN_EGG = spawnEgg("taint_spore_spawn_egg", ModEntities.TAINT_SPORE, 0xFFC0FF, 0x800070);
+    public static final DeferredItem<SpawnEggItem> TAINT_SPORE_SWARMER_SPAWN_EGG = spawnEgg("taint_spore_swarmer_spawn_egg", ModEntities.TAINT_SPORE_SWARMER, 0xFFC0FF, 0x800060);
+    public static final DeferredItem<SpawnEggItem> TAINT_SWARM_SPAWN_EGG = spawnEgg("taint_swarm_spawn_egg", ModEntities.TAINT_SWARM, 0xFFC0FF, 0x800050);
+    public static final DeferredItem<SpawnEggItem> TAINT_CHICKEN_SPAWN_EGG = spawnEgg("taint_chicken_spawn_egg", ModEntities.TAINTED_CHICKEN, 0xFFC0FF, 0xC0C0C0);
+    public static final DeferredItem<SpawnEggItem> TAINT_COW_SPAWN_EGG = spawnEgg("taint_cow_spawn_egg", ModEntities.TAINTED_COW, 0xFFC0FF, 0x7E3A3B);
+    public static final DeferredItem<SpawnEggItem> TAINT_CREEPER_SPAWN_EGG = spawnEgg("taint_creeper_spawn_egg", ModEntities.TAINTED_CREEPER, 0xFFC0FF, 0x00FF00);
+    public static final DeferredItem<SpawnEggItem> TAINT_PIG_SPAWN_EGG = spawnEgg("taint_pig_spawn_egg", ModEntities.TAINTED_PIG, 0xFFC0FF, 0xEF99EF);
+    public static final DeferredItem<SpawnEggItem> TAINT_SHEEP_SPAWN_EGG = spawnEgg("taint_sheep_spawn_egg", ModEntities.TAINTED_SHEEP, 0xFFC0FF, 0x808080);
+    public static final DeferredItem<SpawnEggItem> TAINT_VILLAGER_SPAWN_EGG = spawnEgg("taint_villager_spawn_egg", ModEntities.TAINTED_VILLAGER, 0xFFC0FF, 0x00FFFF);
     public static final DeferredItem<BucketItem> PURIFYING_FLUID_BUCKET = RegistryHelper.registerItem(ITEMS, "purifying_fluid_bucket", properties -> new BucketItem(ModFluids.PURIFYING_FLUID.get(), properties.stacksTo(1)));
     public static final DeferredItem<BucketItem> LIQUID_DEATH_BUCKET = RegistryHelper.registerItem(ITEMS, "liquid_death_bucket", properties -> new BucketItem(ModFluids.LIQUID_DEATH.get(), properties.stacksTo(1)));
     public static final DeferredItem<BathSaltsItem> BATH_SALTS = RegistryHelper.registerItem(ITEMS, "bath_salts", BathSaltsItem::new);
@@ -306,6 +337,16 @@ public final class ModItems {
 
     private static DeferredItem<Item> nugget(String name) {
         return RegistryHelper.registerSimpleItem(ITEMS, name, properties -> Registration.food(properties, 1, 0.3F, false, 0.5F));
+    }
+
+    private static <T extends Mob> DeferredItem<SpawnEggItem> spawnEgg(
+        String name,
+        DeferredHolder<EntityType<?>, EntityType<T>> entityType,
+        int backgroundColor,
+        int highlightColor
+    ) {
+        Supplier<? extends EntityType<? extends Mob>> type = entityType::get;
+        return ITEMS.registerItem(name, properties -> new DeferredSpawnEggItem(type, backgroundColor, highlightColor, properties));
     }
 
     public static void register(IEventBus bus) {

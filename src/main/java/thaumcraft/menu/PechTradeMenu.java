@@ -8,7 +8,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -353,7 +352,7 @@ public class PechTradeMenu extends AbstractContainerMenu {
         };
         int amplifier = metadata == 8225 || metadata == 8229 ? 1 : 0;
         ItemStack stack = new ItemStack(Items.POTION);
-        stack.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), List.of(new MobEffectInstance(effect, duration, amplifier)), Optional.empty()));
+        stack.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), List.of(new MobEffectInstance(effect, duration, amplifier))));
         return stack;
     }
 
@@ -402,7 +401,7 @@ public class PechTradeMenu extends AbstractContainerMenu {
             for (int index = 0; index < OUTPUT_END; index++) {
                 ItemStack stack = tradeInventory.removeItemNoUpdate(index);
                 if (!stack.isEmpty()) {
-                    player.drop(stack, false, Prediction.PREDICTED);
+                    player.drop(stack, false, false);
                 }
             }
             if (pech != null) {

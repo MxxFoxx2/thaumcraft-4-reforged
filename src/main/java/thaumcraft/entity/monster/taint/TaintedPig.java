@@ -5,7 +5,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.pig.PigSoundVariants;
 import net.minecraft.world.level.Level;
 
 public class TaintedPig extends TaintedAnimalMonster {
@@ -19,17 +18,17 @@ public class TaintedPig extends TaintedAnimalMonster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.PIG_SOUNDS.get(PigSoundVariants.SoundSet.CLASSIC).adultSounds().ambientSound().value();
+        return SoundEvents.PIG_AMBIENT;
     }
 
     @Override
     protected SoundEvent getHurtSound(net.minecraft.world.damagesource.DamageSource source) {
-        return SoundEvents.PIG_SOUNDS.get(PigSoundVariants.SoundSet.CLASSIC).adultSounds().hurtSound().value();
+        return SoundEvents.PIG_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.PIG_SOUNDS.get(PigSoundVariants.SoundSet.CLASSIC).adultSounds().deathSound().value();
+        return SoundEvents.PIG_DEATH;
     }
 
     @Override

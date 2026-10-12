@@ -44,11 +44,11 @@ public class MindSpider extends Spider {
     }
 
     public static boolean spawnForWarp(ServerLevel level, ServerPlayer player, BlockPos pos, boolean harmless) {
-        MindSpider spider = ModEntities.MIND_SPIDER.get().create(level, MobSpawnType.TRIGGERED);
+        MindSpider spider = ModEntities.MIND_SPIDER.get().create(level);
         if (spider == null) {
             return false;
         }
-        spider.snapTo(pos.getX(), pos.getY(), pos.getZ(), player.getYRot(), player.getXRot());
+        spider.absMoveTo(pos.getX(), pos.getY(), pos.getZ(), player.getYRot(), player.getXRot());
         spider.setTarget(player);
         spider.setHarmless(harmless);
         if (harmless) {
@@ -66,7 +66,7 @@ public class MindSpider extends Spider {
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (target, level) ->
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, target ->
             target instanceof ServerPlayer
         ));
     }
@@ -104,8 +104,8 @@ public class MindSpider extends Spider {
     }
 
     @Override
-    public boolean doHurtTarget(ServerLevel level, Entity target) {
-        return !this.isHarmless() && super.doHurtTarget(level, target);
+    public boolean doHurtTarget(Entity target) {
+        return !this.isHarmless() && super.doHurtTarget(target);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class MindSpider extends Spider {
     }
 
     @Override
-    protected int getBaseExperienceReward(ServerLevel level) {
+    protected int getBaseExperienceReward() {
         return this.isHarmless() ? 0 : 1;
     }
 
@@ -144,15 +144,17 @@ public class MindSpider extends Spider {
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueOutput output = thaumcraft.compat.ValueOutput.of(tag, this.registryAccess());
+        super.addAdditionalSaveData(tag);
         output.putBoolean("harmless", this.isHarmless());
         output.putString("viewer", this.getViewer());
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        thaumcraft.compat.ValueInput input = thaumcraft.compat.ValueInput.of(tag, this.registryAccess());
+        super.readAdditionalSaveData(tag);
         this.entityData.set(DATA_HARMLESS, input.getBooleanOr("harmless", false));
         this.entityData.set(DATA_VIEWER, input.getStringOr("viewer", ""));
     }

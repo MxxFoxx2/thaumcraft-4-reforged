@@ -6,7 +6,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -21,7 +20,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.level.redstone.Orientation;
 import javax.annotation.Nullable;
 import thaumcraft.damage.ModDamageTypes;
 import thaumcraft.registry.ModFluids;
@@ -57,10 +55,6 @@ public class LiquidDeathBlock extends LiquidBlock {
         return Shapes.empty();
     }
 
-    @Override
-    protected VoxelShape getEntityInsideCollisionShape(BlockState state, BlockGetter level, BlockPos pos, Entity entity) {
-        return Shapes.block();
-    }
 
     @Override
     protected boolean canBeReplaced(BlockState state, net.minecraft.world.item.context.BlockPlaceContext context) {
@@ -84,7 +78,7 @@ public class LiquidDeathBlock extends LiquidBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos neighborPos, boolean movedByPiston) {
         level.scheduleTick(pos, this, TICK_RATE);
     }
 
@@ -216,7 +210,7 @@ public class LiquidDeathBlock extends LiquidBlock {
     }
 
     @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (level instanceof ServerLevel serverLevel && entity instanceof LivingEntity living) {
             int quanta = getQuanta(state);
             living.hurt(serverLevel.damageSources().source(ModDamageTypes.DISSOLVE), quanta);

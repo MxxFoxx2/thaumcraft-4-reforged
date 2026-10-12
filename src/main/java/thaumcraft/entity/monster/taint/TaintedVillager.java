@@ -83,7 +83,7 @@ public class TaintedVillager extends TaintedAnimalMonster {
 
     @Override
     protected void registerGoals() {
-        this.getNavigation().setCanOpenDoors(true);
+        ((net.minecraft.world.entity.ai.navigation.GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
         super.registerGoals();
         this.goalSelector.addGoal(2, new TaintedVillagerIndoorGoal(this));
         this.goalSelector.addGoal(3, new TaintedVillagerRestrictDoorGoal(this));
@@ -93,8 +93,9 @@ public class TaintedVillager extends TaintedAnimalMonster {
     }
 
     @Override
-    protected void customServerAiStep(ServerLevel level) {
-        super.customServerAiStep(level);
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        if (!(this.level() instanceof ServerLevel level)) return;
         if (--this.villageSearchTicks > 0) {
             return;
         }
@@ -103,14 +104,14 @@ public class TaintedVillager extends TaintedAnimalMonster {
             .findAll(type -> type.is(PoiTypeTags.VILLAGE), pos -> true, this.blockPosition(), 32, PoiManager.Occupancy.ANY)
             .toList();
         if (villagePoints.isEmpty()) {
-            this.clearHome();
+            this.clearRestriction();
         } else {
             double centerX = villagePoints.stream().mapToInt(BlockPos::getX).average().orElse(this.getBlockX());
             double centerY = villagePoints.stream().mapToInt(BlockPos::getY).average().orElse(this.getBlockY());
             double centerZ = villagePoints.stream().mapToInt(BlockPos::getZ).average().orElse(this.getBlockZ());
             BlockPos villageCenter = BlockPos.containing(centerX, centerY, centerZ);
             int radius = (int) (Math.sqrt(villagePoints.stream().mapToDouble(villageCenter::distSqr).max().orElse(0.0)) * 0.6);
-            this.setHomeTo(villageCenter, radius);
+            this.restrictTo(villageCenter, radius);
         }
     }
 
@@ -123,7 +124,7 @@ public class TaintedVillager extends TaintedAnimalMonster {
                 .getOrThrow(net.minecraft.world.item.enchantment.Enchantments.LOOTING))
             : 0;
         if (level.getRandom().nextInt(13) < 1 + looting) {
-            this.spawnAtLocation(level, thaumcraft.registry.ModItems.GOLD_COIN.get());
+            this.spawnAtLocation(thaumcraft.registry.ModItems.GOLD_COIN.get());
         }
     }
 }

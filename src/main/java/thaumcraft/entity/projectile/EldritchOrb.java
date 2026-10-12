@@ -31,7 +31,7 @@ public class EldritchOrb extends ThrowableProjectile {
         double offsetAngle = shooter.getYRot() + (left ? 90.0F : 180.0F);
         double side = Math.cos(offsetAngle * Math.PI / 180.0) * 0.5;
         double forward = Math.sin(offsetAngle * Math.PI / 180.0) * 0.5;
-        orb.snapTo(orb.getX() - side, orb.getY() - shooter.getBbHeight() * 0.057777777, orb.getZ() - forward, orb.getYRot(), orb.getXRot());
+        orb.absMoveTo(orb.getX() - side, orb.getY() - shooter.getBbHeight() * 0.057777777, orb.getZ() - forward, orb.getYRot(), orb.getXRot());
         CombatUtils.aim(orb, target.getX() + target.getDeltaMovement().x - shooter.getX(), target.getY() - shooter.getY() - target.getBbHeight() / 2.0, target.getZ() + target.getDeltaMovement().z - shooter.getZ(), 1.0F, 2.0F);
         return orb;
     }

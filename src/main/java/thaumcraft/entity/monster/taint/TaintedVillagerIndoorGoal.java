@@ -78,12 +78,12 @@ public final class TaintedVillagerIndoorGoal extends Goal {
     }
 
     public static boolean isNightRainOrNoPrecipitation(ServerLevel level, BlockPos pos) {
-        return (!isDay(level) || level.isRaining() || !level.getBiome(pos).value().hasPrecipitation())
+        return (!isDay(level, pos) || level.isRaining() || !level.getBiome(pos).value().hasPrecipitation())
             && level.dimensionType().hasSkyLight();
     }
 
-    public static boolean isDay(ServerLevel level) {
-        return level.isBrightOutside();
+    public static boolean isDay(ServerLevel level, BlockPos pos) {
+        return level.isDay() && level.canSeeSky(pos);
     }
 
     @Nullable

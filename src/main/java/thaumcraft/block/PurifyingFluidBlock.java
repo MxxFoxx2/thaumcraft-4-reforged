@@ -5,7 +5,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -23,7 +22,7 @@ public class PurifyingFluidBlock extends LiquidBlock {
     }
 
     @Override
-    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
         if (level instanceof ServerLevel serverLevel && state.getFluidState().isSource() && entity instanceof Player player && !player.hasEffect(ModEffects.WARP_WARD)) {
             int warp = Warp.get(player, WarpType.PERMANENT);
             int divisor = Math.max(1, (int) Math.sqrt(warp));

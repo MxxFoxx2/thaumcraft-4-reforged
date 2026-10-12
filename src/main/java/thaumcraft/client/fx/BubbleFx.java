@@ -27,6 +27,11 @@ public class BubbleFx extends ParticleFx {
         return this;
     }
 
+    public BubbleFx scaleTo(float particleSize) {
+        scale = particleSize * 10.0F;
+        return this;
+    }
+
     public BubbleFx froth() {
         scale *= 0.75F;
         life = 4 + random.nextInt(3);

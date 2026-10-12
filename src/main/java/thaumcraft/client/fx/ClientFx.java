@@ -1,11 +1,15 @@
 package thaumcraft.client.fx;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -19,11 +23,13 @@ import thaumcraft.aspect.Aspect;
 import thaumcraft.client.geom.LightningBolt;
 import thaumcraft.client.platform.ParticleSprites;
 import thaumcraft.client.platform.WorldFxRenderer;
+import thaumcraft.entity.monster.taint.TaintSwarm;
 import thaumcraft.fx.FxProxy;
 
 public final class ClientFx implements FxProxy {
     private static final int EXCAVATION_COLOR = 65382;
     private final Map<Integer, WandBeamFx> beams = new HashMap<>();
+    private final Map<UUID, List<TaintSwarmFx>> taintSwarmParticles = new HashMap<>();
 
     @Override
     public void beamPulse(Level level, Entity source, Entity target, int color) {
@@ -222,6 +228,25 @@ public final class ClientFx implements FxProxy {
         WorldFxRenderer.add(new BlockRunesFx(level.getRandom(), x + 0.5, y + 0.5, z + 0.5, red, green, blue, duration, gravity));
     }
 
+    @Override
+    public void taintSwarm(Level level, Entity target, int maxParticles, float speed, float turnSpeed, float gravity) {
+        if (!level.isClientSide || target.isRemoved()) {
+            return;
+        }
+        taintSwarmParticles.values().forEach(particles -> particles.removeIf(TaintSwarmFx::isDead));
+        taintSwarmParticles.values().removeIf(List::isEmpty);
+        int targetCount = target instanceof TaintSwarm ? Math.max(particleCount(maxParticles), 10) : maxParticles;
+        if (targetCount <= 0) {
+            return;
+        }
+        List<TaintSwarmFx> particles = taintSwarmParticles.computeIfAbsent(target.getUUID(), ignored -> new ArrayList<>());
+        if (particles.size() < targetCount) {
+            TaintSwarmFx particle = new TaintSwarmFx(level, target, level.getRandom(), speed, turnSpeed, gravity);
+            particles.add(particle);
+            WorldFxRenderer.add(particle);
+        }
+    }
+
     private static float jitter(RandomSource random, float amount) {
         return (random.nextFloat() - random.nextFloat()) * amount;
     }
@@ -239,6 +264,81 @@ public final class ClientFx implements FxProxy {
         fx.shrink(shrink);
         fx.gravity(gravity);
         WorldFxRenderer.add(fx);
+    }
+
+    @Override
+    public void alumentumTrail(Level level, Entity projectile) {
+        RandomSource random = level.getRandom();
+        double x = projectile.getX();
+        double y = projectile.getY();
+        double z = projectile.getZ();
+        for (int index = 0; index < particleCount(3); index++) {
+            wisp(level, x + jitter(random, 0.12F), y + jitter(random, 0.12F), z + jitter(random, 0.12F), 0.45F, 7, true, 0.0F);
+        }
+        for (int index = 0; index < particleCount(6); index++) {
+            WispFx fx = new WispFx(random, x + jitter(random, 0.18F), y + jitter(random, 0.18F), z + jitter(random, 0.18F), 0.22F, 4, null);
+            fx.moveTo(x - projectile.getDeltaMovement().x * 2.0, y - projectile.getDeltaMovement().y * 2.0, z - projectile.getDeltaMovement().z * 2.0);
+            fx.gravity(0.0F);
+            WorldFxRenderer.add(fx);
+        }
+        if (particleCount(1) > 0) {
+            SparkleFx sparkle = new SparkleFx(random, x, y, z, 0.7F, 7, 1);
+            sparkle.gravity(0.0F);
+            WorldFxRenderer.add(sparkle);
+        }
+    }
+
+    @Override
+    public void eldritchOrbBurst(Level level, Entity orb) {
+        RandomSource random = level.getRandom();
+        double x = orb.getX();
+        double y = orb.getY();
+        double z = orb.getZ();
+        for (int index = 0; index < 30; index++) {
+            float dx = jitter(random, 0.3F);
+            float dy = jitter(random, 0.3F);
+            float dz = jitter(random, 0.3F);
+            wispTo(level, x + dx, y + dy, z + dz, x + dx * 8.0, y + dy * 8.0, z + dz * 8.0, 0.3F, 5, true, 0.02F);
+        }
+    }
+
+    @Override
+    public void golemOrbBurst(Level level, double x, double y, double z, float size) {
+        WorldFxRenderer.add(new BurstFx(level.getRandom(), x, y, z, size));
+    }
+
+    @Override
+    public void purifyingFluid(Level level, BlockPos pos, int fluidLevel, RandomSource random) {
+        BubbleFx bubble = new BubbleFx(
+            random,
+            pos.getX() + random.nextFloat(),
+            pos.getY() + 0.125F * (8 - fluidLevel),
+            pos.getZ() + random.nextFloat(),
+            0
+        );
+        bubble.color(1.0F, 1.0F, 1.0F).alpha(0.25F);
+        WorldFxRenderer.add(bubble);
+        if (random.nextInt(25) == 0) {
+            level.playLocalSound(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.25F, 0.8F + random.nextFloat() * 0.4F, false);
+        }
+    }
+
+    @Override
+    public void liquidDeath(Level level, BlockPos pos, int fluidLevel, RandomSource random) {
+        BubbleFx bubble = new BubbleFx(
+            random,
+            pos.getX() + random.nextFloat(),
+            pos.getY() + 0.1F + 0.225F * fluidLevel,
+            pos.getZ() + random.nextFloat(),
+            0
+        );
+        bubble.color(0.65F, 0.1F, 0.8F);
+        bubble.alpha(0.8F);
+        bubble.scaleTo(0.075F + random.nextFloat() * 0.075F);
+        WorldFxRenderer.add(bubble);
+        if (random.nextInt(50) == 0) {
+            level.playLocalSound(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.25F, 0.7F + random.nextFloat() * 0.3F, false);
+        }
     }
 
     private static void bolt(Level level, double x, double y, double z, double targetX, double targetY, double targetZ) {

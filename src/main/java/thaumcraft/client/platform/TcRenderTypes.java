@@ -86,4 +86,8 @@ public final class TcRenderTypes extends RenderType {
     public static RenderType byBlend(ResourceLocation texture, int blendMode) {
         return blendMode == 771 ? translucent(texture) : additive(texture);
     }
+
+    public static RenderType outline(ResourceLocation texture) {
+        return RenderType.outline(texture);
+    }
 }

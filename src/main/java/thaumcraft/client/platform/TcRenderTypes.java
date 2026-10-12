@@ -14,6 +14,7 @@ public final class TcRenderTypes extends RenderType {
     private static final Map<ResourceLocation, RenderType> TRANSLUCENT = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> ADDITIVE_NO_DEPTH = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> TRANSLUCENT_NO_DEPTH = new HashMap<>();
+    private static final Map<ResourceLocation, RenderType> ENTITY_TRANSLUCENT_NO_DEPTH = new HashMap<>();
 
     private TcRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload,
                           Runnable setupState, Runnable clearState) {
@@ -85,6 +86,39 @@ public final class TcRenderTypes extends RenderType {
 
     public static RenderType byBlend(ResourceLocation texture, int blendMode) {
         return blendMode == 771 ? translucent(texture) : additive(texture);
+    }
+
+    public static RenderType entityCutoutNoCull(ResourceLocation texture) {
+        return RenderType.entityCutoutNoCull(texture);
+    }
+
+    public static RenderType eyes(ResourceLocation texture) {
+        return RenderType.eyes(texture);
+    }
+
+    public static RenderType translucentMovingBlock() {
+        return RenderType.translucentMovingBlock();
+    }
+
+    public static RenderType entityTranslucentNoDepth(ResourceLocation texture) {
+        return ENTITY_TRANSLUCENT_NO_DEPTH.computeIfAbsent(texture, key -> RenderType.create(
+            "thaumcraft_entity_translucent_no_depth",
+            DefaultVertexFormat.NEW_ENTITY,
+            VertexFormat.Mode.QUADS,
+            1536,
+            true,
+            true,
+            RenderType.CompositeState.builder()
+                .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                .setTextureState(new TextureStateShard(key, false, false))
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setCullState(NO_CULL)
+                .setLightmapState(LIGHTMAP)
+                .setOverlayState(OVERLAY)
+                .setDepthTestState(NO_DEPTH_TEST)
+                .setWriteMaskState(COLOR_WRITE)
+                .createCompositeState(true)
+        ));
     }
 
     public static RenderType outline(ResourceLocation texture) {

@@ -9,7 +9,7 @@
 
 ## Last synced main commit
 
-`057ddba` (phases 8–9 complete at `cd26a9c`, plus generated robe dye recipes)
+`f0c40ed` (phase 10–11 runtime fixes synced from main; backport tests/resources are pending manual validation)
 
 ## Sync procedure
 
@@ -112,3 +112,9 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 - `SidedInvWrapper` marks a container changed before setting its slot in 1.21.1; the grate delivers inserted items from `setItem` as well. The open/closed grate GameTest verifies insertion, dropped item count, collisions and redstone closure.
 - Block entity renderers use the 1.21.1 direct rendering API. Warded disguises use `ModelData`; connected warded glass uses a custom baked-model loader and 47 variants. Special device items use `BlockEntityWithoutLevelRenderer`; mirrors/lodestone use legacy item predicates.
 - `runClient` completes resource loading without Thaumcraft errors or missing models/textures. Vanilla sound/shader warnings and focus texture mipmap reductions remain in the development log. In-world visual checks and two-client animation/synchronization checks remain pending.
+
+
+## Phase 10–11 backport status
+
+- Backported GameTest source and generated resource/tool changes are present. The 1.21.1 taint fibres model uses the `thaumcraft:taint_fibres` geometry loader and ordinary blockstate model references.
+- The last supplied compile diagnostic identified one GameRules API mismatch in `ProjectileGameTests`; it was changed to `getRule(RULE_MOBGRIEFING).set(...)`. No build or test run was performed after the user's request to stop testing; GameTests and runtime resource loading remain pending manual verification.

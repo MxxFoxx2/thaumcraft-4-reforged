@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "thaumcraft:airarrow",
-    "thaumcraft:orderarrow"
+    "thaumcraft:dissolve",
+    "thaumcraft:orderarrow",
+    "thaumcraft:taint"
   ]
 }

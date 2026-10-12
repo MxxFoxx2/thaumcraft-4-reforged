@@ -1,0 +1,10 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "thaumcraft:tainted_land",
+  "spawners": {
+    "type": "thaumcraft:taintacle",
+    "weight": 1,
+    "minCount": 1,
+    "maxCount": 1
+  }
+}

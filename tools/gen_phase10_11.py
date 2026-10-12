@@ -2,6 +2,33 @@ import json
 
 NS = "thaumcraft"
 
+SPAWN_EGGS = [
+    ("brainy_zombie_spawn_egg", 0xFFC0FF, 0x008000),
+    ("giant_brainy_zombie_spawn_egg", 0xFFC0FF, 0x004000),
+    ("wisp_spawn_egg", 0xFFC0FF, 0xFFFFFF),
+    ("fire_bat_spawn_egg", 0xFFC0FF, 0xC00000),
+    ("pech_spawn_egg", 0xFFC0FF, 0x400040),
+    ("mind_spider_spawn_egg", 0xAAAAAA, 0x404040),
+    ("eldritch_guardian_spawn_egg", 0x222222, 0x404040),
+    ("cultist_knight_spawn_egg", 0xFF5055, 0x000080),
+    ("cultist_cleric_spawn_egg", 0xFF5055, 0x800000),
+    ("eldritch_crab_spawn_egg", 0x555555, 0x550000),
+    ("inhabited_zombie_spawn_egg", 0x557755, 0x550000),
+    ("thaumic_slime_spawn_egg", 0xFFC0FF, 0xFF80FF),
+    ("taint_spider_spawn_egg", 0xFFC0FF, 0x404040),
+    ("taintacle_spawn_egg", 0xFFC0FF, 0x800080),
+    ("taintacle_small_spawn_egg", 0xFFC0FF, 0x800090),
+    ("taint_spore_spawn_egg", 0xFFC0FF, 0x800070),
+    ("taint_spore_swarmer_spawn_egg", 0xFFC0FF, 0x800060),
+    ("taint_swarm_spawn_egg", 0xFFC0FF, 0x800050),
+    ("taint_chicken_spawn_egg", 0xFFC0FF, 0xC0C0C0),
+    ("taint_cow_spawn_egg", 0xFFC0FF, 0x7E3A3B),
+    ("taint_creeper_spawn_egg", 0xFFC0FF, 0x00FF00),
+    ("taint_pig_spawn_egg", 0xFFC0FF, 0xEF99EF),
+    ("taint_sheep_spawn_egg", 0xFFC0FF, 0x808080),
+    ("taint_villager_spawn_egg", 0xFFC0FF, 0x00FFFF),
+]
+
 
 def write_damage_types(ctx):
     definitions = {
@@ -48,6 +75,41 @@ def write_damage_types(ctx):
             "random_sequence": f"{NS}:entities/inhabited_zombie",
         }),
     )
+
+
+def write_spawn_eggs(ctx):
+    from PIL import Image
+
+    texture_directory = ctx.ASSETS / "textures" / "item"
+    texture_directory.mkdir(parents=True, exist_ok=True)
+    egg_shape = [
+        "................", "......####......", ".....######.....", "....########....",
+        "....########....", "...##########...", "...##########...", "..############..",
+        "..############..", "..############..", "..############..", "..############..",
+        "...##########...", "...##########...", "....########....", "......####......",
+    ]
+    spots = {(6, 3), (9, 5), (5, 7), (10, 9), (7, 11), (4, 10), (11, 6), (8, 8), (6, 13)}
+    highlights = {(5, 4), (6, 4), (5, 5)}
+    for name, base_color, spot_color in SPAWN_EGGS:
+        image = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        inside = lambda x, y: 0 <= x < 16 and 0 <= y < 16 and egg_shape[y][x] == "#"
+        for y in range(16):
+            for x in range(16):
+                if not inside(x, y):
+                    continue
+                color = spot_color if (x, y) in spots else base_color
+                if (x, y) in highlights:
+                    factor = 1.3
+                elif not inside(x + 1, y) or not inside(x, y + 1):
+                    factor = 0.6
+                elif not inside(x - 1, y) or not inside(x, y - 1):
+                    factor = 0.85
+                else:
+                    factor = 1.0
+                channels = [min(255, int(((color >> shift) & 0xFF) * factor)) for shift in (16, 8, 0)]
+                image.putpixel((x, y), (*channels, 255))
+        image.save(texture_directory / f"{name}.png")
+        ctx.generated_item(name, name)
 
 
 def write_spawn_modifiers(ctx):
@@ -118,6 +180,51 @@ def cross(ctx, name, texture):
     ctx.self_drop(name)
 
 
+def taint_fibres_model(ctx):
+    ctx.block_model("taint_fibres_face", {
+        "parent": "minecraft:block/cube_all",
+        "textures": {"all": ctx.ref("taint_fibres", "block")},
+    })
+    for name, texture in [
+        ("blank", "blank"),
+        ("over_1", "taint_over_1"),
+        ("over_2", "taint_over_2"),
+        ("over_3", "taint_over_3"),
+    ]:
+        ctx.block_model(f"taint_fibres_{name}", {
+            "parent": "minecraft:block/cube_all",
+            "textures": {"all": ctx.ref(texture, "block")},
+        })
+    for model, texture in [
+        ("taint_fibres_grass", "taintgrass1"),
+        ("taint_fibres_plant", "taintgrass2"),
+        ("taint_fibres_stalk", "taint_spore_stalk_1"),
+        ("taint_fibres_mature_stalk", "taint_spore_stalk_2"),
+    ]:
+        ctx.block_model(model, {
+            "parent": "minecraft:block/cross",
+            "textures": {"cross": ctx.ref(texture, "block")},
+        })
+    model_id = lambda name: f"{NS}:block/{name}"
+    overlays = [
+        [model_id(f"taint_fibres_{name}") for name in ("blank", "over_1", "over_2", "over_3")]
+        for _ in range(6)
+    ]
+    custom_model = {
+        "loader": f"{NS}:taint_fibres",
+        "faces": [model_id("taint_fibres_face") for _ in range(6)],
+        "overlays": overlays,
+        "grass": model_id("taint_fibres_grass"),
+        "plant": model_id("taint_fibres_plant"),
+        "stalk": model_id("taint_fibres_stalk"),
+        "mature_stalk": model_id("taint_fibres_mature_stalk"),
+    }
+    ctx.write(ctx.ASSETS / "models" / "block" / "taint_fibres.json", custom_model)
+    blockstate = {"variants": {"": {"model": model_id("taint_fibres")}}}
+    for name in ("fibrous_taint", "tainted_grass", "tainted_plant", "spore_stalk", "mature_spore_stalk"):
+        ctx.write(ctx.ASSETS / "blockstates" / f"{name}.json", blockstate)
+
+
 def fluid_item(ctx, item, texture):
     ctx.generated_item(item, texture)
 
@@ -125,6 +232,7 @@ def fluid_item(ctx, item, texture):
 def generate(ctx):
     write_damage_types(ctx)
     write_spawn_modifiers(ctx)
+    write_spawn_eggs(ctx)
 
     for name, texture in [
         ("crusted_taint", "taint_crust"),
@@ -145,6 +253,7 @@ def generate(ctx):
     ]:
         cross(ctx, name, texture)
         no_drop(ctx, name)
+    taint_fibres_model(ctx)
 
     for name, texture in [
         ("purifying_fluid_bucket", "bucket_pure"),

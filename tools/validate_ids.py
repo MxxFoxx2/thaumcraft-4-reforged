@@ -168,6 +168,15 @@ class Validator:
         self.textures = {"minecraft:" + texture for texture in self.textures}
         self.models |= self.asset_ids(out, "models", ".json")
         self.textures |= self.asset_ids(out, "textures", ".png")
+        self.shader_programs = set()
+        self.shader_stages = set()
+        for name in client | {path.relative_to(out).as_posix() for path in out.glob("assets/*/shaders/**/*") if path.is_file()}:
+            match = re.match(r"assets/([^/]+)/shaders/program/(.+)\.json$", name)
+            if match:
+                self.shader_programs.add(f"{match.group(1)}:{match.group(2)}")
+            match = re.match(r"assets/([^/]+)/shaders/(?:program|core|post)/(.+)\.(?:vsh|fsh)$", name)
+            if match:
+                self.shader_stages.add(f"{match.group(1)}:{match.group(2)}")
         profile = mcformat.PROFILES[version]
         self.loot_tables = datapack_ids(server, [profile.loot_folder])
         self.enchantments = datapack_ids(server, ["enchantment"]) | self.registry.get("enchantment", set())
@@ -283,6 +292,8 @@ class Validator:
             known = value in self.enchantments
         elif kind == "model":
             known = value in self.models or value.split(":", 1)[1] in BUILTIN_MODELS
+        elif kind == "shader":
+            known = value in self.shader_stages
         elif kind == "texture":
             known = value in self.textures
         elif kind == "skip":
@@ -340,6 +351,17 @@ class Validator:
             if "biomes" in keys:
                 return "tag:biome"
             return "tag:item"
+        if file_kind == "post_effect":
+            if key in ("vertex_shader", "fragment_shader"):
+                return "shader"
+            if key in ("target", "output") and value == "minecraft:main":
+                return "skip"
+        if file_kind == "shader_program":
+            if key in ("vertex", "fragment"):
+                return "shader"
+            return "flat"
+        if file_kind == "shader_post":
+            return "skip" if key in ("intarget", "outtarget") and value == "minecraft:main" else "flat"
         if file_kind == "recipe":
             return ("recipe_serializer" if value.startswith("minecraft:") else "skip") if key == "type" else "item"
         if file_kind == "item_tag":
@@ -408,10 +430,23 @@ class Validator:
             file_kind = "model"
         elif relative.startswith("assets/") and "/items/" in relative:
             file_kind = "item_model"
+        elif relative.startswith("assets/") and "/post_effect/" in relative:
+            file_kind = "post_effect"
+        elif "/shaders/program/" in relative:
+            file_kind = "shader_program"
+        elif "/shaders/post/" in relative:
+            file_kind = "shader_post"
         else:
             file_kind = "other"
         content = json.loads(path.read_text(encoding="utf-8"))
         self.walk(relative, content, [], file_kind)
+        if file_kind == "shader_post":
+            for pass_entry in content.get("passes", []):
+                shader = pass_entry.get("name")
+                if shader:
+                    shader_id = shader if ":" in shader else f"minecraft:{shader}"
+                    if shader_id not in self.shader_programs and shader_id not in self.shader_stages:
+                        self.report(relative, shader_id, "shader_program")
         if file_kind == "blockstate":
             self.check_blockstate(relative, content)
 

@@ -99,10 +99,21 @@ def cube_element(start, end, texture="#t", faces=None):
 def arm_element(texture, extended, width=(7, 9)):
     low, high = width
     start = -6 if extended else 0
+    end = 7 if low == 7 else low
+    faces = {face: {"texture": texture} for face in ["down", "up", "north", "south", "west", "east"]}
+    if extended:
+        # The arm crosses the block boundary. Default cuboid UVs extend past
+        # the 16-unit texture domain (to 22) on its horizontal faces; keep the
+        # full arm length while mapping it into the original 32x32 texture.
+        length = end - start
+        faces["down"]["uv"] = [low, 16 - end + start, high, 16]
+        faces["up"]["uv"] = [low, 0, high, length]
+        faces["west"]["uv"] = [0, 16 - high, length, 16 - low]
+        faces["east"]["uv"] = [16 - end + start, 16 - high, 16, 16 - low]
     return {
         "from": [low, low, start],
-        "to": [high, high, 7 if low == 7 else low],
-        "faces": {face: {"texture": texture} for face in ["down", "up", "north", "south", "west", "east"]},
+        "to": [high, high, end],
+        "faces": faces,
     }
 
 

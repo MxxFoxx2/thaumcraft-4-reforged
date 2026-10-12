@@ -45,12 +45,15 @@ import thaumcraft.block.GolemFetterBlock;
 import thaumcraft.block.HoleBlock;
 import thaumcraft.block.InfusedStoneBlock;
 import thaumcraft.block.LootBlock;
+import thaumcraft.block.LiquidDeathBlock;
+import thaumcraft.blockentity.EtherealBloomBlockEntity;
 import thaumcraft.block.MagicalLeavesBlock;
 import thaumcraft.block.MagicalLogBlock;
 import thaumcraft.block.MagicalSaplingBlock;
 import thaumcraft.block.ManaPodBlock;
 import thaumcraft.block.NodeJarBlock;
 import thaumcraft.block.ObsidianTotemBlock;
+import thaumcraft.block.PurifyingFluidBlock;
 import thaumcraft.block.RechargeFocusBlock;
 import thaumcraft.block.ResearchTableBlock;
 import thaumcraft.block.ResearchTablePartBlock;
@@ -89,10 +92,24 @@ import thaumcraft.node.EnergizedNodeBlock;
 import thaumcraft.node.NodeStabilizerBlock;
 import thaumcraft.node.NodeTransducerBlock;
 import thaumcraft.platform.Registration;
+import thaumcraft.taint.EtherealBloomBlock;
+import thaumcraft.taint.TaintBlock;
+import thaumcraft.taint.TaintFibresBlock;
 import thaumcraft.vis.VisRelayBlock;
 
 public final class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Thaumcraft.MODID);
+
+    public static final DeferredBlock<PurifyingFluidBlock> PURIFYING_FLUID = RegistryHelper.registerBlock(BLOCKS,
+        "purifying_fluid",
+        properties -> new PurifyingFluidBlock(ModFluids.PURIFYING_FLUID.get(), properties),
+        properties -> properties.mapColor(MapColor.WATER).replaceable().noCollision().strength(100.0F).pushReaction(PushReaction.DESTROY).lightLevel(state -> 10).noLootTable().liquid().sound(SoundType.EMPTY)
+    );
+    public static final DeferredBlock<LiquidDeathBlock> LIQUID_DEATH = RegistryHelper.registerBlock(BLOCKS,
+        "liquid_death",
+        properties -> new LiquidDeathBlock(ModFluids.LIQUID_DEATH.get(), properties),
+        properties -> properties.mapColor(MapColor.COLOR_PURPLE).replaceable().noCollision().strength(100.0F).pushReaction(PushReaction.DESTROY).lightLevel(state -> 8).noLootTable().liquid().sound(SoundType.EMPTY)
+    );
 
     public static final String[] CANDLE_COLORS = {
         "white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
@@ -158,15 +175,56 @@ public final class ModBlocks {
         properties -> new CustomPlantBlock(CustomPlantBlock.Kind.CINDERPEARL, properties),
         properties -> plant(properties).lightLevel(state -> 8)
     ));
-    public static final DeferredBlock<CustomPlantBlock> ETHEREAL_BLOOM = withItem(RegistryHelper.registerBlock(BLOCKS,
+    public static final DeferredBlock<EtherealBloomBlock> ETHEREAL_BLOOM = withItem(RegistryHelper.registerBlock(BLOCKS,
         "ethereal_bloom",
-        properties -> new CustomPlantBlock(CustomPlantBlock.Kind.ETHEREAL_BLOOM, properties),
+        EtherealBloomBlock::new,
         properties -> plant(properties).lightLevel(state -> 15)
     ));
     public static final DeferredBlock<CustomPlantBlock> VISHROOM = withItem(RegistryHelper.registerBlock(BLOCKS,
         "vishroom",
         properties -> new CustomPlantBlock(CustomPlantBlock.Kind.VISHROOM, properties),
         properties -> plant(properties).lightLevel(state -> 8)
+    ));
+
+    public static final DeferredBlock<TaintBlock> CRUSTED_TAINT = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "crusted_taint",
+        properties -> new TaintBlock(TaintBlock.Kind.CRUST, properties),
+        properties -> properties.mapColor(MapColor.COLOR_PURPLE).strength(1.0F).sound(SoundType.GRAVEL)
+    ));
+    public static final DeferredBlock<TaintBlock> TAINTED_SOIL = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "tainted_soil",
+        properties -> new TaintBlock(TaintBlock.Kind.SOIL, properties),
+        properties -> properties.mapColor(MapColor.COLOR_PURPLE).strength(0.6F).sound(SoundType.GRAVEL)
+    ));
+    public static final DeferredBlock<TaintBlock> FLESH_BLOCK = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "flesh_block",
+        properties -> new TaintBlock(TaintBlock.Kind.FLESH, properties),
+        properties -> properties.mapColor(MapColor.COLOR_RED).strength(0.8F).sound(SoundType.SLIME_BLOCK)
+    ));
+    public static final DeferredBlock<TaintFibresBlock> FIBROUS_TAINT = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "fibrous_taint",
+        properties -> new TaintFibresBlock(TaintFibresBlock.Kind.FIBRES, properties),
+        properties -> plant(properties)
+    ));
+    public static final DeferredBlock<TaintFibresBlock> TAINTED_GRASS = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "tainted_grass",
+        properties -> new TaintFibresBlock(TaintFibresBlock.Kind.GRASS, properties),
+        properties -> plant(properties)
+    ));
+    public static final DeferredBlock<TaintFibresBlock> TAINTED_PLANT = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "tainted_plant",
+        properties -> new TaintFibresBlock(TaintFibresBlock.Kind.PLANT, properties),
+        properties -> plant(properties)
+    ));
+    public static final DeferredBlock<TaintFibresBlock> SPORE_STALK = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "spore_stalk",
+        properties -> new TaintFibresBlock(TaintFibresBlock.Kind.STALK, properties),
+        properties -> plant(properties)
+    ));
+    public static final DeferredBlock<TaintFibresBlock> MATURE_SPORE_STALK = withItem(RegistryHelper.registerBlock(BLOCKS,
+        "mature_spore_stalk",
+        properties -> new TaintFibresBlock(TaintFibresBlock.Kind.MATURE_STALK, properties),
+        properties -> plant(properties)
     ));
 
     public static final DeferredBlock<ManaPodBlock> MANA_POD = RegistryHelper.registerBlock(BLOCKS,
@@ -661,12 +719,12 @@ public final class ModBlocks {
     public static final DeferredItem<thaumcraft.device.MirrorItem> MAGIC_MIRROR_ITEM = RegistryHelper.registerItem(ModItems.ITEMS,
         "magic_mirror",
         properties -> new thaumcraft.device.MirrorItem(MAGIC_MIRROR.get(), properties),
-        properties -> properties.rarity(net.minecraft.world.item.Rarity.UNCOMMON)
+        properties -> properties.useBlockDescriptionPrefix().rarity(net.minecraft.world.item.Rarity.UNCOMMON)
     );
     public static final DeferredItem<thaumcraft.device.MirrorItem> ESSENTIA_MIRROR_ITEM = RegistryHelper.registerItem(ModItems.ITEMS,
         "essentia_mirror",
         properties -> new thaumcraft.device.MirrorItem(ESSENTIA_MIRROR.get(), properties),
-        properties -> properties.rarity(net.minecraft.world.item.Rarity.UNCOMMON)
+        properties -> properties.useBlockDescriptionPrefix().rarity(net.minecraft.world.item.Rarity.UNCOMMON)
     );
 
     private static DeferredBlock<thaumcraft.device.CrystalClusterBlock> crystalCluster(String name, int kind) {

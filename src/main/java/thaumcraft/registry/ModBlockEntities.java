@@ -21,6 +21,7 @@ import thaumcraft.arcane.DeconstructionTableBlockEntity;
 import thaumcraft.arcane.VisChargeRelayBlockEntity;
 import thaumcraft.arcane.FocalManipulatorBlockEntity;
 import thaumcraft.blockentity.HoleBlockEntity;
+import thaumcraft.blockentity.EtherealBloomBlockEntity;
 import thaumcraft.blockentity.ManaPodBlockEntity;
 import thaumcraft.blockentity.NodeJarBlockEntity;
 import thaumcraft.blockentity.ResearchTableBlockEntity;
@@ -302,6 +303,10 @@ public final class ModBlockEntities {
     public static final Supplier<BlockEntityType<ArcaneSpaBlockEntity>> ARCANE_SPA = BLOCK_ENTITIES.register(
         "arcane_spa",
         () -> BlockEntityType.Builder.of(ArcaneSpaBlockEntity::new, ModBlocks.ARCANE_SPA.get()).build(null)
+    );
+    public static final Supplier<BlockEntityType<EtherealBloomBlockEntity>> ETHEREAL_BLOOM = BLOCK_ENTITIES.register(
+        "ethereal_bloom",
+        () -> new BlockEntityType<>(EtherealBloomBlockEntity::new, ModBlocks.ETHEREAL_BLOOM.get())
     );
 
     private ModBlockEntities() {

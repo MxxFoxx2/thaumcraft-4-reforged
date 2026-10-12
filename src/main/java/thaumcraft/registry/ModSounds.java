@@ -51,6 +51,27 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> SWING = register("swing");
     public static final DeferredHolder<SoundEvent, SoundEvent> DOORFAIL = register("doorfail");
     public static final DeferredHolder<SoundEvent, SoundEvent> BRAIN = register("brain");
+    public static final DeferredHolder<SoundEvent, SoundEvent> HEARTBEAT = register("heartbeat");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ROOTS = register("roots");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PECH_IDLE = register("pech_idle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PECH_HIT = register("pech_hit");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PECH_DEATH = register("pech_death");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PECH_TRADE = register("pech_trade");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PECH_CHARGE = register("pech_charge");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WISPLIVE = register("wisplive");
+    public static final DeferredHolder<SoundEvent, SoundEvent> WISPDEAD = register("wispdead");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TENTACLE = register("tentacle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SWARM = register("swarm");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SWARM_ATTACK = register("swarmattack");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CRAB_CLAW = register("crabclaw");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CRAB_DEATH = register("crabdeath");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CRAB_TALK = register("crabtalk");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDRITCH_GUARDIAN_IDLE = register("egidle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDRITCH_GUARDIAN_ATTACK = register("egattack");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDRITCH_GUARDIAN_DEATH = register("egdeath");
+    public static final DeferredHolder<SoundEvent, SoundEvent> ELDRITCH_GUARDIAN_SCREECH = register("egscreech");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHANT = register("chant");
+    public static final DeferredHolder<SoundEvent, SoundEvent> FLY = register("fly");
 
     private ModSounds() {
     }

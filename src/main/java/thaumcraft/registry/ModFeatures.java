@@ -7,6 +7,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumcraft.Thaumcraft;
 import thaumcraft.world.biome.MagicalForestDecorationFeature;
+import thaumcraft.world.biome.TaintDecorationFeature;
 import thaumcraft.world.gen.ThaumcraftWorldGenFeature;
 
 public final class ModFeatures {
@@ -14,6 +15,7 @@ public final class ModFeatures {
 
     public static final Supplier<ThaumcraftWorldGenFeature> WORLD_GENERATION = FEATURES.register("world_generation", ThaumcraftWorldGenFeature::new);
     public static final Supplier<MagicalForestDecorationFeature> MAGICAL_FOREST_DECORATION = FEATURES.register("magical_forest_decoration", MagicalForestDecorationFeature::new);
+    public static final Supplier<TaintDecorationFeature> TAINT_DECORATION = FEATURES.register("taint_decoration", TaintDecorationFeature::new);
 
     private ModFeatures() {
     }

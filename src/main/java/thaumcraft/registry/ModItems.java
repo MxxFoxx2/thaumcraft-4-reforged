@@ -3,6 +3,7 @@ package thaumcraft.registry;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Rarity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -12,6 +13,9 @@ import thaumcraft.device.ArcaneKeyItem;
 import thaumcraft.device.OwnedBlockEntity;
 import thaumcraft.essentia.PhialItem;
 import thaumcraft.item.AspectContainerItem;
+import thaumcraft.item.AlumentumItem;
+import thaumcraft.item.BathSaltsItem;
+import thaumcraft.item.BottledTaintItem;
 import thaumcraft.item.CrystalEssenceItem;
 import thaumcraft.item.GogglesItem;
 import thaumcraft.item.KnowledgeFragmentItem;
@@ -19,6 +23,7 @@ import thaumcraft.item.LootBagItem;
 import thaumcraft.item.PrimalCharmItem;
 import thaumcraft.item.ResearchNotesItem;
 import thaumcraft.item.ScribingToolsItem;
+import thaumcraft.item.SanitizingSoapItem;
 import thaumcraft.item.ThaumometerItem;
 import thaumcraft.item.ThaumonomiconItem;
 import thaumcraft.item.ZombieBrainItem;
@@ -93,7 +98,7 @@ public final class ModItems {
         Registration.armorMaterial(TcMaterials.CULTIST_LEADER_ARMOR);
     }
 
-    public static final DeferredItem<Item> ALUMENTUM = RegistryHelper.registerSimpleItem(ITEMS, "alumentum", properties -> Registration.fuel(properties, 6400));
+    public static final DeferredItem<Item> ALUMENTUM = RegistryHelper.registerItem(ITEMS, "alumentum", properties -> new AlumentumItem(Registration.fuel(properties, 6400)));
     public static final DeferredItem<Item> NITOR = RegistryHelper.registerItem(ITEMS, "nitor", properties -> new net.minecraft.world.item.BlockItem(ModBlocks.NITOR_LIGHT.get(), properties));
     public static final DeferredItem<Item> THAUMIUM_INGOT = RegistryHelper.registerSimpleItem(ITEMS, "thaumium_ingot");
     public static final DeferredItem<Item> QUICKSILVER = RegistryHelper.registerSimpleItem(ITEMS, "quicksilver");
@@ -111,6 +116,13 @@ public final class ModItems {
     public static final DeferredItem<Item> VOID_METAL_INGOT = RegistryHelper.registerSimpleItem(ITEMS, "void_metal_ingot");
     public static final DeferredItem<Item> VOID_SEED = RegistryHelper.registerSimpleItem(ITEMS, "void_seed");
     public static final DeferredItem<Item> GOLD_COIN = RegistryHelper.registerSimpleItem(ITEMS, "gold_coin");
+    public static final DeferredItem<BucketItem> PURIFYING_FLUID_BUCKET = RegistryHelper.registerItem(ITEMS, "purifying_fluid_bucket", properties -> new BucketItem(ModFluids.PURIFYING_FLUID.get(), properties.stacksTo(1)));
+    public static final DeferredItem<BucketItem> LIQUID_DEATH_BUCKET = RegistryHelper.registerItem(ITEMS, "liquid_death_bucket", properties -> new BucketItem(ModFluids.LIQUID_DEATH.get(), properties.stacksTo(1)));
+    public static final DeferredItem<BathSaltsItem> BATH_SALTS = RegistryHelper.registerItem(ITEMS, "bath_salts", BathSaltsItem::new);
+    public static final DeferredItem<SanitizingSoapItem> SANITIZING_SOAP = RegistryHelper.registerItem(ITEMS, "sanitizing_soap", SanitizingSoapItem::new);
+    public static final DeferredItem<BottledTaintItem> BOTTLED_TAINT = RegistryHelper.registerItem(ITEMS, "bottled_taint", BottledTaintItem::new);
+
+    public static final DeferredItem<Item> CRIMSON_RITES = RegistryHelper.registerSimpleItem(ITEMS, "crimson_rites", properties -> properties.rarity(Rarity.RARE));
 
     public static final DeferredItem<Item> AIR_SHARD = RegistryHelper.registerSimpleItem(ITEMS, "air_shard");
     public static final DeferredItem<Item> FIRE_SHARD = RegistryHelper.registerSimpleItem(ITEMS, "fire_shard");

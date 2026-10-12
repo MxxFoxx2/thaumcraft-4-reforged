@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -15,6 +16,7 @@ import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.platform.Baubles;
+import thaumcraft.registry.ModEffects;
 import thaumcraft.registry.ModSounds;
 import thaumcraft.wand.focus.FocusItem;
 import thaumcraft.wand.focus.FocusPouchItem;
@@ -54,7 +56,11 @@ public final class WandManager {
     }
 
     private static int getVisExhaustPenalty(Player player) {
-        return 0;
+        MobEffectInstance normal = player.getEffect(ModEffects.VIS_EXHAUST);
+        MobEffectInstance infectious = player.getEffect(ModEffects.INFECTIOUS_VIS_EXHAUST);
+        int normalAmplifier = normal == null ? -1 : normal.getAmplifier();
+        int infectiousAmplifier = infectious == null ? -1 : infectious.getAmplifier();
+        return (Math.max(normalAmplifier, infectiousAmplifier) + 1) * 10;
     }
 
     public static boolean consumeVisFromInventory(Player player, AspectList cost) {

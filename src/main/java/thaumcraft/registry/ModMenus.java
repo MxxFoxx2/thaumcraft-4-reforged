@@ -3,6 +3,7 @@ package thaumcraft.registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import thaumcraft.Thaumcraft;
@@ -16,6 +17,7 @@ import thaumcraft.menu.FocusPouchMenu;
 import thaumcraft.menu.HoverHarnessMenu;
 import thaumcraft.menu.ResearchTableMenu;
 import thaumcraft.menu.ThaumatoriumMenu;
+import thaumcraft.menu.PechTradeMenu;
 import thaumcraft.platform.Menus;
 
 public final class ModMenus {
@@ -34,7 +36,7 @@ public final class ModMenus {
 
     public static final DeferredHolder<MenuType<?>, MenuType<ArcaneBoreMenu>> ARCANE_BORE = MENUS.register("arcane_bore", () -> Menus.withPos(ArcaneBoreMenu::new));
     public static final DeferredHolder<MenuType<?>, MenuType<ArcaneSpaMenu>> ARCANE_SPA = MENUS.register("arcane_spa", () -> Menus.withPos(ArcaneSpaMenu::new));
-
+    public static final DeferredHolder<MenuType<?>, MenuType<PechTradeMenu>> PECH_TRADE = MENUS.register("pech_trade", () -> IMenuTypeExtension.create((id, inventory, buffer) -> new PechTradeMenu(id, inventory, buffer.readVarInt())));
     private ModMenus() {
     }
 

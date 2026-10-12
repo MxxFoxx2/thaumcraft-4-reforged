@@ -3,6 +3,9 @@ package thaumcraft.infusion;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import thaumcraft.item.gear.RunicArmor;
+import thaumcraft.research.Warp;
+import thaumcraft.research.ResearchConfig;
+import thaumcraft.research.WarpType;
 
 public final class InfusionHooks {
     private InfusionHooks() {
@@ -31,5 +34,9 @@ public final class InfusionHooks {
     }
 
     public static void onInfusionCrafted(ServerPlayer player, ItemStack result) {
+        int amount = Warp.getItemWarp(result);
+        if (!ResearchConfig.WUSS_MODE && amount > 0) {
+            Warp.add(player, amount, WarpType.STICKY);
+        }
     }
 }

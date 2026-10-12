@@ -7,8 +7,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.fx.ClientFx;
+import thaumcraft.client.platform.WarpPostEffects;
 import thaumcraft.client.research.ResearchBrowserScreen;
 import thaumcraft.client.research.ThaumometerClient;
 import thaumcraft.client.screen.AlchemicalFurnaceScreen;
@@ -33,6 +35,11 @@ public final class ThaumcraftClient {
         ResearchClientHooks.setBookOpener(ResearchBrowserScreen::open);
         ThaumometerClient.register();
         modEventBus.addListener(ThaumcraftClient::setup);
+        modEventBus.addListener(ThaumcraftClient::registerReloadListeners);
+    }
+
+    private static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(WarpPostEffects.INSTANCE);
     }
 
     private static void setup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {

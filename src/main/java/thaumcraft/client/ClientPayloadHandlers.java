@@ -1,6 +1,7 @@
 package thaumcraft.client;
 
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -27,6 +28,7 @@ import thaumcraft.network.NodeZapPayload;
 import thaumcraft.network.ResearchCompletePayload;
 import thaumcraft.network.VisDrainFxPayload;
 import thaumcraft.network.WarpMessagePayload;
+import thaumcraft.network.WarpEventPayload;
 import thaumcraft.registry.ModSounds;
 
 public final class ClientPayloadHandlers {
@@ -49,6 +51,11 @@ public final class ClientPayloadHandlers {
         ClientNetwork.handle(ShockZapPayload.TYPE, ClientPayloadHandlers::shockZap);
         ClientNetwork.handle(RunicChargePayload.TYPE, (payload, player) -> GearHud.setRunic(payload.charge(), payload.max()));
         ClientNetwork.handle(ShieldFxPayload.TYPE, ClientPayloadHandlers::shield);
+        ClientNetwork.handle(WarpEventPayload.TYPE, (payload, player) -> {
+            if (player instanceof LocalPlayer localPlayer) {
+                WarpEffectClient.handle(payload, localPlayer);
+            }
+        });
     }
 
     private static void blockBubble(BlockBubbleFxPayload payload, Player player) {

@@ -23,7 +23,7 @@ import thaumcraft.Thaumcraft;
 @EventBusSubscriber(modid = Thaumcraft.MODID)
 public final class ModNetwork {
     private static final List<Consumer<PayloadRegistrar>> REGISTRATIONS = new ArrayList<>();
-    private static final Map<CustomPacketPayload.Type<?>, Handler<?>> CLIENT_HANDLERS = new HashMap<>();
+    private static final Map<CustomPacketPayload.Type<?>, Consumer<?>> CLIENT_HANDLERS = new HashMap<>();
 
     private ModNetwork() {
     }
@@ -34,18 +34,18 @@ public final class ModNetwork {
     }
 
     public static <T extends CustomPacketPayload> void toClient(CustomPacketPayload.Type<T> type, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
-        REGISTRATIONS.add(registrar -> registrar.playToClient(type, codec, (payload, context) -> dispatch(type, payload, context.player())));
+        REGISTRATIONS.add(registrar -> registrar.playToClient(type, codec, (payload, context) -> dispatch(type, payload)));
     }
 
-    public static <T extends CustomPacketPayload> void setClientHandler(CustomPacketPayload.Type<T> type, Handler<T> handler) {
+    public static <T extends CustomPacketPayload> void setClientHandler(CustomPacketPayload.Type<T> type, Consumer<T> handler) {
         CLIENT_HANDLERS.put(type, handler);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends CustomPacketPayload> void dispatch(CustomPacketPayload.Type<T> type, T payload, Player player) {
-        Handler<T> handler = (Handler<T>) CLIENT_HANDLERS.get(type);
+    private static <T extends CustomPacketPayload> void dispatch(CustomPacketPayload.Type<T> type, T payload) {
+        Consumer<T> handler = (Consumer<T>) CLIENT_HANDLERS.get(type);
         if (handler != null) {
-            handler.handle(payload, player);
+            handler.accept(payload);
         }
     }
 

@@ -6,10 +6,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import thaumcraft.aspect.AspectRegistry;
+import thaumcraft.platform.DataAttachments;
 import thaumcraft.client.platform.ClientNetwork;
 import thaumcraft.client.research.ResearchNotifications;
 import thaumcraft.fx.Fx;
 import thaumcraft.infusion.InfusionMatrixBlockEntity;
+import thaumcraft.platform.DataAttachments.SyncPayload;
 import thaumcraft.network.AspectDiscoveryPayload;
 import thaumcraft.network.AspectPoolPayload;
 import thaumcraft.network.AspectTagsPayload;
@@ -36,6 +38,7 @@ public final class ClientPayloadHandlers {
     }
 
     public static void register() {
+        ClientNetwork.handle(SyncPayload.TYPE, DataAttachments::receive);
         ClientNetwork.handle(BeamPulsePayload.TYPE, ClientPayloadHandlers::beamPulse);
         ClientNetwork.handle(AspectTagsPayload.TYPE, ClientPayloadHandlers::aspectTags);
         ClientNetwork.handle(NodeZapPayload.TYPE, ClientPayloadHandlers::nodeZap);

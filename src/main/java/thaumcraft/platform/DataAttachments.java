@@ -48,7 +48,6 @@ public final class DataAttachments {
     static void register(IEventBus bus) {
         ATTACHMENTS.register(bus);
         ModNetwork.toClient(SyncPayload.TYPE, SyncPayload.STREAM_CODEC);
-        ModNetwork.setClientHandler(SyncPayload.TYPE, DataAttachments::receive);
     }
 
     static <T> void sendSync(DataKey<T> key, Entity holder, boolean toTracking) {
@@ -68,7 +67,7 @@ public final class DataAttachments {
         }
     }
 
-    private static <T> void receive(SyncPayload payload, Player player) {
+    public static <T> void receive(SyncPayload payload, Player player) {
         @SuppressWarnings("unchecked")
         DataKey<T> key = (DataKey<T>) DataKey.KEYS.get(payload.key());
         Entity holder = player.level().getEntity(payload.entityId());

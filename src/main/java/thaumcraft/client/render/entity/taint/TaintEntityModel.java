@@ -5,8 +5,10 @@ import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.resources.ResourceLocation;
 import thaumcraft.entity.monster.taint.Taintacle;
 import thaumcraft.entity.monster.taint.TaintSpore;
 import thaumcraft.entity.monster.taint.TaintedChicken;
@@ -37,7 +39,7 @@ public class TaintEntityModel<T extends Mob> extends EntityModel<T> {
         VILLAGER("tainted_villager", "textures/model/villager.png");
 
         private final ModelLayerLocation layer;
-        private final net.minecraft.resources.Identifier texture;
+        private final ResourceLocation texture;
 
         Kind(String layer, String texture) {
             this.layer = new ModelLayerLocation(Thaumcraft.id(layer), "main");
@@ -48,7 +50,7 @@ public class TaintEntityModel<T extends Mob> extends EntityModel<T> {
             return this.layer;
         }
 
-        public net.minecraft.resources.Identifier texture() {
+        public ResourceLocation texture() {
             return this.texture;
         }
     }
@@ -69,7 +71,7 @@ public class TaintEntityModel<T extends Mob> extends EntityModel<T> {
     private final List<ModelPart> tentacleSegments = new ArrayList<>();
 
     public TaintEntityModel(ModelPart root, Kind kind) {
-        super(root, kind == Kind.SPORE || kind == Kind.SWARMER ? TcRenderTypes::entityTranslucent : TcRenderTypes::entityCutoutNoCull);
+        super(kind == Kind.SPORE || kind == Kind.SWARMER ? RenderType::entityTranslucent : TcRenderTypes::entityCutoutNoCull);
         this.root = root;
         this.kind = kind;
         this.body = root.getChild("body");

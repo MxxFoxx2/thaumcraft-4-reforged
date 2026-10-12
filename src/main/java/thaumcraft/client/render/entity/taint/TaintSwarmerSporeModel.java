@@ -3,6 +3,7 @@ package thaumcraft.client.render.entity.taint;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.RenderType;
 import thaumcraft.entity.monster.taint.TaintSpore;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -13,7 +14,6 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import thaumcraft.Thaumcraft;
-import thaumcraft.client.platform.TcRenderTypes;
 
 public class TaintSwarmerSporeModel extends EntityModel<TaintSpore> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(Thaumcraft.id("taint_swarmer_spore"), "main");
@@ -24,7 +24,7 @@ public class TaintSwarmerSporeModel extends EntityModel<TaintSpore> {
     private final ModelPart spore;
 
     public TaintSwarmerSporeModel(ModelPart root) {
-        super(TcRenderTypes::entityTranslucent);
+        super(RenderType::entityTranslucent);
         this.root = root;
         this.sporeScale = root.getChild("spore_transform").getChild("spore_scale");
         this.sporeOffset = this.sporeScale.getChild("spore_offset");

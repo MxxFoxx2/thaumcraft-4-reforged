@@ -11,7 +11,7 @@ public final class ClientLayers {
     private ClientLayers() {
     }
 
-    public static <T extends Entity, M extends EntityModel<T>> EyesLayer<T, M> fullbrightEyes(RenderLayerParent<T, M> parent, ResourceLocation texture) {
+    public static <E extends Entity, M extends EntityModel<E>> EyesLayer<E, M> fullbrightEyes(RenderLayerParent<E, M> parent, ResourceLocation texture) {
         return new EyesLayer<>(parent) {
             @Override
             public RenderType renderType() {

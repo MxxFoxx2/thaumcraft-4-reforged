@@ -14,5 +14,6 @@ public final class BlockModels {
     @SubscribeEvent
     static void registerModels(ModelEvent.RegisterGeometryLoaders event) {
         event.register(Thaumcraft.id("warded"), (net.neoforged.neoforge.client.model.geometry.IGeometryLoader<WardedBlockModel.Unbaked>) (json, context) -> new WardedBlockModel.Unbaked());
+        event.register(Thaumcraft.id("taint_fibres"), new thaumcraft.client.render.taint.TaintFibresModel.Loader());
     }
 }

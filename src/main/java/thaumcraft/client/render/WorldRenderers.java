@@ -43,5 +43,6 @@ public final class WorldRenderers {
         event.registerBlockEntityRenderer(ModBlockEntities.PEDESTAL.get(), ArcanePedestalRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.INFUSION_PILLAR.get(), InfusionPillarRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.INFUSION_MATRIX.get(), RunicMatrixRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.ETHEREAL_BLOOM.get(), thaumcraft.client.render.taint.EtherealBloomRenderer::new);
     }
 }

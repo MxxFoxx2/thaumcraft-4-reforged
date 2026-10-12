@@ -55,7 +55,8 @@ def generate_modern(root):
     def color_effect(name, scale, sat):
         u={"WarpColorConfig":[{"name":"ColorScale","type":"vec3","value":scale},{"name":"Saturation","type":"float","value":sat}]}
         put_json(a/f"post_effect/{name}.json",{**swap,"passes":[simple_pass("warp_color","minecraft:main","swap",u),
-            {"vertex_shader":"minecraft:core/screenquad","fragment_shader":"minecraft:post/blit","inputs":[{"sampler_name":"In","target":"swap"}],"output":"minecraft:main"}]})
+            {"vertex_shader":"minecraft:core/screenquad","fragment_shader":"minecraft:post/blit","inputs":[{"sampler_name":"In","target":"swap"}],"output":"minecraft:main",
+             "uniforms":{"BlitConfig":[{"name":"ColorModulate","type":"vec4","value":[1.0,1.0,1.0,1.0]}]}}]})
     color_effect("desaturatetc",[1.0,1.0,1.0],0.8)
     color_effect("hunger",[1.0,0.8,0.8],1.1)
     put_json(a/"post_effect/sunscorned.json",{**swap,"passes":[simple_pass("warp_bloom_color","minecraft:main","swap"),simple_pass("warp_bloom_add","swap","minecraft:main")]})

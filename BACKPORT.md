@@ -13,7 +13,7 @@
 
 ## Sync procedure
 
-1. `git log --reverse 057ddba..main` in the worktree of this branch.
+1. `git log --reverse f0c40ed..main` in the worktree of this branch.
 2. A commit touching only resources, lang or `tools/`: `git cherry-pick`, then regenerate with `python3 tools/gen_resources.py --mc 1.21.1`.
 3. A commit with Java: `git show <sha> | python3 tools/backport/rewrite.py --target 1.21.1 | git apply -3`, resolve conflicts by hand, run `compileJava`.
 4. Commit with the same message, then update the sha above.
@@ -116,5 +116,5 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 
 ## Phase 10–11 backport status
 
-- Backported GameTest source and generated resource/tool changes are present. The 1.21.1 taint fibres model uses the `thaumcraft:taint_fibres` geometry loader and ordinary blockstate model references.
-- The last supplied compile diagnostic identified one GameRules API mismatch in `ProjectileGameTests`; it was changed to `getRule(RULE_MOBGRIEFING).set(...)`. No build or test run was performed after the user's request to stop testing; GameTests and runtime resource loading remain pending manual verification.
+- Common entities, champions, aspect orbs, fluids/taint/warp, direct entity/block rendering, post shaders, GameTest source and generated resource/tool changes are present. The 1.21.1 taint fibres model uses the `thaumcraft:taint_fibres` geometry loader and ordinary blockstate model references.
+- The last supplied compile diagnostic identified one GameRules API mismatch in `ProjectileGameTests`; it was changed to `getRule(RULE_MOBGRIEFING).set(...)`. The final fibre geometry/vertex stride and queued-payload logout fixes were also applied after that diagnostic. No build or test run was performed after the user's request to stop testing; final compilation, GameTests and runtime resource loading remain pending manual verification.

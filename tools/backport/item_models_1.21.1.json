@@ -237,37 +237,37 @@
     "robe_chestplate": {
       "0": {
         "source": "minecraft:dye",
-        "default": 6961280
+        "default": -9815936
       }
     },
     "robe_leggings": {
       "0": {
         "source": "minecraft:dye",
-        "default": 6961280
+        "default": -9815936
       }
     },
     "robe_boots": {
       "0": {
         "source": "minecraft:dye",
-        "default": 6961280
+        "default": -9815936
       }
     },
     "void_robe_helmet": {
       "0": {
         "source": "minecraft:dye",
-        "default": 6961280
+        "default": -9815936
       }
     },
     "void_robe_chestplate": {
       "0": {
         "source": "minecraft:dye",
-        "default": 6961280
+        "default": -9815936
       }
     },
     "void_robe_leggings": {
       "0": {
         "source": "minecraft:dye",
-        "default": 6961280
+        "default": -9815936
       }
     },
     "apprentice_ring_air": {

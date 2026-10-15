@@ -41,7 +41,7 @@ import thaumcraft.research.ResearchNotes;
 public class ResearchBrowserScreen extends Screen {
     private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/gui/gui_research.png");
     private static final ResourceLocation NODES = Thaumcraft.id("textures/misc/nodes.png");
-    private static final Style GALACTIC = Style.EMPTY.withFont(ResourceLocation.withDefaultNamespace("alt"));
+    private static final Style GALACTIC = Style.EMPTY.withFont(Thaumcraft.id("galactic"));
     private static final int PANE_WIDTH = 256;
     private static final int PANE_HEIGHT = 230;
     private static final int VIEW_WIDTH = 224;

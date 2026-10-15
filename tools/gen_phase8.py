@@ -149,7 +149,7 @@ ROBES = ["robe_chestplate", "robe_leggings", "robe_boots", "void_robe_helmet", "
 
 
 def dye_tint():
-    return {"type": "minecraft:dye", "default": ROBE_COLOR}
+    return {"type": "minecraft:dye", "default": (ROBE_COLOR | 0xFF000000) - 0x100000000}
 
 
 def handheld_item(ctx, name, texture):

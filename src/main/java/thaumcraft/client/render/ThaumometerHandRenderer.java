@@ -18,6 +18,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -142,7 +143,11 @@ public final class ThaumometerHandRenderer {
             }
         } else if (target.kind() == ScanKind.PHENOMENON) {
             BlockPos pos = hit.pos();
-            text = new ItemStack(level.getBlockState(pos).getBlock()).getHoverName();
+            BlockState state = level.getBlockState(pos);
+            ItemStack picked = state.getBlock().getCloneItemStack(level, pos, state);
+            if (!picked.isEmpty()) {
+                text = picked.getHoverName();
+            }
             if (scanned && level.getBlockEntity(pos) instanceof Node node) {
                 aspects = node.getAspects();
                 Component nodeText = Component.translatable(node.getNodeType().getTranslationKey());

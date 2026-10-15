@@ -89,7 +89,7 @@ public final class ThaumometerClient implements ScanClientHooks.Scanner {
             ScanManager.Target target = ScanManager.resolveEntity(pointed);
             return new Hit(ScanManager.KIND_ENTITY, BlockPos.ZERO, pointed.getId(), target);
         }
-        HitResult result = player.pick(player.blockInteractionRange(), 1.0F, true);
+        HitResult result = ScanManager.pickBlock(level, player);
         if (result instanceof BlockHitResult blockHit && result.getType() == HitResult.Type.BLOCK) {
             BlockPos pos = blockHit.getBlockPos();
             ScanManager.Target target = ScanManager.resolveBlock(level, pos);

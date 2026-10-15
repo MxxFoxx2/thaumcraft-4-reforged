@@ -141,11 +141,21 @@ def devices(ctx):
             "top": ctx.ref("wandpedestal_focus_top"),
             "side": ctx.ref("wandpedestal_focus_side"),
         },
-        "elements": [box(ctx, [1, 0, 1], [15, 7, 15], {
-            "down": {"texture": "#bottom", "cullface": "down"}, "up": {"texture": "#top"},
+        "elements": [box(ctx, start, end, {
+            "down": {"texture": "#bottom"}, "up": {"texture": "#top"},
             "north": {"texture": "#side"}, "south": {"texture": "#side"},
             "west": {"texture": "#side"}, "east": {"texture": "#side"},
-        })],
+        }) for start, end in [
+            ([5, 0, 5], [11, 1, 11]),
+            ([1, 0, 7], [5, 1, 9]),
+            ([11, 0, 7], [15, 1, 9]),
+            ([7, 0, 1], [9, 1, 5]),
+            ([7, 0, 11], [9, 1, 15]),
+            ([1, 1, 7], [3, 7, 9]),
+            ([7, 1, 1], [9, 7, 3]),
+            ([13, 1, 7], [15, 7, 9]),
+            ([7, 1, 13], [9, 7, 15]),
+        ]],
     })
     for name in ["wand_recharge_pedestal", "compound_recharge_focus"]:
         ctx.simple_state(name)

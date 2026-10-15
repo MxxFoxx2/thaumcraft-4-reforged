@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import thaumcraft.Thaumcraft;
+import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.entity.monster.ThaumicSlime;
 
 final class ThaumicSlimeOuterLayer extends RenderLayer<ThaumicSlime, SlimeModel<ThaumicSlime>> {
@@ -29,7 +30,7 @@ final class ThaumicSlimeOuterLayer extends RenderLayer<ThaumicSlime, SlimeModel<
             float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!entity.isInvisible() || Minecraft.getInstance().shouldEntityAppearGlowing(entity)) {
             model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-            model.renderToBuffer(poseStack, buffer.getBuffer(RenderType.entityTranslucent(TEXTURE)), packedLight,
+            model.renderToBuffer(poseStack, buffer.getBuffer(TcRenderTypes.entityTranslucentNoDepth(TEXTURE)), packedLight,
                 LivingEntityRenderer.getOverlayCoords(entity, 0.0F), 0x66FFFFFF);
         }
     }

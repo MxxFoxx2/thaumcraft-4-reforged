@@ -24,6 +24,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -36,6 +38,7 @@ import thaumcraft.node.NodeGenerator;
 import thaumcraft.node.NodeType;
 import thaumcraft.registry.ModBlocks;
 import thaumcraft.network.PlayerCompletePayload;
+import thaumcraft.network.ScanPayload;
 import thaumcraft.research.Knowledge;
 import thaumcraft.research.PlayerKnowledge;
 import thaumcraft.research.ResearchCategories;
@@ -131,6 +134,60 @@ public final class ThaumcraftGameTests {
         knowledge.setAspectPool(Aspect.FIRE, 125);
         helper.assertValueEqual(ResearchManager.awardAspect(player, Aspect.FIRE, 16), 1, "award above 125");
         helper.assertValueEqual(knowledge.getAspectPool(Aspect.FIRE), 126, "pool after awards");
+        helper.succeed();
+    }
+
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void scanFluidTargets(GameTestHelper helper) {
+        ServerPlayer player = mockServerPlayer(helper);
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
+        player.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 0.0F, 0.0F);
+        helper.getLevel().setBlockAndUpdate(pos, Blocks.WATER.defaultBlockState());
+        ScanManager.Target water = ScanManager.resolveBlock(helper.getLevel(), pos);
+        helper.assertTrue(water != null && water.aspects() != null, "water must be scannable without an item");
+        helper.assertValueEqual(water.aspects().size(), 1, "water aspect count");
+        helper.assertValueEqual(water.aspects().getAmount(Aspect.WATER), 4, "water aspects");
+        helper.assertTrue(!water.key().equals(ScanManager.itemKey(new ItemStack(net.minecraft.world.item.Items.WATER_BUCKET))), "water is not a bucket");
+        int before = Knowledge.get(player).getAspectPool(Aspect.WATER);
+        ScanPayload payload = new ScanPayload(ScanManager.KIND_BLOCK, pos, 0);
+        ScanManager.handleScan(payload, player);
+        helper.assertTrue(ScanManager.hasBeenScanned(player, water), "water scan must be saved");
+        helper.assertValueEqual(Knowledge.get(player).getAspectPool(Aspect.WATER), before + 4, "water scan award");
+        ScanManager.handleScan(payload, player);
+        helper.assertValueEqual(Knowledge.get(player).getAspectPool(Aspect.WATER), before + 4, "water must not award twice");
+        helper.getLevel().setBlockAndUpdate(pos, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 3));
+        helper.assertTrue(ScanManager.hasBeenScanned(player, ScanManager.resolveBlock(helper.getLevel(), pos)), "flowing water must share the scan");
+        helper.getLevel().setBlockAndUpdate(pos, Blocks.LAVA.defaultBlockState());
+        ScanManager.Target lava = ScanManager.resolveBlock(helper.getLevel(), pos);
+        helper.assertTrue(lava != null && lava.aspects() != null, "lava must be scannable without an item");
+        helper.assertValueEqual(lava.aspects().size(), 2, "lava aspect count");
+        helper.assertValueEqual(lava.aspects().getAmount(Aspect.FIRE), 3, "lava fire aspects");
+        helper.assertValueEqual(lava.aspects().getAmount(Aspect.EARTH), 1, "lava earth aspects");
+        helper.assertTrue(!ScanManager.hasBeenScanned(player, lava), "water must not mark lava scanned");
+        helper.succeed();
+    }
+
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void scanBlocksThroughWater(GameTestHelper helper) {
+        ServerPlayer player = mockServerPlayer(helper);
+        BlockPos waterPos = helper.absolutePos(new BlockPos(2, 2, 2));
+        BlockPos floorPos = waterPos.below();
+        helper.getLevel().setBlockAndUpdate(floorPos, Blocks.STONE.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(waterPos, Blocks.WATER.defaultBlockState());
+        player.moveTo(waterPos.getX() + 0.5, waterPos.getY() + 0.5, waterPos.getZ() + 0.5, 0.0F, 90.0F);
+        var hit = ScanManager.pickBlock(helper.getLevel(), player);
+        helper.assertTrue(hit.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(waterPos), "unscanned water surface must be targetable");
+        ScanManager.Target water = ScanManager.resolveBlock(helper.getLevel(), waterPos);
+        helper.assertTrue(ScanManager.completeScan(player, water), "water scan must complete");
+        hit = ScanManager.pickBlock(helper.getLevel(), player);
+        helper.assertTrue(hit.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(floorPos), "scanned water must not hide the bottom");
+        player.setPos(waterPos.getX() + 0.5, waterPos.getY() - player.getEyeHeight() + 0.5, waterPos.getZ() + 0.5);
+        hit = ScanManager.pickBlock(helper.getLevel(), player);
+        helper.assertTrue(hit.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(floorPos), "submerged scanner must target the bottom");
+        ScanManager.Target floor = ScanManager.resolveChecked(player, new ScanPayload(ScanManager.KIND_BLOCK, floorPos, 0));
+        helper.assertTrue(floor != null && floor.aspects() != null, "server must accept the underwater block");
+        helper.getLevel().setBlockAndUpdate(waterPos, Blocks.OAK_SLAB.defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, true));
+        helper.assertTrue(!ScanManager.resolveBlock(helper.getLevel(), waterPos).key().equals(water.key()), "waterlogged blocks must keep their own scan");
         helper.succeed();
     }
 

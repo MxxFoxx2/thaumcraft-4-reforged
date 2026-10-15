@@ -15,9 +15,13 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectHelper;
@@ -82,11 +86,34 @@ public final class ScanManager {
         if (state.isAir()) {
             return null;
         }
+        if (state.is(Blocks.WATER)) {
+            return new Target(ScanKind.OBJECT, "minecraft:water", new AspectList().add(Aspect.WATER, 4), ItemStack.EMPTY, null);
+        }
+        if (state.is(Blocks.LAVA)) {
+            return new Target(ScanKind.OBJECT, "minecraft:lava", new AspectList().add(Aspect.FIRE, 3).add(Aspect.EARTH, 1), ItemStack.EMPTY, null);
+        }
         ItemStack stack = state.getBlock().getCloneItemStack(level, pos, state);
         if (stack.isEmpty()) {
             return null;
         }
         return resolveStack(stack);
+    }
+
+    public static BlockHitResult pickBlock(Level level, Player player) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 end = eye.add(player.getLookAngle().scale(player.blockInteractionRange()));
+        BlockHitResult solid = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+        if (!level.getFluidState(BlockPos.containing(eye)).isEmpty()) {
+            return solid;
+        }
+        BlockHitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.SOURCE_ONLY, player));
+        if (hit.getType() == HitResult.Type.BLOCK && !hit.getBlockPos().equals(solid.getBlockPos())) {
+            Target target = resolveBlock(level, hit.getBlockPos());
+            if (target != null && hasBeenScanned(player, target) && solid.getType() == HitResult.Type.BLOCK) {
+                return solid;
+            }
+        }
+        return hit;
     }
 
     public static @Nullable Target resolveStack(ItemStack stack) {

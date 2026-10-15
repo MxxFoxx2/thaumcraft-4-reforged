@@ -115,7 +115,7 @@ public final class TcRenderTypes extends RenderType {
                 .setCullState(NO_CULL)
                 .setLightmapState(LIGHTMAP)
                 .setOverlayState(OVERLAY)
-                .setDepthTestState(NO_DEPTH_TEST)
+                .setDepthTestState(LEQUAL_DEPTH_TEST)
                 .setWriteMaskState(COLOR_WRITE)
                 .createCompositeState(true)
         ));

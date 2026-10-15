@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import thaumcraft.Thaumcraft;
+import thaumcraft.aspect.Aspect;
 import thaumcraft.client.platform.Billboards;
 import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.entity.monster.Wisp;
@@ -28,7 +29,8 @@ public final class WispRenderer extends EntityRenderer<Wisp> {
     @Override
     public void render(Wisp entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
         if (entity.getHealth() > 0.0F) {
-            int color = entity.getAspect().getColor();
+            Aspect aspect = entity.getAspect();
+            int color = aspect == null ? 0xFFFFFF : aspect.getColor();
             int red = color >> 16 & 255;
             int green = color >> 8 & 255;
             int blue = color & 255;

@@ -58,13 +58,23 @@ public final class WandKeyHandler {
             ClientNetwork.sendToServer(new thaumcraft.network.GearMovementPayload(movingForward));
         }
         boolean inGame = minecraft.screen == null;
+        boolean focusClicked = false;
+        while (CHANGE_FOCUS.consumeClick()) {
+            focusClicked = true;
+        }
+        ItemStack held = player.getMainHandItem();
+        boolean canChangeFocus = Wands.isWand(held) && !Wands.isSceptre(held);
+        if (inGame && canChangeFocus && (CHANGE_FOCUS.isDown() || focusClicked)
+            && minecraft.options.keySwapOffhand.isActiveAndMatches(CHANGE_FOCUS.getKey())) {
+            while (minecraft.options.keySwapOffhand.consumeClick()) {
+            }
+        }
         if (CHANGE_FOCUS.isDown()) {
             if (inGame || radialActive) {
                 if (!pressedF) {
                     radialLock = false;
                 }
-                ItemStack held = player.getMainHandItem();
-                if (!radialLock && Wands.isWand(held) && !Wands.isSceptre(held)) {
+                if (!radialLock && canChangeFocus) {
                     if (player.isShiftKeyDown()) {
                         ClientNetwork.sendToServer(new FocusChangePayload(WandManager.REMOVE_FOCUS));
                     } else {

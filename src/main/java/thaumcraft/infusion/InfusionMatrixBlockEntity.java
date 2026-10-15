@@ -327,7 +327,7 @@ public class InfusionMatrixBlockEntity extends TcBlockEntity implements WandInte
         if (recipeEssentia.visSize() > 0) {
             for (Aspect aspect : recipeEssentia.getAspects()) {
                 if (recipeEssentia.getAmount(aspect) > 0) {
-                    if (EssentiaHandler.drainEssentia(this, aspect, Direction.UP, 12)) {
+                    if (EssentiaHandler.drainEssentia(this, aspect, null, 12)) {
                         recipeEssentia.reduce(aspect, 1);
                         sync();
                         return;

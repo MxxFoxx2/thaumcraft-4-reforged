@@ -38,15 +38,7 @@ public class ExcavationFocus extends FocusItem {
     public static final FocusUpgradeType DOWSING = new FocusUpgradeType(20, "dowsing", new AspectList().add(Aspect.MINE, 1));
 
     private static final AspectList COST = new AspectList().add(Aspect.EARTH, 15);
-    private static final AspectList COST_SILK = new AspectList()
-        .add(Aspect.AIR, 1)
-        .add(Aspect.FIRE, 1)
-        .add(Aspect.EARTH, 1)
-        .add(Aspect.WATER, 1)
-        .add(Aspect.ORDER, 1)
-        .add(Aspect.ENTROPY, 1)
-        .add(COST);
-    private static final AspectList COST_DOWSING = new AspectList().add(Aspect.FIRE, 2).add(Aspect.ORDER, 2).add(COST);
+    private static AspectList cost2;
     private static final double RANGE = 10.0;
     private static final Map<String, State> STATES = new HashMap<>();
 
@@ -83,10 +75,23 @@ public class ExcavationFocus extends FocusItem {
     @Override
     public AspectList getVisCost(ItemStack focus) {
         if (isUpgradedWith(focus, FocusUpgradeType.SILKTOUCH)) {
-            return COST_SILK;
+            if (cost2 == null) {
+                cost2 = new AspectList()
+                    .add(Aspect.AIR, 1)
+                    .add(Aspect.FIRE, 1)
+                    .add(Aspect.EARTH, 1)
+                    .add(Aspect.WATER, 1)
+                    .add(Aspect.ORDER, 1)
+                    .add(Aspect.ENTROPY, 1)
+                    .add(COST);
+            }
+            return cost2;
         }
         if (isUpgradedWith(focus, DOWSING)) {
-            return COST_DOWSING;
+            if (cost2 == null) {
+                cost2 = new AspectList().add(Aspect.FIRE, 2).add(Aspect.ORDER, 2).add(COST);
+            }
+            return cost2;
         }
         return COST;
     }

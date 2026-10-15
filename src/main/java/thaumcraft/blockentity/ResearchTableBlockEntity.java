@@ -77,10 +77,14 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, ResearchTableBlockEntity table) {
+        serverTick(level, pos, state, table, null);
+    }
+
+    public static void serverTick(Level level, BlockPos pos, BlockState state, ResearchTableBlockEntity table, RandomSource random) {
         if (table.nextRecalc++ > RECALC_INTERVAL) {
             table.nextRecalc = 0;
             if (level instanceof ServerLevel serverLevel) {
-                table.recalculateBonus(serverLevel);
+                table.recalculateBonus(serverLevel, random == null ? serverLevel.getRandom() : random);
             }
             table.sync();
         }
@@ -297,8 +301,7 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
         return block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.ROOTED_DIRT || block == Blocks.FARMLAND || block == Blocks.DIRT_PATH;
     }
 
-    private void recalculateBonus(ServerLevel serverLevel) {
-        RandomSource random = serverLevel.getRandom();
+    private void recalculateBonus(ServerLevel serverLevel, RandomSource random) {
         BlockPos above = worldPosition.above();
         if (serverLevel.isNight()
             && serverLevel.getMaxLocalRawBrightness(above) < 4
@@ -360,6 +363,11 @@ public class ResearchTableBlockEntity extends TcBlockEntity implements Container
                         return;
                     }
                     if (block == Blocks.BOOKSHELF && random.nextInt(300) == 0) {
+                        Aspect[] aspects = Aspect.values();
+                        bonusAspects.merge(aspects[random.nextInt(aspects.length)], 1);
+                        return;
+                    }
+                    if (block == ModBlocks.BRAIN_JAR.get() && random.nextInt(200) == 0) {
                         Aspect[] aspects = Aspect.values();
                         bonusAspects.merge(aspects[random.nextInt(aspects.length)], 1);
                         return;

@@ -26,6 +26,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import thaumcraft.Thaumcraft;
+import thaumcraft.block.LootBlock;
 import thaumcraft.network.BlockSparkleFxPayload;
 import thaumcraft.platform.ModNetwork;
 import thaumcraft.registry.ModSounds;
@@ -44,7 +45,7 @@ public final class BlockSwapper {
     }
 
     public static void add(ServerLevel level, BlockPos pos, BlockState source, ItemStack target, int lifespan, ServerPlayer player, int wandSlot) {
-        if (source.isAir() || source.getDestroySpeed(level, pos) < 0.0F || target.is(source.getBlock().asItem()) || Block.byItem(target.getItem()) == Blocks.AIR) {
+        if (source.isAir() || source.getDestroySpeed(level, pos) < 0.0F || samePlacement(source, target) || Block.byItem(target.getItem()) == Blocks.AIR) {
             return;
         }
         QUEUES.computeIfAbsent(level.dimension(), key -> new ArrayDeque<>()).offer(new Swap(pos, source, target.copyWithCount(1), lifespan, player, wandSlot));
@@ -86,7 +87,7 @@ public final class BlockSwapper {
             return false;
         }
         ItemStack focusStack = Wands.getFocusItem(wand);
-        if (!level.mayInteract(player, pos) || swap.target().is(state.getBlock().asItem())) {
+        if (!level.mayInteract(player, pos) || samePlacement(state, swap.target())) {
             return false;
         }
         BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
@@ -113,7 +114,7 @@ public final class BlockSwapper {
             wandItem.consumeAllVis(wand, player, focus.getVisCost(focusStack), true, false);
         }
         Block block = Block.byItem(swap.target().getItem());
-        BlockState placed = block.defaultBlockState();
+        BlockState placed = LootBlock.stateForStack(swap.target());
         level.setBlock(pos, placed, Block.UPDATE_ALL);
         block.setPlacedBy(level, pos, placed, player, swap.target());
         ModNetwork.sendToNear(level, null, pos.getX(), pos.getY(), pos.getZ(), 32.0, new BlockSparkleFxPayload(pos, SPARKLE_COLOR));
@@ -137,10 +138,25 @@ public final class BlockSwapper {
         Inventory inventory = player.getInventory();
         for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
             ItemStack stack = inventory.getItem(slot);
-            if (!stack.isEmpty() && ItemStack.isSameItem(stack, target)) {
+            if (!stack.isEmpty() && sameItemVariant(stack, target)) {
                 return slot;
             }
         }
         return -1;
+    }
+
+    private static boolean samePlacement(BlockState state, ItemStack stack) {
+        Block block = Block.byItem(stack.getItem());
+        return block == state.getBlock() && (!(block instanceof LootBlock) || LootBlock.stateForStack(stack) == state);
+    }
+
+    private static boolean sameItemVariant(ItemStack first, ItemStack second) {
+        if (!ItemStack.isSameItem(first, second)) {
+            return false;
+        }
+        if (Block.byItem(first.getItem()) instanceof LootBlock && Block.byItem(second.getItem()) == Block.byItem(first.getItem())) {
+            return LootBlock.stateForStack(first) == LootBlock.stateForStack(second);
+        }
+        return true;
     }
 }

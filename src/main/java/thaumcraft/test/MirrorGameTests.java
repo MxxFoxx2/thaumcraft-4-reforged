@@ -82,8 +82,8 @@ public final class MirrorGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void mirrorsTransportItem(GameTestHelper helper) {
-        BlockPos first = placeMirror(helper, new BlockPos(1, 2, 1), false, Direction.EAST);
-        BlockPos second = placeMirror(helper, new BlockPos(5, 2, 1), false, Direction.EAST);
+        BlockPos first = placeMirror(helper, new BlockPos(1, 1, 1), false, Direction.EAST);
+        BlockPos second = placeMirror(helper, new BlockPos(5, 1, 1), false, Direction.EAST);
         MirrorBlockEntity firstMirror = helper.<MirrorBlockEntity>getBlockEntity(first);
         MirrorBlockEntity secondMirror = helper.<MirrorBlockEntity>getBlockEntity(second);
         firstMirror.setLinkTarget(GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(second)));
@@ -93,7 +93,7 @@ public final class MirrorGameTests {
         helper.spawnItem(Items.DIAMOND, 1.5F, 1.2F, 1.5F);
         helper.succeedWhen(() -> {
             helper.assertTrue(itemsNear(helper, second, 2.0).stream().anyMatch(entity -> entity.getItem().is(Items.DIAMOND)), "item did not come out of the second mirror");
-            helper.assertTrue(java.util.Objects.equals(itemsNear(helper, new BlockPos(3, 2, 1), 5.0).stream().filter(entity -> entity.getItem().is(Items.DIAMOND)).mapToInt(entity -> entity.getItem().getCount()).sum(), 1), "diamond count");
+            helper.assertTrue(java.util.Objects.equals(itemsNear(helper, new BlockPos(3, 1, 1), 5.0).stream().filter(entity -> entity.getItem().is(Items.DIAMOND)).mapToInt(entity -> entity.getItem().getCount()).sum(), 1), "diamond count");
         });
     }
 

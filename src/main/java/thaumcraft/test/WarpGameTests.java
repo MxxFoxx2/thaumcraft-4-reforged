@@ -317,10 +317,10 @@ public final class WarpGameTests {
         BlockPos fluxRelativePos = new BlockPos(3, 3, 3);
         BlockPos fluxAbsolutePos = helper.absolutePos(fluxRelativePos);
         LivingEntity fluxTarget = createMob(helper, EntityType.BAT, fluxAbsolutePos.getX() + 0.5, fluxAbsolutePos.getY(), fluxAbsolutePos.getZ() + 0.5);
-        invokeRandomEffect("applyThaumarhia", helper, fluxTarget, new FixedRandomSource(0));
+        invokeRandomEffect("applyThaumarhia", helper, fluxTarget, findSeedForNextInt(15, 0));
         helper.assertTrue(helper.getBlockState(fluxRelativePos).is(thaumcraft.registry.ModBlocks.FLUX_GOO), "thaumarhia should create flux goo after a successful server roll");
 
-        BlockPos darkRelativePos = new BlockPos(5, -39, 3);
+        BlockPos darkRelativePos = new BlockPos(5, 3, 3);
         BlockPos darkAbsolutePos = helper.absolutePos(darkRelativePos);
         for (int relativeY = 0; relativeY <= 2; relativeY++) {
             helper.setBlock(darkRelativePos.above(relativeY), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
@@ -332,17 +332,19 @@ public final class WarpGameTests {
         helper.getLevel().updateSkyBrightness();
         helper.assertTrue(darkTarget.getLightLevelDependentMagicValue() < 0.25F, "sun scorned healing test target must be dark enough for its healing branch");
         float darkHealth = darkTarget.getHealth();
-        invokeRandomEffect("applySunScorned", helper, darkTarget, new FixedRandomSource(999));
+        invokeRandomEffect("applySunScorned", helper, darkTarget, findSeedForFloat(darkTarget.getLightLevelDependentMagicValue() * 2.0F, false));
         helper.assertTrue(darkTarget.getHealth() > darkHealth, "sun scorned should heal in darkness");
 
         helper.getLevel().setDayTime(1000L);
         helper.getLevel().updateSkyBrightness();
-        BlockPos sunlitRelativePos = new BlockPos(5, 21, 3);
-        BlockPos sunlitAbsolutePos = helper.absolutePos(sunlitRelativePos);
+        BlockPos sunlitColumn = helper.absolutePos(new BlockPos(5, 0, 3));
+        int sunlitY = helper.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, sunlitColumn.getX(), sunlitColumn.getZ());
+        BlockPos sunlitAbsolutePos = new BlockPos(sunlitColumn.getX(), sunlitY, sunlitColumn.getZ());
         LivingEntity sunlitTarget = createMob(helper, EntityType.SHEEP, sunlitAbsolutePos.getX() + 0.5, sunlitAbsolutePos.getY(), sunlitAbsolutePos.getZ() + 0.5);
         helper.assertTrue(helper.getLevel().canSeeSky(sunlitTarget.blockPosition()), "sun scorned damage test target must have open sky");
         helper.assertTrue(sunlitTarget.getLightLevelDependentMagicValue() > 0.5F, "sun scorned damage test target must be bright enough for its daylight branch");
-        invokeRandomEffect("applySunScorned", helper, sunlitTarget, new FixedRandomSource(0));
+        float sunlitRollLimit = (sunlitTarget.getLightLevelDependentMagicValue() - 0.4F) * 2.0F / 30.0F;
+        invokeRandomEffect("applySunScorned", helper, sunlitTarget, findSeedForFloat(sunlitRollLimit, true));
         helper.assertTrue(sunlitTarget.isOnFire(), "sun scorned should ignite an exposed entity under daylight");
 
         BlockPos gazeRelativePos = new BlockPos(3, 3, 3);
@@ -392,11 +394,31 @@ public final class WarpGameTests {
         return entity;
     }
 
-    private static void invokeRandomEffect(String methodName, GameTestHelper helper, LivingEntity entity, RandomSource random) {
+    private static long findSeedForNextInt(int bound, int expected) {
+        for (long seed = 0; seed < 10000L; seed++) {
+            if (RandomSource.create(seed).nextInt(bound) == expected) {
+                return seed;
+            }
+        }
+        throw new IllegalStateException("No seed found for random bound " + bound + " and value " + expected);
+    }
+
+    private static long findSeedForFloat(float limit, boolean below) {
+        for (long seed = 0; seed < 10000L; seed++) {
+            float value = RandomSource.create(seed).nextFloat();
+            if (below ? value < limit : value > limit) {
+                return seed;
+            }
+        }
+        throw new IllegalStateException("No seed found for random float threshold " + limit);
+    }
+
+    private static void invokeRandomEffect(String methodName, GameTestHelper helper, LivingEntity entity, long seed) {
         try {
-            var method = WarpMobEffect.class.getDeclaredMethod(methodName, net.minecraft.server.level.ServerLevel.class, LivingEntity.class, RandomSource.class);
+            var method = WarpMobEffect.class.getDeclaredMethod(methodName, net.minecraft.server.level.ServerLevel.class, LivingEntity.class);
             method.setAccessible(true);
-            method.invoke(null, helper.getLevel(), entity, random);
+            helper.getLevel().getRandom().setSeed(seed);
+            method.invoke(null, helper.getLevel(), entity);
         } catch (ReflectiveOperationException exception) {
             helper.fail("warp effect roll could not be invoked: " + exception.getMessage());
         }

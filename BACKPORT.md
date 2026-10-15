@@ -9,7 +9,7 @@
 
 ## Last synced main commit
 
-`f0c40ed` (phase 10–11 runtime fixes synced from main; backport tests/resources are pending manual validation)
+`f0c40ed` (phases 1–11; the 2026-10-14 parity fixes are committed on top and do not advance this SHA)
 
 ## Sync procedure
 
@@ -29,6 +29,7 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 - GameTests: `@GameTestHolder` + `@PrefixGameTestTemplate` instead of the `test_function` registry and `TestEnvironmentDefinition`
 - Item models: `items/*.json` client item definitions do not exist; the generator writes `models/item` with `overrides`, special renderers go through `BlockEntityWithoutLevelRenderer` + `IClientItemExtensions`, tints through `RegisterColorHandlersEvent.Item`
 - Data attachments: no `.sync()`, `DataAttachments` sends its own payload
+- Warp blur post effect: vanilla 1.21.1 has no `blur` program, `gen_warp_shaders.py` writes `box_blur` passes for this profile
 
 ## Intentional changes from TC4
 
@@ -117,4 +118,11 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 ## Phase 10–11 backport status
 
 - Common entities, champions, aspect orbs, fluids/taint/warp, direct entity/block rendering, post shaders, GameTest source and generated resource/tool changes are present. The 1.21.1 taint fibres model uses the `thaumcraft:taint_fibres` geometry loader and ordinary blockstate model references.
-- The last supplied compile diagnostic identified one GameRules API mismatch in `ProjectileGameTests`; it was changed to `getRule(RULE_MOBGRIEFING).set(...)`. The final fibre geometry/vertex stride and queued-payload logout fixes were also applied after that diagnostic. No build or test run was performed after the user's request to stop testing; final compilation, GameTests and runtime resource loading remain pending manual verification.
+- Final automated verification completed: build passed, all 122 GameTests passed, and `python3 tools/validate_ids.py --mc 1.21.1` reported zero problems. This does not constitute visual validation or user gameplay testing; those checks remain open.
+
+## Parity fixes (2026-10-14)
+
+- Applied parity corrections for phases 1–11 only. The eight production-file changes cover primal-orb taint spread, uncommon/rare loot tier stack preservation and replacement, focal-manipulator canceled-upgrade drain behavior, excavation focus cost caching, Brain Jar research bonus, and the champion whitelist clamp. Backport-specific API adapters are recorded alongside the code changes.
+- Added regression GameTests for the fixes, including deterministic primal-orb taint spread, focus loot tier pick/save/load and replacement, excavation shared lazy pricing, canceled focal manipulation, Brain Jar, champion clamping, and warp encounter/effect behavior. The test suite passed as part of the 122/122 run above.
+- Removed only the byte-identical duplicate `vignette.png` and `vignette.png.mcmeta` resource sources; generator-owned copies remain. Resource collision validation found no remaining duplicate paths.
+- The synced base remains `f0c40ed`. No phase 12 or 13 content was backported. Automated checks do not replace visual or user gameplay validation.

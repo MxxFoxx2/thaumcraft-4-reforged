@@ -2,6 +2,7 @@ package thaumcraft.entity.projectile;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
 import thaumcraft.compat.ValueInput;
 import net.minecraft.nbt.CompoundTag;
 import thaumcraft.compat.ValueOutput;
@@ -22,6 +24,9 @@ import thaumcraft.entity.CombatUtils;
 import thaumcraft.fx.Fx;
 import thaumcraft.node.NodeGenerator;
 import thaumcraft.registry.ModEntities;
+import thaumcraft.platform.BiomeEdit;
+import thaumcraft.registry.ModBlocks;
+import thaumcraft.taint.TaintBiomes;
 
 public class PrimalOrb extends ThrowableProjectile {
     private static final EntityDataAccessor<Boolean> DATA_SEEKER = SynchedEntityData.defineId(PrimalOrb.class, EntityDataSerializers.BOOLEAN);
@@ -146,6 +151,27 @@ public class PrimalOrb extends ThrowableProjectile {
     }
 
     public void taintSplosion() {
+        if (!(this.level() instanceof ServerLevel level)) {
+            return;
+        }
+        int x = (int)this.getX();
+        int z = (int)this.getZ();
+        var tainted = level.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(TaintBiomes.TAINTED_LAND);
+        for (int attempt = 0; attempt < 10; attempt++) {
+            int xx = x + (int)(this.random.nextFloat() - this.random.nextFloat() * 6.0F);
+            int zz = z + (int)(this.random.nextFloat() - this.random.nextFloat() * 6.0F);
+            BlockPos column = new BlockPos(xx, 0, zz);
+            if (this.random.nextBoolean() && level.hasChunkAt(column)) {
+                int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, xx, zz);
+                BlockPos surface = new BlockPos(xx, y, zz);
+                if (!BiomeEdit.getColumnBiome(level, surface).is(TaintBiomes.TAINTED_LAND)) {
+                    BiomeEdit.setColumn(level, surface, tainted);
+                    if (y > level.getMinBuildHeight() && !level.isEmptyBlock(surface.below())) {
+                        level.setBlock(surface, ModBlocks.FIBROUS_TAINT.get().defaultBlockState(), 3);
+                    }
+                }
+            }
+        }
     }
 
     @Override

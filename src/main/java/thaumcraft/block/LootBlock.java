@@ -6,6 +6,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -51,6 +53,27 @@ public class LootBlock extends Block {
 
     public Kind kind() {
         return kind;
+    }
+
+    public static ItemStack stackForState(BlockState state) {
+        ItemStack stack = new ItemStack(state.getBlock().asItem());
+        if (state.getBlock() instanceof LootBlock) {
+            stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(TIER, state.getValue(TIER)));
+        }
+        return stack;
+    }
+
+    public static BlockState stateForStack(ItemStack stack) {
+        Block block = Block.byItem(stack.getItem());
+        BlockState state = block.defaultBlockState();
+        if (block instanceof LootBlock) {
+            BlockItemStateProperties properties = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+            Tier tier = properties.get(TIER);
+            if (tier != null) {
+                state = state.setValue(TIER, tier);
+            }
+        }
+        return state;
     }
 
     @Override

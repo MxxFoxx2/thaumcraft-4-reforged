@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
+import thaumcraft.block.LootBlock;
 import thaumcraft.wand.WandManager;
 import thaumcraft.wand.Wands;
 
@@ -85,7 +86,7 @@ public class TradeFocus extends FocusItem implements Architect {
         BlockState state = level.getBlockState(pos);
         if (player.isShiftKeyDown()) {
             if (level instanceof ServerLevel && level.getBlockEntity(pos) == null) {
-                storePickedBlock(wand, new ItemStack(state.getBlock().asItem()));
+                storePickedBlock(wand, LootBlock.stackForState(state));
             }
             return InteractionResult.SUCCESS;
         }

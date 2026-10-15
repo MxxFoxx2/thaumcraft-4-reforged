@@ -6,6 +6,7 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 import thaumcraft.Thaumcraft;
 import thaumcraft.entity.monster.eldritch.EldritchCrab;
 import thaumcraft.registry.ModEntities;
@@ -31,7 +32,7 @@ public final class EldritchCrabGameTests {
     public static void eldritchCrabMountsRevengeTarget(GameTestHelper helper) {
         EldritchCrab crab = ModEntities.ELDRITCH_CRAB.get().create(helper.getLevel());
         helper.assertTrue(crab != null, "eldritch crab factory returned null");
-        Player target = TestSupport.mockServerPlayer(helper);
+        Player target = helper.makeMockPlayer(GameType.SURVIVAL);
         net.minecraft.core.BlockPos targetPos = helper.absolutePos(new net.minecraft.core.BlockPos(2, 2, 2));
         target.moveTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, 0.0F, 0.0F);
         helper.getLevel().addFreshEntity(target);

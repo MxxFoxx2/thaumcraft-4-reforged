@@ -98,14 +98,14 @@ public class FocalManipulatorBlockEntity extends TcBlockEntity implements Contai
                 failed = true;
                 level.playSound(null, worldPosition, ModSounds.CRAFTFAIL.get(), SoundSource.BLOCKS, 0.33F, 1.0F);
             }
-            if (!failed) {
-                for (Aspect aspect : aspects.getAspectsSortedAmount()) {
-                    int drain = VisNet.drainVis(level, worldPosition, aspect, Math.min(100, aspects.getAmount(aspect)));
-                    if (drain > 0) {
-                        aspects.reduce(aspect, drain);
-                        sync();
-                    }
+            for (Aspect aspect : aspects.getAspectsSortedAmount()) {
+                int drain = VisNet.drainVis(level, worldPosition, aspect, Math.min(100, aspects.getAmount(aspect)));
+                if (drain > 0) {
+                    aspects.reduce(aspect, drain);
+                    sync();
                 }
+            }
+            if (!failed) {
                 if (aspects.visSize() <= 0 && stack.getItem() instanceof FocusItem focus) {
                     complete = true;
                     FocusUpgradeType type = FocusUpgradeType.byId(upgrade);
@@ -193,14 +193,18 @@ public class FocalManipulatorBlockEntity extends TcBlockEntity implements Contai
     public ItemStack removeItem(int slot, int amount) {
         ItemStack result = ContainerHelper.removeItem(items, slot, amount);
         if (!result.isEmpty()) {
-            onSlotChanged();
+            sync();
         }
         return result;
     }
 
     @Override
     public ItemStack removeItemNoUpdate(int slot) {
-        return ContainerHelper.takeItem(items, slot);
+        ItemStack result = ContainerHelper.takeItem(items, slot);
+        if (!result.isEmpty()) {
+            sync();
+        }
+        return result;
     }
 
     @Override

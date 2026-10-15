@@ -102,12 +102,23 @@ public final class ChampionModifier {
         if (state != UNPROCESSED) {
             return;
         }
+        if (whitelistLevel(mob) < 0) {
+            ChampionKeys.MODIFIER.set(mob, NORMAL);
+            return;
+        }
+        processSpawn(mob, level.getRandom().nextInt(100));
+    }
+
+    public static void processSpawn(Mob mob, int initialRoll) {
+        if (!(mob.level() instanceof ServerLevel level) || mob.level().isClientSide() || get(mob) != UNPROCESSED) {
+            return;
+        }
         int whitelist = whitelistLevel(mob);
         if (whitelist < 0) {
             ChampionKeys.MODIFIER.set(mob, NORMAL);
             return;
         }
-        int roll = level.getRandom().nextInt(100);
+        int roll = initialRoll;
         if (level.getDifficulty() == net.minecraft.world.Difficulty.EASY) {
             roll += 2;
         }
@@ -118,7 +129,7 @@ public final class ChampionModifier {
         if (biome.is(Tags.Biomes.IS_SPOOKY) || biome.is(Tags.Biomes.IS_NETHER) || biome.is(Tags.Biomes.IS_END)) {
             roll -= 2;
         }
-        roll -= whitelist - 1;
+        roll -= Math.max(0, whitelist - 1);
         if (roll <= 0 && mob.getAttributeBaseValue(Attributes.MAX_HEALTH) >= 10.0) {
             int id = isVanilla(mob, "creeper") ? 0 : level.getRandom().nextInt(NAMES.length);
             assign(mob, id, false);

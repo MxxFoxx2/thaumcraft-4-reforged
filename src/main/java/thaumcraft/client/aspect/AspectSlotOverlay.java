@@ -44,6 +44,8 @@ public final class AspectSlotOverlay {
         }
         GuiGraphics graphics = event.getGuiGraphics();
         graphics.flush();
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0F, 0.0F, 400.0F);
         int index = 0;
         for (Aspect aspect : aspects.getAspectsSortedAmount()) {
             int x = event.getMouseX() + 17 + index * 18 - 8;
@@ -56,5 +58,7 @@ public final class AspectSlotOverlay {
             }
             index++;
         }
+        graphics.flush();
+        graphics.pose().popPose();
     }
 }

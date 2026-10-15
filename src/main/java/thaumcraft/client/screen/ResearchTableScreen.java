@@ -329,6 +329,8 @@ public class ResearchTableScreen extends AbstractContainerScreen<ResearchTableMe
         if (draggedAspect != null) {
             graphics.flush();
             drawOrb(graphics, mouseX - 8, mouseY - 8, draggedAspect.getColor());
+        } else {
+            renderTooltip(graphics, mouseX, mouseY);
         }
     }
 

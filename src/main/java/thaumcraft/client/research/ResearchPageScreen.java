@@ -27,10 +27,13 @@ public class ResearchPageScreen extends Screen {
     private static final int PANE_HEIGHT = 181;
 
     private final ResearchItem research;
-    private final List<ResearchPage> pages;
+    private final List<DisplayPage> pages;
     private final PageRenderer renderer;
     private int page;
     private long lastCycle;
+
+    private record DisplayPage(ResearchPage source, List<BookText.Line> lines) {
+    }
 
     private record HistoryEntry(String research, int page) {
     }
@@ -49,11 +52,11 @@ public class ResearchPageScreen extends Screen {
         Minecraft.getInstance().setScreen(new ResearchPageScreen(item, 0));
     }
 
-    private static List<ResearchPage> buildPages(Minecraft minecraft, ResearchItem research) {
-        List<ResearchPage> pages = new ArrayList<>();
+    private static List<DisplayPage> buildPages(Minecraft minecraft, ResearchItem research) {
+        List<ResearchPage> sources = new ArrayList<>();
         for (ResearchPage candidate : research.pages()) {
             if (!(candidate instanceof ResearchPage.ConcealedText concealed) || ResearchManager.isComplete(minecraft.player, concealed.research())) {
-                pages.add(candidate);
+                sources.add(candidate);
             }
         }
         if (research.key().equals("ASPECTS")) {
@@ -63,22 +66,45 @@ public class ResearchPageScreen extends Screen {
             for (Aspect aspect : known.getAspectsSorted()) {
                 group.add(aspect, known.getAmount(aspect));
                 if (++count == 4) {
-                    pages.add(ResearchPage.aspects(group));
+                    sources.add(ResearchPage.aspects(group));
                     group = new AspectList();
                     count = 0;
                 }
             }
             if (count > 0) {
-                pages.add(ResearchPage.aspects(group));
+                sources.add(ResearchPage.aspects(group));
+            }
+        }
+        List<DisplayPage> pages = new ArrayList<>();
+        for (ResearchPage source : sources) {
+            String key = switch (source) {
+                case ResearchPage.Text text -> text.text();
+                case ResearchPage.ConcealedText text -> text.text();
+                default -> null;
+            };
+            if (key == null) {
+                pages.add(new DisplayPage(source, List.of()));
+                continue;
+            }
+            String raw = PageRenderer.lang(key);
+            List<BookText.Line> lines = BookText.layout(minecraft.font, raw.isEmpty() ? key : raw, PageRenderer.TEXT_WIDTH);
+            int height = PANE_HEIGHT + 10;
+            int firstHeight = pages.isEmpty() ? height - 25 : height;
+            for (List<BookText.Line> textPage : BookText.paginate(lines, firstHeight, height)) {
+                pages.add(new DisplayPage(source, textPage));
             }
         }
         return pages;
     }
 
     private static int pageIndex(ResearchItem target, ResearchPage page) {
-        List<ResearchPage> built = buildPages(Minecraft.getInstance(), target);
-        int index = built.indexOf(page);
-        return Math.max(index, 0);
+        List<DisplayPage> built = buildPages(Minecraft.getInstance(), target);
+        for (int index = 0; index < built.size(); index++) {
+            if (built.get(index).source().equals(page)) {
+                return index;
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -139,11 +165,12 @@ public class ResearchPageScreen extends Screen {
         graphics.pose().popPose();
     }
 
-    private void drawPage(GuiGraphics graphics, ResearchPage node, int side, int x, int y) {
+    private void drawPage(GuiGraphics graphics, DisplayPage display, int side, int x, int y) {
+        ResearchPage node = display.source();
         if (page == 0 && side == 0) {
             GuiBlit.blit(graphics, BookText.BOOK, x + 4, y - 13, 96, 4, 24, 184, 96, 4, 256, 256, 0xFFFFFFFF);
             GuiBlit.blit(graphics, BookText.BOOK, x + 4, y + 4, 96, 4, 24, 184, 96, 4, 256, 256, 0xFFFFFFFF);
-            Component name = Component.translatable(research.nameKey());
+            Component name = BookText.uniform(Component.translatable(research.nameKey()).getString());
             int nameWidth = font.width(name);
             if (nameWidth <= 130) {
                 graphics.drawString(font, name, x + 52 - nameWidth / 2, y - 6, 0xFF303030, false);
@@ -158,8 +185,8 @@ public class ResearchPageScreen extends Screen {
             y += 25;
         }
         switch (node) {
-            case ResearchPage.Text text -> renderer.text(side, x, y - 10, text.text());
-            case ResearchPage.ConcealedText text -> renderer.text(side, x, y - 10, text.text());
+            case ResearchPage.Text text -> renderer.text(side, x, y - 10, display.lines());
+            case ResearchPage.ConcealedText text -> renderer.text(side, x, y - 10, display.lines());
             case ResearchPage.Aspects aspects -> renderer.aspects(side, x - 8, y - 8, aspects.aspects());
             case ResearchPage.Crucible crucible -> PageRecipes.crucible(renderer, side, x - 4, y - 8, crucible);
             case ResearchPage.Crafting crafting -> PageRecipes.crafting(renderer, side, x - 4, y - 8, crafting);

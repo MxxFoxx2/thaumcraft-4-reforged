@@ -42,8 +42,8 @@ public class ResearchToast implements Toast {
         }
         if (!icon.isEmpty()) {
             graphics.renderFakeItem(icon, 8, 8);
-        } else if (research.iconTexture() != null) {
-            BrowserDraw.full(graphics, research.iconTexture(), 8, 8, 16, 16, 0xFFFFFFFF);
+        } else {
+            ResearchIcons.drawFallback(graphics, research, 8, 8, 0xFFFFFFFF);
         }
         return fullyVisibleForMs >= DISPLAY_TIME ? Visibility.HIDE : Visibility.SHOW;
     }

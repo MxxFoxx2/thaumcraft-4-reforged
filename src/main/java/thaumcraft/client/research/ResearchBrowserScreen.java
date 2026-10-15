@@ -360,15 +360,15 @@ public class ResearchBrowserScreen extends Screen {
             final int iconX = x + 3;
             final int iconY = y + 3;
             final int iconTint = unlockable ? tint : gray(0.2F);
+            ItemStack stack = item.iconItem() == null ? ItemStack.EMPTY : item.iconItem().create();
             icons.add(() -> {
-                ItemStack stack = item.iconItem() == null ? ItemStack.EMPTY : item.iconItem().create();
                 if (!stack.isEmpty()) {
                     graphics.renderItem(stack, iconX, iconY);
-                } else if (item.iconTexture() != null) {
-                    BrowserDraw.full(graphics, item.iconTexture(), iconX, iconY, 16, 16, iconTint);
+                } else {
+                    ResearchIcons.drawFallback(graphics, item, iconX, iconY, iconTint);
                 }
             });
-            if (!unlockable && item.iconItem() != null) {
+            if (!unlockable && !stack.isEmpty()) {
                 darkened.add(new int[] {iconX, iconY});
             }
             if (mouseX >= mapLeft && mouseY >= mapTop && mouseX < mapLeft + VIEW_WIDTH && mouseY < mapTop + VIEW_HEIGHT
@@ -422,6 +422,8 @@ public class ResearchBrowserScreen extends Screen {
 
     private void drawOverlays(GuiGraphics graphics, int mouseX, int mouseY) {
         graphics.flush();
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0F, 0.0F, 400.0F);
         if (popupTime > System.currentTimeMillis()) {
             int centerX = left() + 128;
             int centerY = top() + 128;
@@ -447,6 +449,8 @@ public class ResearchBrowserScreen extends Screen {
         if (currentHighlight != null) {
             drawTooltip(graphics, currentHighlight, mouseX, mouseY);
         }
+        graphics.flush();
+        graphics.pose().popPose();
     }
 
     private void drawTooltip(GuiGraphics graphics, ResearchItem item, int mouseX, int mouseY) {

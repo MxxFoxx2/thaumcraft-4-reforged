@@ -30,6 +30,7 @@ import thaumcraft.research.ScanKind;
 
 final class PageRenderer {
     static final ResourceLocation OVERLAY = Thaumcraft.id("textures/gui/gui_researchbook_overlay.png");
+    static final int TEXT_WIDTH = 139;
     static final int TITLE_COLOR = 0xFF505050;
 
     final Minecraft minecraft;
@@ -200,13 +201,9 @@ final class PageRenderer {
         return Language.getInstance().getOrDefault(key);
     }
 
-    void text(int side, int x, int y, String key) {
-        String raw = lang(key);
-        if (raw.isEmpty()) {
-            raw = key;
-        }
+    void text(int side, int x, int y, List<BookText.Line> lines) {
         int textX = x - 15 + side * 152;
-        BookText.draw(graphics, font, BookText.layout(font, raw, 139), textX, y, 139, 0xFF000000);
+        BookText.draw(graphics, font, lines, textX, y, TEXT_WIDTH, 0xFF000000);
     }
 
     void aspects(int side, int x, int y, AspectList aspects) {

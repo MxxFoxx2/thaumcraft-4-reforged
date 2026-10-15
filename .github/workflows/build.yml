@@ -30,6 +30,8 @@ jobs:
         run: |
           echo "java=$(grep '^java_version=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
           echo "mc=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+          echo "name=$(grep '^mod_name=' gradle.properties | cut -d= -f2-)" >> "$GITHUB_OUTPUT"
+          echo "version=$(grep '^mod_version=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-java@v5
         with:
@@ -46,12 +48,14 @@ jobs:
           chmod +x gradlew
           ./gradlew build
 
-      - name: Publish nightly
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           MC: ${{ steps.props.outputs.mc }}
+          MOD_NAME: ${{ steps.props.outputs.name }}
+          VERSION: ${{ steps.props.outputs.version }}
         run: |
-          tag="nightly-$MC"
+          tag="$MC"
           notes="$(git log -1 --format='%h: %s')"
           gh release delete "$tag" --cleanup-tag --yes || true
           latest=false
@@ -59,5 +63,5 @@ jobs:
           gh release create "$tag" build/libs/*.jar \
             --latest="$latest" \
             --target "$GITHUB_SHA" \
-            --title "Nightly $MC" \
+            --title "$MOD_NAME $VERSION (Minecraft $MC)" \
             --notes "$notes"

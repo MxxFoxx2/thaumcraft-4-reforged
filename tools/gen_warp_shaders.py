@@ -71,10 +71,14 @@ void main(){ vec4 c=texture(InSampler,texCoord); vec3 s=c.rgb*ColorScale; float 
 """)
     put(a/"shaders/post/warp_bloom_color.fsh",modernize(PENDING / "program/bloomColor.fsh","InSampler","warp_bloom_color"))
     put(a/"shaders/post/warp_bloom_add.fsh",modernize(PENDING / "program/bloom2.fsh","InSampler","warp_bloom_add"))
-def generate_legacy(root):
+def generate_legacy(root, mc):
     a=root/"assets/thaumcraft/shaders"; post=a/"post"; prog=a/"program"
     p=PENDING / "post"; q=PENDING / "program"
-    put_json(post/"blurtc.json",json.loads((p/"blurtc.json").read_text()))
+    b=json.loads((p/"blurtc.json").read_text())
+    if mc == "1.21.1":
+        for blur_pass in b["passes"]:
+            blur_pass["name"]="box_blur"
+    put_json(post/"blurtc.json",b)
     d=json.loads((p/"desaturatetc.json").read_text()); d["passes"][0]["name"]="color_convolve"; put_json(post/"desaturatetc.json",d)
     h=json.loads((p/"hunger.json").read_text()); h["passes"][0]["name"]="thaumcraft:warp_color_convolve"; put_json(post/"hunger.json",h)
     s=json.loads((p/"sunscorned.json").read_text()); s["passes"][0]["name"]="thaumcraft:warp_bloom_color"; s["passes"][1]["name"]="thaumcraft:warp_bloom_add"; put_json(post/"sunscorned.json",s)
@@ -117,7 +121,7 @@ def generate(mc, out=DEFAULT_OUT):
     if mc == "26.3":
         generate_modern(output)
     elif mc in ("1.21.1", "1.19.2"):
-        generate_legacy(output)
+        generate_legacy(output, mc)
     else:
         raise ValueError(f"unsupported Minecraft profile: {mc}")
     return output

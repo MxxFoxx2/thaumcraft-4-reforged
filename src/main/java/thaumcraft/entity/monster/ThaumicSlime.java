@@ -7,6 +7,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
@@ -91,14 +92,18 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
         ThaumicSlime closestSlime = null;
         if (player != null) {
             this.spitCounter = Math.max(0, this.spitCounter - 1);
-            this.getLookControl().setLookAt(player, 10.0F, 20.0F);
+            if (this.onGround()) {
+                this.lookAt(player, 10.0F, 20.0F);
+            }
             if (this.distanceTo(player) > 4.0F && this.spitCounter == 0 && this.getSlimeSize() > 3) {
                 this.spitAt(player);
             }
         } else {
             closestSlime = this.getClosestMergableSlime(level);
             if (closestSlime != null) {
-                this.getLookControl().setLookAt(closestSlime, 10.0F, 20.0F);
+                if (this.onGround()) {
+                    this.lookAt(closestSlime, 10.0F, 20.0F);
+                }
                 if (this.distanceTo(closestSlime) < this.getBbWidth() + closestSlime.getBbWidth()) {
                     closestSlime.setSlimeSize(Math.min(100, closestSlime.getSlimeSize() + this.getSlimeSize()));
                     this.discard();
@@ -122,12 +127,29 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
                     double angle = this.random.nextDouble() * Math.PI * 2.0;
                     this.setDeltaMovement(this.getDeltaMovement().add(Math.cos(angle) * speed, 0.0, Math.sin(angle) * speed));
                 }
+                this.faceMovement();
                 if (this.getSlimeSize() > 3) {
                     this.playSound(SoundEvents.SLIME_JUMP, this.getSoundVolume(), 1.0F);
                 }
             }
         }
         this.attackNearbyPlayers(level);
+    }
+
+    private void faceMovement() {
+        Vec3 movement = this.getDeltaMovement();
+        if (movement.horizontalDistanceSqr() > 1.0E-7) {
+            this.setYRot((float) (Mth.atan2(movement.z, movement.x) * Mth.RAD_TO_DEG) - 90.0F);
+            this.setYBodyRot(this.getYRot());
+            this.setYHeadRot(this.getYRot());
+        }
+    }
+
+    @Override
+    protected float tickHeadTurn(float yBodyRot, float animStep) {
+        this.setYBodyRot(this.getYRot());
+        this.setYHeadRot(this.getYRot());
+        return animStep;
     }
 
     private void spitAt(Player target) {
@@ -153,6 +175,7 @@ public class ThaumicSlime extends Monster implements Enemy, TaintedMob {
                     this.random.nextGaussian() * 0.0075
                 ).scale(1.5);
                 spit.setDeltaMovement(direction);
+                spit.faceMovement();
                 if (level.addFreshEntity(spit)) {
                     this.setSlimeSize(this.getSlimeSize() - 1);
                     this.playSound(ModSounds.GORE.get(), 1.0F, 0.8F);

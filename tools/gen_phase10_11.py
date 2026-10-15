@@ -77,39 +77,13 @@ def write_damage_types(ctx):
     )
 
 
-def write_spawn_eggs(ctx):
-    from PIL import Image
+def write_spawn_egg(ctx, name, base_color, spot_color):
+    ctx.generated_item(name, ["spawn_egg", "spawn_egg_overlay"], [ctx.tint(base_color), ctx.tint(spot_color)])
 
-    texture_directory = ctx.ASSETS / "textures" / "item"
-    texture_directory.mkdir(parents=True, exist_ok=True)
-    egg_shape = [
-        "................", "......####......", ".....######.....", "....########....",
-        "....########....", "...##########...", "...##########...", "..############..",
-        "..############..", "..############..", "..############..", "..############..",
-        "...##########...", "...##########...", "....########....", "......####......",
-    ]
-    spots = {(6, 3), (9, 5), (5, 7), (10, 9), (7, 11), (4, 10), (11, 6), (8, 8), (6, 13)}
-    highlights = {(5, 4), (6, 4), (5, 5)}
+
+def write_spawn_eggs(ctx):
     for name, base_color, spot_color in SPAWN_EGGS:
-        image = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-        inside = lambda x, y: 0 <= x < 16 and 0 <= y < 16 and egg_shape[y][x] == "#"
-        for y in range(16):
-            for x in range(16):
-                if not inside(x, y):
-                    continue
-                color = spot_color if (x, y) in spots else base_color
-                if (x, y) in highlights:
-                    factor = 1.3
-                elif not inside(x + 1, y) or not inside(x, y + 1):
-                    factor = 0.6
-                elif not inside(x - 1, y) or not inside(x, y - 1):
-                    factor = 0.85
-                else:
-                    factor = 1.0
-                channels = [min(255, int(((color >> shift) & 0xFF) * factor)) for shift in (16, 8, 0)]
-                image.putpixel((x, y), (*channels, 255))
-        image.save(texture_directory / f"{name}.png")
-        ctx.generated_item(name, name)
+        write_spawn_egg(ctx, name, base_color, spot_color)
 
 
 def write_spawn_modifiers(ctx):

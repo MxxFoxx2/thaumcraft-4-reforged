@@ -307,6 +307,198 @@
       "1": {
         "constant": "#EECCFF"
       }
+    },
+    "brainy_zombie_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#008000"
+      }
+    },
+    "giant_brainy_zombie_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#004000"
+      }
+    },
+    "wisp_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#FFFFFF"
+      }
+    },
+    "fire_bat_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#C00000"
+      }
+    },
+    "pech_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#400040"
+      }
+    },
+    "mind_spider_spawn_egg": {
+      "0": {
+        "constant": "#AAAAAA"
+      },
+      "1": {
+        "constant": "#404040"
+      }
+    },
+    "eldritch_guardian_spawn_egg": {
+      "0": {
+        "constant": "#222222"
+      },
+      "1": {
+        "constant": "#404040"
+      }
+    },
+    "cultist_knight_spawn_egg": {
+      "0": {
+        "constant": "#FF5055"
+      },
+      "1": {
+        "constant": "#000080"
+      }
+    },
+    "cultist_cleric_spawn_egg": {
+      "0": {
+        "constant": "#FF5055"
+      },
+      "1": {
+        "constant": "#800000"
+      }
+    },
+    "eldritch_crab_spawn_egg": {
+      "0": {
+        "constant": "#555555"
+      },
+      "1": {
+        "constant": "#550000"
+      }
+    },
+    "inhabited_zombie_spawn_egg": {
+      "0": {
+        "constant": "#557755"
+      },
+      "1": {
+        "constant": "#550000"
+      }
+    },
+    "thaumic_slime_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#FF80FF"
+      }
+    },
+    "taint_spider_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#404040"
+      }
+    },
+    "taintacle_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#800080"
+      }
+    },
+    "taintacle_small_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#800090"
+      }
+    },
+    "taint_spore_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#800070"
+      }
+    },
+    "taint_spore_swarmer_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#800060"
+      }
+    },
+    "taint_swarm_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#800050"
+      }
+    },
+    "taint_chicken_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#C0C0C0"
+      }
+    },
+    "taint_cow_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#7E3A3B"
+      }
+    },
+    "taint_creeper_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#00FF00"
+      }
+    },
+    "taint_pig_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#EF99EF"
+      }
+    },
+    "taint_sheep_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#808080"
+      }
+    },
+    "taint_villager_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#00FFFF"
+      }
     }
   },
   "builtin_entity": {

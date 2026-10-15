@@ -1,155 +1,54 @@
-# Thaumcraft 4 Reforged
+# Thaumcraft 4: Reforged (mc/1.21.1)
 
-Порт Thaumcraft 4.2.3.5 (MC 1.7.10, Azanor) на Minecraft 26.3 (`main`), 1.21.1 и 1.19.2 (`mc/*`). Только для личного использования: логика, числа, тексты и ассеты оригинала переносятся 1:1. План и фазы: `PLAN.md`, инвентарь контента: `INVENTORY.md`.
+Бэкпорт порта Thaumcraft 4.2.3.5 с ветки `main` (MC 26.3) на Minecraft 1.21.1. Игровая логика приходит с `main`, в этой ветке меняются только версионно-зависимые части.
 
-## Статус
+Этот файл описывает, как синхронизировать и поддерживать бэкпорт. Статусы, счётчики тестов, даты прогонов и пути к логам сюда не пишутся. Новая строка добавляется только если без неё агент сделает ошибку. Общие правила порта (принципы, генераторы, архитектура) описаны в `CLAUDE.md` ветки `main`; процедура синхронизации, sha последней синхронизации и отличия ветки в `BACKPORT.md`.
 
-- Фаза 0 (инструменты и декомпиляция): готово, репозиторий `github.com/irithyllll/thaumcraft-4-reforged`
-- Фаза 1 (каркас NeoForge 26.3.0.57-beta, швы `platform/`, луч через `client/geom`, свои слоты Baubles, `check_seams.py`): готово, кроме визуальной проверки в `runClient`
-- Фаза 2 (48 аспектов, теги предметов и сущностей с генерацией из рецептов, мировые блоки, базовые предметы, оверлей аспектов по Shift, ванильные рецепты): готово, кроме визуальной проверки в `runClient`
-- Фаза 3 (генерация мира, биомы через TerraBlender, деревня с волшебником и банкиром, урны, ящики, мешочки, лут в сундуках): готово, кроме визуальной проверки в `runClient`
-- Фаза 4 (ноды и их генерация, жезлы, вис-сеть, стабилизаторы, трансдьюсер, пьедестал, банка для ноды, HUD виса, GameTest-ы): готово, кроме визуальной проверки в `runClient`
-- Фаза 5 (знания игрока, сканирование, варп, 201 исследование, рецепты TC данными, исследовательский стол с гексами, Таумономикон, команды, GameTest-ы): готово, кроме визуальной проверки в `runClient`
-- Фаза 6 (тигель, эссенция: банки, трубы, буфер, центрифуга, кристаллизатор, резервуар, фиалы; алембик, обе алхимические печи, тауматориум, мнемоническая матрица, флюкс, очиститель, мехи) и фаза 7 (магический верстак, рецепты жезла и скипетра, зарядное реле, стол деконструкции, алтарь инфузии): готово, кроме визуальной проверки в `runClient`
-- Ветка `mc/1.21.1` (код фаз 1–11, worktree `~/projects/thaumcraft-4-reforged-1.21.1`, синхронизирована с `f0c40ed`, отличия в `BACKPORT.md` ветки): фазы 10–11 перенесены, финальная сборка и игровая проверка после последних исправлений оставлены пользователю. Ранее для фаз 1–9 прошли сборка, 60 GameTest-ов, сервер и сохранение устройств. Бижутерия на Curios 9.5.1
-- Фаза 8 (10 фокусов с апгрейдами, сумка фокусов, фокальный манипулятор, инструменты, броня с моделями TC4, бижутерия, рунный щит, саморемонт, варп снаряжения, зачарования, снаряды и огненная мышь, GameTest-ы): готово, кроме визуальной проверки в `runClient`
-- Фаза 9 (нитор, лампы, аура ограждения, решётка, ухо, левитатор, кластеры кристаллов; защищённое стекло, арканная дверь и плита, ключи, голодный сундук, мозг в банке, знамёна; адская печь, бур и основание, купальня; магическое зеркало, зеркало эссенции, ручное зеркало, резонатор, компас камня; GameTest-ы): готово, кроме визуальной проверки в `runClient`. Фазы 8–9 перенесены в локальную ветку `mc/1.21.1`
-- Фазы 10–11: код интегрирован в `main` (9 эффектов, варп, жидкости и порча, существа и торговля, 13 чемпионов с наградами/FX, сферы аспектов, 24 яйца, спавн, post-шейдеры). До остановки проверок: сборка и 114 GameTest-ов прошли, выделенный сервер, `/reload` и сохранение/загрузка проверены. Пользователь взял на себя дальнейшие игровые и визуальные проверки; не считать их выполненными. Код перенесён на `mc/1.21.1`, статус проверок в `BACKPORT.md` этой ветки
-- Следующая реализация: фаза 12 (големы); визуальная проверка предыдущих фаз остаётся открытой
+## Версии
+
+- Minecraft 1.21.1, NeoForge 21.1.256, Java 21, Parchment 1.21.1 / 2024.11.17, ModDevGradle 2.0.148
+- JEI 19.57.0.451, TerraBlender 1.21.1-4.1.0.1, Curios 9.5.1+1.21.1
+- Перенесены фазы 1–11. Големы (фаза 12), Эльдрич и Outer Lands (фаза 13) и конфиг фазы 14 в ветке отсутствуют.
 
 ## Окружение
 
-- Java 25 / 21 / 17: `/opt/homebrew/opt/openjdk@{25,21,17}`, системной `java` нет
-- Gradle: `export JAVA_HOME=/opt/homebrew/opt/openjdk@25`, сервер `tail -f cmds | ./gradlew runServer` (`cmds` в .gitignore, в `run/server.properties` `pause-when-empty-seconds=-1`)
-- `reference/mc`, `reference/neo` пересобраны под NeoForge 26.3.0.57-beta (из `build/moddev/artifacts/minecraft-patched-*-sources.jar` и `neoforge-*-sources.jar`)
-- Python 3 (`python3`), скрипты в `tools/` без внешних зависимостей
-- Зависимости по версиям: таблица «Решения» в `PLAN.md`
-- Облачная сессия (Linux): JDK 25 из Adoptium в `~/jdk25`, симлинки `/opt/homebrew/opt/openjdk@{25,21}` (скрипты и `gradle.properties` не меняются), оригинальный jar с cursemaven `thaumcraft-223628/2227552`, затем `tools/fetch_1710.py` (Vineflower 1.12 с Maven Central в `tools/cache/vineflower.jar`), `tools/decompile.py tc4|mc1710`; `reference/mc`, `reference/neo` из `build/moddev/artifacts` и `~/.gradle/caches/.../neoforge-*-sources.jar`
-- CI: `.github/workflows/build.yml` из TC3 (nightly-релиз `nightly-<mc>`, версия Java и MC из `gradle.properties`), заработает после фазы 1 и появления remote
+- Worktree `~/projects/thaumcraft-4-reforged-1.21.1`, основной checkout `~/projects/thaumcraft-4-reforged`.
+- Gradle запускается на Java 25 (`export JAVA_HOME=/opt/homebrew/opt/openjdk@25`), тулчейн 21 из `gradle.properties`.
+- Справочники лежат в основном checkout (gitignore): `reference/decompiled` (TC4), `reference/mc1710`, `reference/1.21.1/{mc,neo}`. Порт тех же классов TC3 в `~/projects/thaumcraft-reforged-1.21.1`: класс, который там есть, берётся оттуда.
 
-## Справочники (в .gitignore)
+## Синхронизация с main
 
-- `Thaumcraft-1.7.10-4.2.3.5.jar` оригинал в корне
-- `reference/decompiled/` декомпилят TC4 (Vineflower 1.12, MCP `stable_12-1.7.10`), ассеты оригинала в `reference/decompiled/assets/`; непереименованные SRG-имена в `reference/decompiled-unmapped.txt` (поля TC4, скопированные из кода 1.8, и безымянные в MCP параметры)
-- `reference/mc1710/minecraft` MC 1.7.10 клиент (SpecialSource по `joined.srg` → Vineflower → MCP); `reference/mc1710/forge` исходники Forge/FML 10.13.4.1614 из userdev; `reference/mc1710/forge-patches/{forge,fml}` патчи Forge к ванильным классам в виде диффов (к декомпиляту не применены, читать рядом с ванильным классом)
-- `reference/mc`, `reference/neo` исходники MC/NeoForge 26.3, `reference/1.21.1`, `reference/1.19.2` справочники бэкпортов (клонированы из TC3)
-- `tools/cache/` загрузки: `1.7.10/` (client.jar, библиотеки, Forge universal/userdev, Baubles 1.0.1.10, SpecialSource, `mcp1710/*.csv`, `joined.srg`), `vineflower.jar`
+1. `git log --reverse <sha из BACKPORT.md>..main`.
+2. Коммит только с ресурсами, lang или `tools/`: `git cherry-pick`, затем `python3 tools/gen_resources.py --mc 1.21.1`.
+3. Коммит с Java: `git show <sha> | python3 tools/backport/rewrite.py --target 1.21.1 | git apply -3`, конфликты руками, `./gradlew compileJava`.
+4. Коммит с тем же сообщением, обновить sha в `BACKPORT.md`.
+5. Новое правило замены API добавлять в `tools/backport/rewrite.py` и в раздел правил `BACKPORT.md`.
 
-## Инструменты
+## Где ветка отличается
 
-- `tools/fetch_1710.py` скачивает всё для 1.7.10 в `tools/cache/1.7.10` (идемпотентно)
-- `tools/decompile.py mc1710|tc4` пересобирает `reference/mc1710` и `reference/decompiled`
-- `tools/convert_recipes.py` разбирает `ConfigRecipes.java` TC4 мини-интерпретатором (циклы разворачиваются) в `crafting/ConfigRecipes.java` (генерируется, руками не править) и `tools/tc_recipes.json` (обычный крафт для `gen_phase5.py`, алиасы на рецепты фазы 2 в `ALIASES`)
-- `tools/remap_srg.py <dirs> [--mappings] [--report]` SRG → MCP (`func_`, `field_`, `p_`)
-- `tools/inventory.py` → `INVENTORY.md` и черновик `tools/id_map.json` (ручные правки в id_map сохраняются)
-- `tools/id_map.json` старые регистрации TC4 с meta → новые id (`old`, `meta`, `lang`, `id`, `state`, `skip`)
-- `tools/vanilla_ids.py` → `tools/vanilla_ids.json` ванильные id 1.7.10 (числовые, `id:meta`, поля `Blocks.*`/`Items.*`) → современные по профилям версий
-- `tools/mcformat.py` профили версий 26.3/1.21.1/1.19.2 (из TC3)
-- `tools/convert_assets.py` текстуры, звуки, `.obj`, lang (22 языка) → `src/main/resources/assets/thaumcraft`; шейдеры варпа откладываются в `tools/assets_pending/` до фазы 10
-- `tools/gen_modern_aspects.py` собирает `tools/modern_aspects/{blocks,items,entities}.json` (аспекты контента 26.3, которого нет в TC4; `copy` берёт аспекты другого предмета) в `aspect/ModernAspects.java`, руками не править
-- `tools/convert_armor_models.py` разбирает конструкторы `ModelRobe`/`ModelFortressArmor`/`ModelKnightArmor`/`ModelLeaderArmor` TC4 в `client/render/armor/ArmorLayers.java` (`LayerDefinition` для внешней 1.0 и внутренней 0.5 версии, карта частей по именам), руками не править
-- `tools/convert_research.py` разбирает `ConfigResearch` TC4 и пишет `research/ConfigResearch.java` (201 исследование, варп, страницы, рецепты скипетра и рунного усиления с ключами `ConfigResearch.*`), руками не править
+- Правятся только `platform/`, `client/platform/`, `compat/` (`ValueInput`/`ValueOutput`, `ItemStackTemplate`), регистрация и ресурсы профиля. Правка игровой логики здесь значит, что на `main` не хватает шва: шов добавляется на `main`, затем синхронизируется.
+- Бижутерия на Curios (`platform/BaublesCurios`, слоты генерирует `tools/gen_curios.py`), своих слотов `main` нет.
+- GameTest через `@GameTestHolder` + `@PrefixGameTestTemplate`.
+- Модели предметов через `models/item` с `overrides`, special-рендер через `BlockEntityWithoutLevelRenderer` + `IClientItemExtensions`, tint через `RegisterColorHandlersEvent.Item`.
+- Attachments без `.sync()`, `DataAttachments` шлёт свой payload.
+- Полный список в `BACKPORT.md`.
+
+## Проверки
+
+```sh
+export JAVA_HOME=/opt/homebrew/opt/openjdk@25
+./gradlew build
+./gradlew runGameTestServer
+python3 tools/check_seams.py
+python3 tools/validate_ids.py --mc 1.21.1
+python3 tools/gen_resources.py --mc 1.21.1 && git status --short src/generated
+```
+
+- Повторная генерация не должна менять файлы.
+- Сервер: `tail -f cmds | ./gradlew runServer`, проверять `/reload`, сохранение и перезапуск мира. Визуальную сверку с 26.3 делает пользователь.
 
 ## Код-стайл
 
-- Java: 4 пробела, без комментариев, как в TC3
-- Python: 4 пробела, двойные кавычки, без комментариев, `pathlib`
-- Коммиты на английском `feat:`/`fix:`, без строк соавторства
-
-## Отступления от плана
-
-- Ванильные id лежат отдельно в `tools/vanilla_ids.json`, а не в `id_map.json`: генерируются из DataFixer-ов 26.3 и не правятся руками
-- Forge 1.7.10 в справочнике без наложенных патчей: исходники Forge и патчи-диффы раздельно (бинарные патчи требуют pack200/Java 8)
-- Олово, серебро, свинец: есть только рецепт слиток → 9 самородков (условие на непустой `c:ingots/<металл>`); обратные рецепты и переплавка кластеров требуют результата-тега, в JSON невозможно, нужен свой тип рецепта
-- Тотем из обсидиана: состояния `part`/`carving` как в TC3 вместо выбора текстуры по соседям в рендере; древний камень и скала выбирают текстуру случайным вариантом blockstate
-- Блендинг аспектов (GL_ONE у большинства) в GUI не воспроизводится, все иконки рисуются обычной альфой
-- Генерация мира: крупные постройки сдвинуты на −8 по X/Z (фича пишет только в радиусе 1 чанка); высоты берутся по `MOTION_BLOCKING` (аналог `getHeightValue` 1.7, `*_WG` на этапе фич не видит деревья). Курган требует ровной площадки 19×19, как в TC4, на рельефе 26.3 встречается реже
-- Серебродрево вне магических биомов: `#c:is_magical` (кроме магического леса и порчи) + `windswept_forest` + `old_growth_birch_forest` вместо Forest Hills
-- Сундуки кургана и хилтопа получают `minecraft:chests/simple_dungeon` один раз (в TC4 хилтоп бросал дважды, курган с шансом 1/5 добавлял бросок); TC-лут попадает туда через `loot_modifiers`
-- Лут в ванильных сундуках: `rolls` как у ChestGenHooks 1.7.10, `minecraft:empty` с весом ванильной суммы 1.7.10, поэтому вероятность на бросок совпадает. Записи только для предметов, у которых `gen_resources` генерирует определение; отсутствующие подхватятся при перегенерации
-- `TcLoot` (урны, ящики, мешочки): записи по id лениво, отсутствующие предметы пропускаются, качество снаряжения без предмета падает на ближайшее нижнее. Вис-амулет со случайным висом (0–4 каждого первичного, один раз за запуск, как в TC4) есть в мешочках, но не в `dungeonChest` (JSON-лут не задаёт случайный вис)
-- Деревня: в TC4 не больше одной башни и одного дома банкира на деревню (веса 15/25), в jigsaw-пулах лимитов нет, поэтому веса 1 в `houses`. Волшебник и банкир без рабочего места (`Xp: 1` в шаблоне держит профессию), волшебнику в фазе 5/7 добавить POI. Сделки: каждый уровень 1–5 берёт 2 из общего пула профессии (в TC4 один случайный трейд и новый после использования последнего)
-- Биомы: веса регионов TerraBlender 3 (магический лес вместо леса и берёзового леса) и 1 (порча вместо равнин), синий вариант магического леса (`blueMagicalForest`) не поддержан, плотность травы и цветов по-современному
-- Baubles: на 26.3 свои слоты по образцу Baubles 1.0.1.10 за фасадом `platform/Baubles`. Curios `17.0.0-beta.2+26.3` собран под NeoForge 26.3.0.7 и падает на 26.3.0.37+ (`ModConfig.Type.COMMON` удалён в FML 12.0.8)
-- Знания игрока в attachment `research/Knowledge` (копируется при смерти целиком, как TC4 с данными по имени игрока), вместо файлов `.thaum`; ключи сканирования строками (id предмета, id сущности + суффиксы TC4, `NODE<id>`) вместо хешей, наборы с префиксом `#` не переносятся
-- Сервер проверяет то, чему TC4 верил с клиента: цель и дистанцию скана, пул и `secondary` при покупке, наличие аспекта и гекса при размещении, оба аспекта при комбинировании
-- Константы конфига исследований (`research_difficulty = 0`, `aspect_total_cap = 100`, `allowCheatSheet = false`, wuss mode) в `research/ResearchConfig` до `ModConfigSpec` (14)
-- События варпа и выдача `ELDRITCHMINOR`/`ELDRITCHMAJOR`/`@BATHSALTS` реализованы в фазе 10; сферы аспектов с мобов и у первичного амулета — в фазе 11. Руны скана таумометра и искры у полки остаются фазе 15
-- Аспекты контента 26.3, которого не было в 1.7.10, заданы таблицей `tools/modern_aspects` по аналогии с числами TC4. Простые записи регистрируются до `ConfigAspects` (TC4 их перекрывает), копии и сущности после. Вывод из рецептов дополнен: без крафта берутся камнерез и печи, а если после деления на выход ничего не осталось, остаётся 1 главного аспекта. Без аспектов остаются технические предметы, яйца призыва, снаряды и служебные сущности. Проверка покрытия: `/thaumcraft aspects missing` → `run/aspects_missing.txt`
-- Рецепты TC переведены в данные в фазе 5 (план ставил их в 7): `crafting/TcRecipes` по ключам TC4, машины фаз 6/7 используют те же записи. Счётчики после разворота циклов: arcane 109, тигель 54, инфузия 63, инфузионные зачарования 24, compound 9. Динамические `ArcaneWandRecipe`, `ArcaneSceptreRecipe`, `InfusionRunicAugmentRecipe`, покраска роб в фазе 7; результаты инфузии с NBT (апгрейды големов, очки и маски) хранятся как центральный предмет с `data`; ярлыки банок (`JarLabel*`) без JSON до своего типа рецепта
-- Бонусы окружения стола сохраняются с количеством (TC4 при загрузке сводил каждый к 1); кристаллы и банки в скане окружения пропускаются до фаз 9 и 6
-- Тост «Research Completed!» ванильный (вверху справа, стопкой), заголовок захардкожен как в TC4 (ключ в фазе 14); линии карты и гексов вместо `glLineWidth(3)` + `GL_LINE_SMOOTH` рисуются полосой квадов `client/platform/GuiLines` (3 физических пикселя, сглаженные края, у гексов аддитивный `GUI_ADDITIVE`); BER стола рисует письменные принадлежности и заметку плоскими предметами
-- Имя жезла: шаблон `item.thaumcraft.wand` разбирается на клиенте по плейсхолдерам `%CAP`/`%ROD`/`%OBJ` (порядок в языках разный), части через `item.Wand.*`
-- Нода у храма: по стартам структур `desert_pyramid`/`jungle_temple`/`swamp_hut` в текущем чанке; `netherTotem` пуст (в TC4 тотем генерировался только в измерениях 0 и 1); чёрные списки измерений и биомов не перенесены, биомные эффекты нод выключены в Нижнем мире и Энде
-- Видимость нод с таумометром: баг TC4 в `isVisibleTo` сохранён (конус всегда истинен, видно в пределах 48 блоков)
-- Пьедестал перезарядки принимает жезлы и вис-амулеты (`wand/VisStorage`), без `Container` и воронок; энергезированная нода не реализует `Node`, как в TC4
-- Рендер: левая рука как правая (без зеркального сдвига 26.3), тексты на экране таумометра обычной альфой вместо аддитивной, вспышка на конце луча реле не перенесена (фаза 15), пульс луча реле приближённый
-
-- Фазы 6/7: фокальный манипулятор перенесён в фазу 8 (нужны фокусы), зеркало эссенции в фазу 9 (общее с магическим зеркалом), мехи из фазы 9 в 6. Колонна инфузии meta 4 называется `infusion_pillar_top` (верхняя часть, в `id_map` было `_base`)
-- Тигель: выход рецепта обычный `ItemEntity` с тегом `thaumcraft_special_item` вместо парящего `EntitySpecialItem`; котёл → тигель без исследования и виса, как в TC4; вёдра только ванильные с водой, остальное через шов `Transfer` (`exposedFluids`)
-- Тауматориум и инфузия хранят игрока по UUID и рецепт по ключу (TC4 имя и хеш); крафт инфузии переживает перезагрузку чанка. Тауматориум смотрит только горизонтально
-- Флюкс-газ и слизь: свои блоки с `level` 1..8 и портом `BlockFluidFinite` (газ поднимается), свет `level*7/8`; газ рисуется слоем от потолка без инвертированных высот
-- Трубы: руки в blockstate (`none/normal/extended` по шести сторонам) + `facing`; с жезлом в руке форма трубы тонкие руки, по которым переключаются стороны (порт sub-hit RayTracer). Снять ярлык с банки или очистить её можно только пустой рукой (ванилла не вызывает use блока при приседании с предметом)
-- Верстак: результат в `ResultContainer` меню (слот 9 BE не хранится), пересчёт при изменении виса жезла, несколько игроков одновременно. Шансы `nextInt(50-2i)`/`nextInt(100-3i)` инфузии ограничены снизу 1 (в TC4 исключение)
-- Мехи ускоряют ванильную печь через перезапись `cooking_time_spent` в NBT (поле приватное, AT нет)
-- Найденные дюпы и NPE TC4 исправлены: возврат стака из тигля после частичного крафта, NPE сопла печи, отрицательный жар продвинутой печи, приоритет в компараторе печи, null-рецепт тауматориума
-- Рендер фаз 6/7 (приближения): вода тигля с биомным оттенком, предметы над столом деконструкции обычной альфой, затемнение недоступного результата верстака заливкой, частицы без столкновений и со светом 240
-- Фаза 8, сохранённые баги TC4: часть фокусов зовёт `getVisCost` со стаком жезла, поэтому бережливость фокуса на их стоимость не влияет; кулдаун ограждения 500 мс по реальному времени; рендер подсветки руд гасит первые ~250 мс (`/5` вместо `/250` в формуле альфы)
-- Фаза 8, исправленные баги TC4: замена фокуса в манипуляторе во время крафта не даёт бесплатный апгрейд; задержка перезарядки рунного щита своя у каждого игрока (в TC4 одна статическая на всех); первичная стрела с одной физикой `AbstractArrow` (в TC4 двойное перемещение); обмен блоков пропускает цели без предмета; щит не тратит заряд на удар, отбитый неуязвимостью; элементальная мотыга не удобряет магические саженцы (наши растут от костной муки, в TC4 нет); `wispFX4` первичной сферы не перенесён (в TC4 частицы рождались у начала координат мира)
-- Фаза 8, данные и логика: фокус жезла и выбранный блок фокуса обмена хранятся как `ItemStackTemplate`, сумка фокусов как `ItemContainerContents` (компоненты должны быть неизменяемыми); у трёх своих типов урона (`airarrow`, `firearrow`, `orderarrow`) добавлены сообщения о смерти, в TC4 их не было; в TC4 4.2.3.5 регистрируются только зачарования спешки и ремонта (классы бережливости, мощи и удачи жезла мёртвый код), поэтому их два, с тегами стола, лута и торговли; заряд рунного щита и кулдауны его эффектов в памяти по UUID (TC4 статические карты по id сущности); набор крепости, маска и очки считаются из рендер-стейта каждый кадр (TC4 раз в 20 тиков); руда для кирки по тегу `c:ores` вместо имени OreDictionary с `ORE`
-- Фаза 8, рендер (приближения): орнамент фокуса на жезле плоский (без боковых рёбер `renderItemIn2D`); подсветка архитектора аддитивной модуляцией вместо `GL_ADD` texenv; модели брони на взрослых гуманоидах, у малышей ванильная модель; скелеты не получают позу рук зомби (их тело в 26.3 позируется иначе); голова брони масштаб 1.01 через `ModelPart` scale; разряды упряжи создаются в клиентском тике, а не в рендере модели, и рисуются и в GUI (в TC4 проверка состояния GL)
-
-- Фаза 9, свет и мелкие устройства: `nitor_light`, `arcane_lamp_light`, `warding_aura` без модели (`INVISIBLE`), `glimmer_of_light` (meta 2) не создан (в 4.2.3.5 его никто не ставит); лампа света `.air()`, у света лампы и ауры тег `minecraft:replaceable_by_trees` (аналог `canBeReplacedByLeaves`). Аура камня ограждения ищет камень по BE на 1–2 блока ниже (в TC4 любой `blockCosmeticSolid`), проходимость для мобов через `getBlockPathType`. Лампы: `facing` и `lit` (`charges > 0`) в blockstate, рост через `state.randomTick`, лампа света работает только в загруженных чанках (TC4 грузил), высота по `MOTION_BLOCKING`; культуры `device/CropUtils` предикатами по `BlockState`, чёрный список ламп тегом `thaumcraft:lamp_blacklist` вместо IMC
-- Фаза 9, решётка/ухо/левитатор/кристаллы: решётка `closed` в blockstate, предметы проходят за счёт пустой коллизии для `ItemEntity` (без `EntityItemGrate`), воронка вставляет через однослотовый `WorldlyContainer`. Ухо слушает `NoteBlockEvent.Play`, тембр как `NoteBlockInstrument` (слышит и инструменты 26.3), сигнал в blockstate `powered`, подпись ноты в очках через `SubmitCustomGeometryEvent`. Левитатор: приседание проверяется у сущности, а не по клавише клиента. Кристаллы: `facing` в blockstate, BE только для рендера, дроп лут-таблицей (6 осколков своей стихии, смешанный по одному каждой, странные один уравновешенный); генерации кристаллов в обычном мире в TC4 4.2.3.5 нет (только эльдрич-измерение, фаза 13)
-- Фаза 9, защищённое: `wardedStone` константой `true` в `device/WardedConfig` до `ModConfigSpec` (14), стекло, дверь и плита неразрушимы и снимаются только жезлом владельца. Владелец и доступ в `device/OwnedBlockEntity` по UUID (пары тип/UUID вместо строк `"0имя"`), синхронизируются целиком. Дверь на `DoorBlock`, ванильный редстоун отключён, реагирует только на соседнюю арканную плиту (сохранён баг TC4: учитывается только владелец плиты); режим плиты в blockstate `setting`, сообщения в ключах `tc.device.*`. Ключ: компонент `arcane_key_link` без измерения, как в TC4; сохранён баг: ключ съедает использование на любом блоке. Эффект ударов по защищённому стеклу в фазе 15; стекло соединяется динамической моделью по таблице `ArchitectOverlay.CONNECTED`
-- Фаза 9, хранение и знамёна: голодный сундук с ванильным `ChestMenu.threeRows`, всегда горизонтальный, крышка только на клиенте. Мозг в банке учитывает `count` слитых орбов (AT `ExperienceOrb.count`, в 1.7.10 слияния не было), частицы `ENTITY_EFFECT`. Знамя: цвет и аспект в компонентах `banner_color`/`banner_aspect` и BE, 16 цветных знамён во вкладке через `BuildCreativeModeTabContentsEvent`, цвет из рецепта ставит `TcStack.create` по `data.color`; знамя без цвета, но с аспектом называется как знамя культа (в TC4 ключ без перевода)
-- Фаза 9, адская печь: одно состояние `tile` (0..25) + `facing` вместо meta 0..10, текстуры граней выбирает генератор по `calculateTexture` TC4 (в игре по соседям не пересчитываются); ядру нужен источник лавы; бонусы переплавки таблицей `device/SmeltingBonuses` (в `ConfigRecipes` не конвертировались), руды по `c:ores/*`; BE сопел только у четырёх клеток рядом с ядром. Исправлена потеря предметов: содержимое печи выпадает при распаде
-- Фаза 9, бур: сторона основания в blockstate `base`, ориентация и поворот в BE, опора `arcane_bore_base` или доски великого дерева/серебродрева; копание через `blockEvent` вместо `PacketBoreDig`; добыча `Block.getDrops` с нетеритовой киркой с шёлком и удачей (шёлк засчитан, если дропнулся сам блок), без `BreakEvent` и защиты территории, как в TC4; слоты только фокус раскопок и `minecraft:pickaxes`, хопперы соблюдают `canPlaceItem`; ремонт кирки через FakePlayer `FakeThaumcraftBore`. Исправлена потеря предметов: без BE основания добыча падает у бура. Строки GUI английские (фаза 14). Боксы модели бура без зеркала (`mirror = true` в TC4 ставится после `addBox` и не действует), сверить визуально вместе с мехами фазы 6
-- Фаза 9, купальня: бак 5000 mB любой жидкости, ведро любой `BucketItem`; соли для ванн и очищающая жидкость за `device/SpaHooks` до фазы 10 (без солей ставится вода); вода не ставится, где `WATER_EVAPORATES`
-- Фаза 9, зеркала: связь компонентом `thaumcraft:mirror_link` (`GlobalPos`), в BE партнёр `GlobalPos`; чанк партнёра грузится только при переносе и установке/проверке связи, периодическая проверка чанки не грузит (TC4 грузил, в том числе (0,0,0) у несвязанного). Воронки через однослотовый буфер `Transfer.exposeItems`, стек уходит в тике. Исправлена потеря предметов: очередь выдачи и входной буфер выпадают при поломке. Окно рисуется шейдером портала Края вместо 16 слоёв `tunnel.png`/`particlefield.png` с `glTexGen`. Зеркало эссенции реализует `AspectSource`, `EssentiaHandler` учитывает `ignoreMirror` и пропускает зеркало, связанное с запрашивающим. В творческом режиме зеркало не дропается. «Linked to ...» английскими строками (фаза 14)
-- Фаза 9, предметы: ручное зеркало не принимает само себя, хотбар-свапы в его меню заблокированы, остаток выбрасывается при закрытии. Резонатор берёт грань трубы через `TubeArms.trace`. Компас камня: свойство модели `thaumcraft:sinister_lodestone_active` по клиентскому реестру тёмных нод `SinisterNodes` (кормит `NodeBlockEntity` раз в 50 тиков), состояние общее на все камни, как в TC4; варп предмета 1 (`addWarpToItem`) в фазе 10
-- Фаза 9, генераторы: `gen_phase5.recipes` вызывается после всех генераторов предметов (иначе рецепты на предметы поздних фаз считались «ждущими»); при нескольких meta на один id имя блока берётся из первой записи `id_map` (решётка, оковы голема), цветные знамёна получают ключ на цвет
-
-## Заметки
-
-- Швы (`platform/`): `ModNetwork` (+ `client/platform/ClientNetwork`), `StackData`/`StackKey` (data components), `DataAttachments`/`DataKey` (attachments, сохраняются как `{value: ...}`), `Transfer`, `Teleport`, `BiomeEdit`, `Registration` (+ `TcToolMaterial`, `TcArmorMaterial`, `ArmorSlot`; топливо через компонент `COOKING_FUEL`), `Baubles`. Шов `SaveIO` на `main` пустой: BE используют ванильные `ValueInput`/`ValueOutput`
-- Рендер FX: `WorldFx` (`client/platform`) отдаёт текстуру и blend, геометрия в `client/geom` пишет в `QuadSink`; `TcRenderTypes` ставят REPEAT-сэмплер (как GL_REPEAT в TC4)
-- Новые пакеты регистрируются в `network/ModPayloads`, клиентские хендлеры в `client/ClientPayloadHandlers`; `/thaumcraft fx beam <цель> [цвет]` отладочная команда
-- `onEquipped`/`onUnequipped` баублов вызываются только на сервере
-- Аспекты: `aspect/Aspect` (enum 48, порядок TC4), `AspectList` (семантика TC4), компонент `AspectKeys.ASPECTS` на фиалах, эссенциях, манабобах, ярлыках. `ConfigAspects.java` генерируется `tools/convert_tags.py` (руками не править), неразрешённые цели (контент будущих фаз) молча пропускаются. Реестр собирается на сервере (`AspectSync`, `ServerStartedEvent` и `/reload`) и уходит клиенту `AspectTagsPayload`. Источники рецептов TC (тигель, arcane, инфузия) подключаются через `RecipeAspectSource.register` в порядке TC4
-- Имена сущностей 1.7.10 → id: `tools/entity_ids.json` (в `id_map.json` нельзя: `inventory.py` перезаписывает всё, кроме `blocks`/`items`)
-- Ресурсы: `python3 tools/gen_resources.py` полностью перезаписывает `src/generated/resources`; текстуры остаются под именами TC4. Самодельные ассеты лежат в `tools/assets_extra/` (копируются `convert_assets.py`)
-- Еда только через `Registration.food` (Consumable/consume_effects запрещены вне `platform/`)
-- Хуки на будущие фазы: `world/gen/NodeHooks` (ноды структур, храмов, дикие, тотем: 4; эльдрич-кольцо: 13), `world/biome/TaintDecorationHook` (10), `WorldGenConfig` → `ModConfigSpec` (14), спавнер виспа в хилтопе пуст до появления `thaumcraft:wisp` (11), `ManaBeanItem.awardAspectPool` (5), `ZombieBrainItem.applyWarp` (5/10), `InfusionStabiliser` у свечей (7), `SilverwoodTreeGenerator.setKnotPlacer` (4), генераторы деревьев в `world/tree/` для фазы 3
-- `/thaumcraft aspects hand|item <предмет>|entity <цель>` печатает теги; `/thaumcraft worldgen mound|hilltop|greatwood|silverwood` ставит постройку в позиции источника (работает через `execute positioned` с консоли)
-- Генераторы ресурсов фазы 3: `tools/gen_world.py`, `gen_biomes.py`, `gen_loot.py`, `gen_villages.py` (+ `gen_structures.py` для NBT деревни) вызываются из `gen_resources.main()` с `ctx` = модуль `gen_resources`; курган из `tools/convert_structures.py` → `src/main/resources/thaumcraft/structures/mound.txt`
-- Тест генерации на сервере: `gamerule max_block_modifications`, `forceload add` (до 256 чанков), подсчёт блоков через `fill ... air replace <блок>`
-
-- Числа оригинала (подробно в `INVENTORY.md`): 45 блоков, 108 предметов (`itemPhotoPlate`, `itemFlyingCarpet`, `itemBootsFortress` объявлены, но не созданы), 73 BE, 50 сущностей, 15 контейнеров, 39 пакетов, 201 исследование, 66 звуковых событий, 22 языка
-- `id_map.json`: meta, меняющие только состояние, свёрнуты в blockstate (`state`), поэтому один id может встречаться в нескольких записях; уникальна пара (id, state). Проверка: `python3 tools/inventory.py --check`
-- Первичные насыщенные камни и осколки названы по TC4 (`order_infused_stone`, `entropy_shard`), прочие общие с TC3 id взяты из TC3
-- Lang собирается кодом в нескольких местах: имя жезла (`item.thaumcraft.wand` = `%%CAP %%ROD %%OBJ`), ядра големов (в ключе только режим), знамёна по цвету (ключ `block.thaumcraft.banner.<цвет>` на каждый из 16 цветов, как `tile.blockWoodenDevice.8.<n>.name` в TC4; базовый `block.thaumcraft.banner` это знамя культа, имя выбирает `device/BannerItem.getName` по компоненту `banner_color`, `convert_assets.build_key_map` добавляет суффикс по `state.color`). Плейсхолдеры TC (`%CAP`, `%n`) в lang экранированы как `%%`, `%d` заменены на `%s`
-- Битые строки в оригинальных lang (es_AR, es_MX, ca_ES, ru_RU строка 1) пропускаются конвертером
-- `.mtl` у `.obj` без путей к текстурам (в оригинале абсолютные пути Windows), текстуры задаются в JSON-моделях
-- Ванильные id: `vanilla_ids.json` (`flatten.get("id:meta") or names.get("id")`, затем `profiles[<версия>]`); блок `skull` по умолчанию `skeleton_skull`, предметы `skull:N` точные
-- Медь, олово, серебро, свинец (самородки, кластеры, колпачки) в оригинале условны, записи в id_map есть
-- Жезл: один предмет `thaumcraft:wand`, компоненты `wand_parts` (cap, rod, sceptre), `wand_vis` (centivis, ключи как NBT TC4), `wand_target` (позиция объекта при тапе); таблицы колпачков и стержней в `wand/WandRegistry`, хранение через `wand/Wands`, траты через `WandItem.consumeAllVis`. Тап: `WandItem.use` → `WandInteractable.onWandUse` ставит `wand_target` → `onUseTick` → `onUsingWandTick`
-- Ноды: `node/NodeBlockEntity` (тип BE `node` на `aura_node`, `charged_obsidian_totem`, `silverwood_knot`), генерация `node/NodeGenerator`, хуки будущих фаз `node/NodeHooks`; вис-сеть `vis/VisNet` + `vis/VisNode`; триггеры жезла `wand/WandTriggers` (банка: `blockentity/NodeJarTrigger`)
-- Special-модели предметов: `thaumcraft:wand`, `aura_node`, `node_jar` (`client/render/ItemRenderers`), `node_stabilizer` (`advanced`), `node_transducer`, `vis_relay` (`client/render/WorldRenderers`); OBJ через `ObjModel`, пайплайны без depth-теста для открытых нод в `ModRenderPipelines`
-- Жезл и таумометр как `ItemRenderType` 1.7.10: `items/*.json` это `minecraft:select` по `display_context` (`legacy_special_item` в `gen_phase4.py`), поле `view` (`inventory`, `equipped`, `first_person`, `entity`), базовая модель без родителя; `client/render/LegacyItemView.apply` переводит позу 26.3 в пространство 1.7.10 (инвентарь с хелпером Forge), дальше числа рендерера TC4. Первое лицо таумометра с руками и показаниями скана: `ThaumometerHandRenderer` (`RenderHandEvent`)
-- В 26.3 (SDL3) левая кнопка мыши `1`: проверять `InputConstants.MOUSE_BUTTON_LEFT`, а не `0`
-- `/thaumcraft node place <pos> [тип] [модификатор]|info <pos>`, `/thaumcraft wand fill [игроки]|give <игроки> <колпачок> <стержень> [скипетр]`
-- Исследования: модель `research/{ResearchItem,ResearchPage,ResearchCategories}`, генерируемый `ConfigResearch`; логика `ResearchManager` (`complete`, `completeWithSiblings`, `handlePlayerComplete`, подсказки `@KEY`), `Warp`, `ScanManager` (+ клиент `client/research/ThaumometerClient` через `ScanClientHooks`), заметки `ResearchNotes` + компонент `research_note` (заметка без компонента = неизвестная), гексы `HexGrid`. `ResearchGate.isComplete` теперь настоящая проверка
-- Книга: `client/research/ResearchBrowserScreen` (карта), `ResearchPageScreen` (страницы), уведомления `ResearchNotifications` + `ResearchHud`, тост `ResearchToast`; общий код открывает книгу через `ResearchClientHooks`. Стол: `blockentity/ResearchTableBlockEntity`, `menu/ResearchTableMenu` (меню с позицией через шов `platform/Menus`), `client/screen/ResearchTableScreen`, tint `thaumcraft:research_note`
-- `/thaumcraft research [list] | <игроки> list|all|reset|<ключ>`, `aspect <игроки> <аспект|all> <n>`, `warp <игроки> set|add <n> [perm|temp|sticky]` (по умолчанию липкий, как в TC4)
-- Эссенция: `essentia/EssentiaTransport` (порт `IEssentiaTransport`), `Essentia.getConnectable`, `aspect/AspectSource`, `EssentiaHandler.drainEssentia(be, aspect, dir, range)` (кэш источников, `EssentiaSourceFxPayload`), фильтр банки `EssentiaKeys.FILTER`; трубы `TubeBlock` + `TubeArms`. Алхимия в `alchemy/`, верстак и стол деконструкции в `arcane/`, алтарь в `infusion/` (`InfusionKeys.HARDEN` рунный заряд, `InfusionKeys.TAGS` NBT-результаты инфузии для фазы 8). Сопоставление рецептов: `crafting/CrucibleCrafting`, `ArcaneCrafting` (работает и на клиенте), `InfusionCrafting`; динамические `ArcaneWandRecipe`, `ArcaneSceptreRecipe`, `InfusionRunicAugmentRecipe`
-- Триггеры жезла фаз 6/7: `alchemy/AlchemyTriggers` (котёл, тауматориум, продвинутая печь), `arcane/ArcaneTriggers` (стол → верстак), `infusion/InfusionTriggers` (алтарь)
-- Шов `Transfer`: `exposeItems`/`exposeFluids` + `Transfer.FluidTank`, регистрации в `registry/ModCapabilities` (BE отдаёт `exposedItems(side)`/`exposedFluids(side)`)
-- Хуки фаз 6/7: `alchemy/AlchemyHooks` (нитор как источник тепла: 9; слизень и порча от флюкса: 10/11), `effect/EffectHooks` (вис-истощение, отравление порчей: 10), `infusion/InfusionHooks` (варп за крафт предмета с варпом: 10)
-- FX фаз 6/7 в `client/fx/ClientFx` (+ `ParticleFx`, `BubbleFx`, `VentFx`, `EssentiaTrailFx`, `BoreSparkleFx`, `BoreParticleFx`, `BlockRunesFx`, `EssentiaSourceTracker`), спрайты частиц блоков и предметов `client/platform/ParticleSprites`
-- Ресурсы фаз 6/7: `tools/gen_phase6.py` (`arcane`, `infusion`, `essentia`, `alchemy`), special-типы предметов константами в начале файла
-- Жезл в мире и в руке: item-модель `thaumcraft:special_owner` (`client/render/OwnerSpecialModel`) передаёт владельца в `WandSpecialRenderer` (анимация использования WAVE/CHARGE, фокус: орнамент, глубинный слой из атласа предметов, куб `textures/model/wand.png`)
-- Броня с моделями TC4: `client/render/armor/` (`ArmorKind`, `TcArmorModel` с анимацией ткани, `ArmorModels` регистрирует слои и `IClientItemExtensions`), упряжь: `HoverHarnessEffects` (тело, разряды) + `HoverHarnessLayer` (OBJ-ранец, кольцо молний)
-- FX фазы 8 в `client/fx`: `SparkleFx`, `WispFx`, `BurstFx`, `SmokeSpiralFx`, `WandBeamFx` (луч раскопок за игроком + вспышка попадания), `OreScanFx` (без теста глубины, `WorldFx.depthTest()`); оверлей архитектора `client/render/ArchitectOverlay` (через `ExtractBlockOutlineRenderStateEvent`)
-- GameTest-ы: `test/ThaumcraftGameTests` (функции в реестре `test_function`, площадка `thaumcraft:test/platform` из `tools/gen_structures.py`), запуск `./gradlew runGameTestServer`. Сервер тестов тикает без пауз, поэтому кулдауны по реальному времени нужно ждать в самом тесте; мок-игроку нужен `connection.markClientLoaded()`, иначе он неуязвим
-- Фаза 9: код в `device/` (клиент `client/render/device`, FX `client/fx/DeviceFx`, `MachineClientFx`, прокси машин `device/MachineFx`), генераторы `tools/gen_phase9_{devices,warded,machines,mirrors}.py`, тесты `test/{Device,Warded,Machine,Mirror}GameTests`. Хуки на будущие фазы: `device/SpaHooks` (соли и очищающая жидкость: 10), `device/CropUtils` (культуры для големов: 12), варп компаса камня (10)
+- Java: 4 пробела, без комментариев.
+- Python: 4 пробела, двойные кавычки, без комментариев, `pathlib`.
+- Коммиты на английском `feat:`/`fix:`, без строк соавторства.

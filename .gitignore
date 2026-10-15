@@ -16,3 +16,7 @@ Thaumcraft-1.7.10-4.2.3.5.jar
 .claude/worktrees/
 .claude/*.lock
 cmds
+CHECKLIST.md
+INVENTORY.md
+PARITY_FIXES.md
+PLAN.md

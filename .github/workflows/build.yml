@@ -61,5 +61,5 @@ jobs:
           gh release create "$tag" build/libs/*.jar \
             --latest="$latest" \
             --target "$GITHUB_SHA" \
-            --title "$VERSION" \
+            --title "$MC" \
             --notes "$notes"

@@ -73,6 +73,30 @@ public final class PortBugGameTests {
         helper.succeed();
     }
 
+    @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 100, batch = "portbuggametests_zombiespawnsupport")
+    public static void zombieSpawnSupport(GameTestHelper helper) {
+        BlockPos pos = helper.absolutePos(new BlockPos(3, 3, 3));
+        var level = helper.getLevel();
+        level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+        level.setBlockAndUpdate(pos.above(), Blocks.AIR.defaultBlockState());
+        for (var type : List.of(ModEntities.BRAINY_ZOMBIE.get(), ModEntities.GIANT_BRAINY_ZOMBIE.get())) {
+            for (var floor : List.of(Blocks.AIR, Blocks.WATER, Blocks.LAVA)) {
+                level.setBlockAndUpdate(pos.below(), floor.defaultBlockState());
+                helper.assertTrue(!SpawnPlacements.isSpawnPositionOk(type, level, pos), "zombie spawn allowed above " + floor);
+                helper.assertTrue(!SpawnPlacements.checkSpawnRules(type, level, MobSpawnType.NATURAL, pos, net.minecraft.util.RandomSource.create(0)), "zombie spawn predicate allowed an invalid floor");
+            }
+            level.setBlockAndUpdate(pos.below(), Blocks.STONE.defaultBlockState());
+            helper.assertTrue(SpawnPlacements.isSpawnPositionOk(type, level, pos), "zombie spawn rejected dry solid ground");
+            level.setBlockAndUpdate(pos, Blocks.WATER.defaultBlockState());
+            helper.assertTrue(!SpawnPlacements.isSpawnPositionOk(type, level, pos), "zombie spawn allowed in water above solid ground");
+            level.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+            level.setBlockAndUpdate(pos.above(), Blocks.WATER.defaultBlockState());
+            helper.assertTrue(!SpawnPlacements.isSpawnPositionOk(type, level, pos), "zombie spawn allowed with its head underwater");
+            level.setBlockAndUpdate(pos.above(), Blocks.AIR.defaultBlockState());
+        }
+        helper.succeed();
+    }
+
     @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "portbuggametests_altarpopulation")
     public static void altarPopulation(GameTestHelper helper) {
         BlockPos pos = helper.absolutePos(new BlockPos(16, 2, 16));

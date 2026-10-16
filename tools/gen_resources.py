@@ -23,6 +23,7 @@ import gen_phase12
 import gen_phase13
 import gen_phase10_11
 import gen_warp_shaders
+import gen_node_shaders
 import gen_villages
 import gen_world
 
@@ -1044,6 +1045,7 @@ def main():
     gen_phase12.generate(ctx)
     gen_phase13.generate(ctx)
     gen_warp_shaders.generate(mcformat.profile.name, OUT)
+    gen_node_shaders.generate(mcformat.profile.name, OUT)
     gen_phase5.recipes(ctx)
     write_tags()
     if profile.explicit_render_types:

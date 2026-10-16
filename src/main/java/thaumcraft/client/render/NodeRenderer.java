@@ -26,6 +26,7 @@ import thaumcraft.aspect.AspectList;
 import thaumcraft.client.geom.FacingQuads;
 import thaumcraft.client.geom.NodeGeometry;
 import thaumcraft.client.geom.QuadSink;
+import thaumcraft.client.platform.NodeRenderTypes;
 import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.client.platform.VertexQuadSink;
 import thaumcraft.node.NodeBlockEntity;
@@ -194,9 +195,9 @@ public abstract class NodeRenderer<T extends BlockEntity> implements BlockEntity
                 state.viewerTicks,
                 state.nanoTime
             );
-            ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(state.depthIgnore ? TcRenderTypes.Kind.ADDITIVE_NO_DEPTH : TcRenderTypes.Kind.ADDITIVE, NODES), (pose, buffer) -> NodeGeometry.render(params, new VertexQuadSink(pose, buffer), WorldRendering.NOOP));
+            ItemGeometry.submit(buffers, poseStack, NodeRenderTypes.of(NODES, false, state.depthIgnore), (pose, buffer) -> NodeGeometry.render(params, new VertexQuadSink(pose, buffer), WorldRendering.NOOP));
             if (state.needsTranslucent) {
-                ItemGeometry.submit(buffers, poseStack, TcRenderTypes.of(state.depthIgnore ? TcRenderTypes.Kind.TRANSLUCENT_NO_DEPTH : TcRenderTypes.Kind.TRANSLUCENT, NODES), (pose, buffer) -> NodeGeometry.render(params, WorldRendering.NOOP, new VertexQuadSink(pose, buffer)));
+                ItemGeometry.submit(buffers, poseStack, NodeRenderTypes.of(NODES, true, state.depthIgnore), (pose, buffer) -> NodeGeometry.render(params, WorldRendering.NOOP, new VertexQuadSink(pose, buffer)));
             }
             if (state.ring) {
                 int frame = (int) ((state.nanoTime / 40000000L + pos.getX()) % RING_FRAMES);

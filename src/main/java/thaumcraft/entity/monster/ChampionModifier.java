@@ -74,17 +74,24 @@ public final class ChampionModifier {
             return;
         }
         ChampionKeys.MODIFIER.set(mob, id);
-        mob.getAttribute(Attributes.MAX_HEALTH).addOrReplacePermanentModifier(CHAMPION_HEALTH);
-        mob.getAttribute(Attributes.ATTACK_DAMAGE).addOrReplacePermanentModifier(CHAMPION_DAMAGE);
+        boolean boss = mob instanceof thaumcraft.entity.boss.ThaumcraftBoss;
+        if (!boss) {
+            mob.getAttribute(Attributes.MAX_HEALTH).addOrReplacePermanentModifier(CHAMPION_HEALTH);
+            mob.getAttribute(Attributes.ATTACK_DAMAGE).addOrReplacePermanentModifier(CHAMPION_DAMAGE);
+            mob.heal(25.0F);
+        }
         if (id == 0) {
             mob.getAttribute(Attributes.MOVEMENT_SPEED).addOrReplacePermanentModifier(BOLD_SPEED);
         } else if (id == 3) {
             mob.getAttribute(Attributes.ATTACK_DAMAGE).addOrReplacePermanentModifier(MIGHTY_DAMAGE);
         } else if (id == 5) {
-            mob.setAbsorptionAmount(mob.getAbsorptionAmount() + (float) (mob.getAttributeBaseValue(Attributes.MAX_HEALTH) / 2.0));
+            float absorption = mob.getAbsorptionAmount() + (float) (mob.getAttributeBaseValue(Attributes.MAX_HEALTH) / 2.0);
+            mob.getAttribute(Attributes.MAX_ABSORPTION).setBaseValue(Math.max(mob.getAttributeBaseValue(Attributes.MAX_ABSORPTION), absorption));
+            mob.setAbsorptionAmount(absorption);
         }
-        mob.heal(25.0F);
-        if (!isVanilla(mob, "ender_dragon")) {
+        if (mob instanceof thaumcraft.entity.boss.ThaumcraftBoss thaumcraftBoss) {
+            thaumcraftBoss.generateName();
+        } else if (!isVanilla(mob, "ender_dragon")) {
             mob.setCustomName(Component.translatable("champion.mod." + NAMES[id]).append(" ").append(mob.getName()));
         }
         if (persist) {
@@ -129,6 +136,11 @@ public final class ChampionModifier {
         if (biome.is(Tags.Biomes.IS_SPOOKY) || biome.is(Tags.Biomes.IS_NETHER) || biome.is(Tags.Biomes.IS_END)) {
             roll -= 2;
         }
+        if (level.dimension().equals(thaumcraft.world.dim.OuterLands.OUTER_LANDS)) {
+            roll -= 3;
+            var cell = thaumcraft.world.dim.MazeHandler.getCell(level, (int) Math.ceil(mob.getX()) >> 4, (int) Math.ceil(mob.getZ()) >> 4);
+            if (cell != null && (cell.feature == 6 || cell.feature == 8)) roll -= 10;
+        }
         roll -= Math.max(0, whitelist - 1);
         if (roll <= 0 && mob.getAttributeBaseValue(Attributes.MAX_HEALTH) >= 10.0) {
             int id = isVanilla(mob, "creeper") ? 0 : level.getRandom().nextInt(NAMES.length);
@@ -145,6 +157,7 @@ public final class ChampionModifier {
         if (mob instanceof Witch || type == ModEntities.WISP.get() || mob instanceof Pech || mob instanceof Cultist) level = Math.max(level, 1);
         if (mob instanceof Taintacle) level = Math.max(level, 2);
         if (mob instanceof InhabitedZombie) level = Math.max(level, 3);
+        if (mob instanceof thaumcraft.entity.boss.ThaumcraftBoss) level = 200;
         return level;
     }
 

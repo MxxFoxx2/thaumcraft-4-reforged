@@ -1287,5 +1287,10 @@
   "warp.text.7": "¡Están por todas partes! ¡Corre!",
   "warp.text.8": "Debe haber una manera de detener estos dolores de cabeza..",
   "warp.text.hunger.1": "No se pueden satisfacer tu hambre con comida normal.",
-  "warp.text.hunger.2": "Tu hambre comienza a desvanecerse."
+  "warp.text.hunger.2": "Tu hambre comienza a desvanecerse.",
+  "item.thaumcraft.eldritch_warden_spawn_egg": "Eldritch Warden Spawn Egg",
+  "item.thaumcraft.eldritch_golem_spawn_egg": "Eldritch Golem Spawn Egg",
+  "item.thaumcraft.cultist_leader_spawn_egg": "Cultist Leader Spawn Egg",
+  "item.thaumcraft.cultist_portal_spawn_egg": "Cultist Portal Spawn Egg",
+  "item.thaumcraft.taintacle_giant_spawn_egg": "Giant Taintacle Spawn Egg"
 }

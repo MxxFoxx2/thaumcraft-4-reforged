@@ -46,7 +46,7 @@ import thaumcraft.item.AspectTooltips;
 import thaumcraft.platform.ModNetwork;
 import thaumcraft.network.WarpEventPayload;
 
-public class EldritchGuardian extends Monster implements RangedAttackMob {
+public class EldritchGuardian extends Monster implements RangedAttackMob, thaumcraft.entity.EldritchMob {
     public float armLiftLeft;
     public float armLiftRight;
     private boolean lastBlast;
@@ -59,6 +59,7 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
             .add(Attributes.MAX_HEALTH, 50.0)
+            .add(Attributes.MAX_ABSORPTION, 25.0)
             .add(Attributes.FOLLOW_RANGE, 40.0)
             .add(Attributes.MOVEMENT_SPEED, 0.28)
             .add(Attributes.ATTACK_DAMAGE, 7.0)
@@ -95,6 +96,21 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
     }
 
     @Override
+    public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level, net.minecraft.world.DifficultyInstance difficulty, MobSpawnType reason, net.minecraft.world.entity.SpawnGroupData data) {
+        var result = super.finalizeSpawn(level, difficulty, reason, data);
+        if (level.getLevel().dimension().equals(thaumcraft.world.dim.OuterLands.OUTER_LANDS)) this.setAbsorptionAmount(this.getAbsorptionAmount() + 25.0F);
+        return result;
+    }
+
+    @Override
+    public boolean checkSpawnRules(net.minecraft.world.level.LevelAccessor level, MobSpawnType reason) {
+        return this.level().getEntitiesOfClass(EldritchGuardian.class, this.getBoundingBox().inflate(32.0, 16.0, 32.0), other -> other != this).isEmpty()
+            && level instanceof net.minecraft.world.level.ServerLevelAccessor server
+            && level.getDifficulty() != Difficulty.PEACEFUL
+            && thaumcraft.entity.monster.EldritchSpawnRules.check(ModEntities.ELDRITCH_GUARDIAN.get(), server, reason, this.blockPosition(), this.random);
+    }
+
+    @Override
     public int getAmbientSoundInterval() {
         return 500;
     }
@@ -102,6 +118,11 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return !this.hasRestriction();
+    }
+
+    @Override
+    public boolean isAlliedTo(Entity entity) {
+        return entity instanceof thaumcraft.entity.EldritchMob || super.isAlliedTo(entity);
     }
 
     @Override
@@ -134,6 +155,9 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
             AspectTooltips.setSingle(essence, Aspect.ELDRITCH, 2);
             this.spawnAtLocation(essence);
         }
+        int looting = source.getEntity() instanceof net.minecraft.world.entity.LivingEntity killer
+            ? net.minecraft.world.item.enchantment.EnchantmentHelper.getEnchantmentLevel(level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getOrThrow(net.minecraft.world.item.enchantment.Enchantments.LOOTING), killer) : 0;
+        if (recentlyHit && this.random.nextInt(200) - looting < 5) this.spawnAtLocation(new net.minecraft.world.item.ItemStack(thaumcraft.registry.EldritchContent.ELDRITCH_EYE.get()));
         super.dropCustomDeathLoot(level, source, recentlyHit);
     }
 
@@ -177,6 +201,9 @@ public class EldritchGuardian extends Monster implements RangedAttackMob {
     @Override
     public void tick() {
         super.tick();
+        if (!this.level().isClientSide() && this.level().dimension().equals(thaumcraft.world.dim.OuterLands.OUTER_LANDS) && this.invulnerableTime <= 0 && this.tickCount % 25 == 0 && this.getAbsorptionAmount() < 25.0F) {
+            this.setAbsorptionAmount(this.getAbsorptionAmount() + 1.0F);
+        }
         if (this.level().isClientSide()) {
             this.armLiftLeft = Math.max(0.0F, this.armLiftLeft - 0.05F);
             this.armLiftRight = Math.max(0.0F, this.armLiftRight - 0.05F);

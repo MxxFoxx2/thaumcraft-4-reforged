@@ -42,6 +42,7 @@ public class Thaumcraft {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Thaumcraft(IEventBus modEventBus, ModContainer modContainer) {
+        thaumcraft.entity.golem.GolemKeys.init();
         AspectKeys.init();
         WandKeys.init();
         FocusKeys.init();
@@ -62,6 +63,9 @@ public class Thaumcraft {
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModEntities.register(modEventBus);
+        thaumcraft.registry.EldritchContent.register(modEventBus);
+        thaumcraft.registry.EldritchEntities.register(modEventBus);
+        thaumcraft.registry.EldritchWorld.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
         ModSounds.register(modEventBus);
         ModFeatures.register(modEventBus);

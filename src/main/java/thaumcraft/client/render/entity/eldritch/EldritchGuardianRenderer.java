@@ -9,11 +9,11 @@ import thaumcraft.client.platform.AlphaMobRenderer;
 import thaumcraft.entity.monster.eldritch.EldritchGuardian;
 import thaumcraft.taint.TaintBiomes;
 
-public final class EldritchGuardianRenderer extends AlphaMobRenderer<EldritchGuardian, EldritchGuardianModel> {
+public final class EldritchGuardianRenderer extends AlphaMobRenderer<EldritchGuardian, EldritchGuardianModel<EldritchGuardian>> {
     private static final ResourceLocation TEXTURE = Thaumcraft.id("textures/model/eldritch_guardian.png");
 
     public EldritchGuardianRenderer(EntityRendererProvider.Context context) {
-        super(context, new EldritchGuardianModel(context.bakeLayer(EldritchGuardianModel.LAYER)), 0.5F);
+        super(context, new EldritchGuardianModel<>(context.bakeLayer(EldritchGuardianModel.LAYER)), 0.5F);
     }
 
     @Override

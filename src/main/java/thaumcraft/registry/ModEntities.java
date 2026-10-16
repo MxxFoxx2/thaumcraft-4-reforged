@@ -98,6 +98,11 @@ public final class ModEntities {
         () -> EntityType.Builder.of(EldritchGuardian::new, MobCategory.MONSTER).sized(0.8F, 2.25F).eyeHeight(2.1F).clientTrackingRange(8).updateInterval(3).build("thaumcraft:eldritch_guardian")
     );
 
+    public static final DeferredHolder<EntityType<?>, EntityType<thaumcraft.entity.golem.GolemBase>> GOLEM = ENTITIES.register("golem", () -> EntityType.Builder.of(thaumcraft.entity.golem.GolemBase::new, MobCategory.MISC).sized(0.4F, 0.95F).clientTrackingRange(4).updateInterval(3).build("thaumcraft:golem"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<thaumcraft.entity.golem.TravelingTrunk>> TRAVELING_TRUNK = ENTITIES.register("traveling_trunk", () -> EntityType.Builder.of(thaumcraft.entity.golem.TravelingTrunk::new, MobCategory.MISC).sized(0.8F, 0.8F).fireImmune().clientTrackingRange(4).updateInterval(3).build("thaumcraft:traveling_trunk"));
+    public static final DeferredHolder<EntityType<?>, EntityType<thaumcraft.entity.golem.GolemBobber>> GOLEM_BOBBER = ENTITIES.register("golem_bobber", () -> EntityType.Builder.<thaumcraft.entity.golem.GolemBobber>of(thaumcraft.entity.golem.GolemBobber::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(64).build("thaumcraft:golem_bobber"));
+
     private ModEntities() {
     }
 
@@ -131,6 +136,8 @@ public final class ModEntities {
     }
 
     private static void createAttributes(EntityAttributeCreationEvent event) {
+        event.put(TRAVELING_TRUNK.get(), thaumcraft.entity.golem.TravelingTrunk.createAttributes().build());
+        event.put(GOLEM.get(), thaumcraft.entity.golem.GolemBase.createAttributes().build());
         event.put(FIREBAT.get(), FireBat.createAttributes().build());
         event.put(TAINT_SPIDER.get(), TaintSpider.createAttributes().build());
         event.put(TAINTACLE.get(), Taintacle.createAttributes().build());
@@ -158,6 +165,10 @@ public final class ModEntities {
     }
 
     private static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+        event.register(ELDRITCH_GUARDIAN.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            thaumcraft.entity.monster.EldritchSpawnRules::check, RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(INHABITED_ZOMBIE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            thaumcraft.entity.monster.EldritchSpawnRules::check, RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(
             TAINTACLE.get(),
             SpawnPlacementTypes.ON_GROUND,

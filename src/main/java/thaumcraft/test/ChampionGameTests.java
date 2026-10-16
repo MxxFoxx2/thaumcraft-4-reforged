@@ -105,7 +105,7 @@ public final class ChampionGameTests {
         ChampionModifier.awardChampionRewards(level, attacker, drops, 0, 1, 0);
         helper.assertValueEqual(drops.size(), 1, "champion awards one loot bag");
         helper.assertTrue(drops.getFirst().getItem().is(thaumcraft.registry.ModItems.COMMON_LOOT_BAG.get()), "fixed low roll awards common bag");
-        int xp = level.getEntitiesOfClass(ExperienceOrb.class, attacker.getBoundingBox().inflate(4.0)).stream().mapToInt(ExperienceOrb::getValue).sum();
+        int xp = level.getEntitiesOfClass(ExperienceOrb.class, attacker.getBoundingBox().inflate(4.0)).stream().mapToInt(orb -> orb.getValue() * orb.count).sum();
         helper.assertValueEqual(xp, 6, "champion awards fixed XP amount for deterministic roll");
         helper.succeed();
     }

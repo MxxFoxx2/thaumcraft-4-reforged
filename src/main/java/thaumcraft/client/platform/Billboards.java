@@ -6,6 +6,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 
 public final class Billboards {
+    public static void submit(PoseStack poses, ImmediateGeometry geometry, CameraRenderState camera, RenderType type, float u0, float u1, float v0, float v1, float scale, int argb, int light) {
+        submit(poses, geometry.buffers, net.minecraft.client.Minecraft.getInstance().gameRenderer.getMainCamera(), type, u0, u1, v0, v1, scale, argb, light);
+    }
+
     private Billboards() {
     }
 

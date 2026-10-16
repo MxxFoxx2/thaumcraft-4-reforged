@@ -61,6 +61,9 @@ public final class ModCreativeTabs {
                     output.accept(item);
                 }
             }
+            for (DeferredHolder<Item, ? extends Item> holder : EldritchContent.ITEMS.getEntries()) {
+                output.accept(holder.get());
+            }
         })
         .build());
 

@@ -138,6 +138,17 @@ public final class Transfer {
         return fluids(level, pos, side) != null;
     }
 
+    public static List<ItemStack> contents(Level level, BlockPos pos, @Nullable Direction side) {
+        IItemHandler handler = items(level, pos, side);
+        if (handler == null) return List.of();
+        List<ItemStack> contents = new java.util.ArrayList<>();
+        for (int index = 0; index < handler.getSlots(); index++) {
+            ItemStack stack = handler.getStackInSlot(index);
+            if (!stack.isEmpty()) contents.add(stack.copy());
+        }
+        return List.copyOf(contents);
+    }
+
     public static int count(Level level, BlockPos pos, @Nullable Direction side, Predicate<ItemStack> filter) {
         IItemHandler handler = items(level, pos, side);
         if (handler == null) {

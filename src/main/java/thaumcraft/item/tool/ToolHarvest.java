@@ -77,6 +77,9 @@ public final class ToolHarvest {
                     y = b;
                 }
                 BlockPos target = pos.offset(x, y, z);
+                if (target.equals(pos)) {
+                    continue;
+                }
                 if (!level.mayInteract(player, target)) {
                     continue;
                 }

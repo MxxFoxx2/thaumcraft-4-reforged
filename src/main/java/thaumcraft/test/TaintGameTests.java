@@ -363,6 +363,12 @@ public final class TaintGameTests {
         level.setDayTime(18000L);
         level.updateSkyBrightness();
         BlockPos origin = helper.absolutePos(BlockPos.ZERO);
+        for (int z = 7; z <= 11; z++) {
+            for (int y = origin.getY() + 3; y < level.getMaxBuildHeight(); y++) {
+                level.setBlockAndUpdate(new BlockPos(origin.getX() + 4, y, origin.getZ() + z), Blocks.AIR.defaultBlockState());
+            }
+        }
+
         for (int x = 2; x <= 6; x++) {
             for (int z = 2; z <= 6; z++) {
                 level.setBlockAndUpdate(origin.offset(x, 2, z), Blocks.STONE.defaultBlockState());

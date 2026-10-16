@@ -94,7 +94,11 @@ public final class NodeHooks {
     }
 
     public static boolean eldritchRing(WorldGenLevel level, Random random, int chunkX, int chunkZ, int x, int y, int z) {
-        return false;
+        if (!thaumcraft.eldritch.EldritchRingGenerator.generate(level, random, chunkX, chunkZ, x, y, z)) {
+            return false;
+        }
+        NodeGenerator.createRandomNodeAt(level, new BlockPos(x, y + 2, z), random, false, true, false);
+        return true;
     }
 
     private static boolean isOpen(BlockState state) {

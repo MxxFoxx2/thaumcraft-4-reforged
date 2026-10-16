@@ -1659,5 +1659,10 @@
   "warp.text.8": "Наверняка есть возможность унять эти головные боли?",
   "warp.text.9": "Вы чувствуете слабость и неохоту копать что-либо. ",
   "warp.text.hunger.1": "Обычная еда не может утолить этот голод.",
-  "warp.text.hunger.2": "Голод ослабевает."
+  "warp.text.hunger.2": "Голод ослабевает.",
+  "item.thaumcraft.eldritch_warden_spawn_egg": "Яйцо призыва эльдрич-стража",
+  "item.thaumcraft.eldritch_golem_spawn_egg": "Яйцо призыва древнего голема",
+  "item.thaumcraft.cultist_leader_spawn_egg": "Яйцо призыва претора",
+  "item.thaumcraft.cultist_portal_spawn_egg": "Яйцо призыва багрового портала",
+  "item.thaumcraft.taintacle_giant_spawn_egg": "Яйцо призыва гигантского заражённого щупальца"
 }

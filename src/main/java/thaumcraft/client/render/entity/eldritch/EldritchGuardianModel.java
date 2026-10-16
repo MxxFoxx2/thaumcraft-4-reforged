@@ -14,7 +14,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import thaumcraft.Thaumcraft;
 
-public class EldritchGuardianModel extends EntityModel<EldritchGuardian> {
+public class EldritchGuardianModel<T extends net.minecraft.world.entity.LivingEntity> extends EntityModel<T> {
     public static final net.minecraft.client.model.geom.ModelLayerLocation LAYER = new net.minecraft.client.model.geom.ModelLayerLocation(Thaumcraft.id("eldritch_guardian"), "main");
     private final ModelPart root;
     private final ModelPart hood1;
@@ -118,11 +118,11 @@ public class EldritchGuardianModel extends EntityModel<EldritchGuardian> {
     }
 
     @Override
-    public void setupAnim(EldritchGuardian entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.hood1.yRot = netHeadYaw * ((float) Math.PI / 180.0F);
         this.hood1.xRot = headPitch * ((float) Math.PI / 180.0F);
-        this.armL1.xRot = -1.0F - entity.armLiftLeft + Mth.sin((ageInTicks + 20.0F) / 10.0F) * 0.08F;
-        this.armR1.xRot = -1.0F - entity.armLiftRight + Mth.sin(ageInTicks / 10.0F) * 0.08F;
+        this.armL1.xRot = -1.0F - (entity instanceof EldritchGuardian guard ? guard.armLiftLeft : ((thaumcraft.entity.boss.EldritchWarden) entity).getArmLiftLeft()) + Mth.sin((ageInTicks + 20.0F) / 10.0F) * 0.08F;
+        this.armR1.xRot = -1.0F - (entity instanceof EldritchGuardian guard ? guard.armLiftRight : ((thaumcraft.entity.boss.EldritchWarden) entity).getArmLiftRight()) + Mth.sin(ageInTicks / 10.0F) * 0.08F;
         this.legpanelC1.xRot = -0.15F + Mth.sin(ageInTicks / 8.0F) * 0.12F;
         this.legpanelC2.xRot = Mth.sin((ageInTicks - 5.0F) / 8.0F) * 0.13F;
         this.legpanelC3.xRot = Mth.sin((ageInTicks - 10.0F) / 8.0F) * 0.14F;

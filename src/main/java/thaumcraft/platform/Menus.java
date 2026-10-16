@@ -22,6 +22,19 @@ public final class Menus {
         return IMenuTypeExtension.create((containerId, inventory, buffer) -> factory.create(containerId, inventory, buffer.readBlockPos()));
     }
 
+    @FunctionalInterface
+    public interface EntityFactory<M extends AbstractContainerMenu> {
+        M create(int containerId, Inventory inventory, int entityId);
+    }
+
+    public static <M extends AbstractContainerMenu> MenuType<M> withEntity(EntityFactory<M> factory) {
+        return IMenuTypeExtension.create((id, inventory, buffer) -> factory.create(id, inventory, buffer.readVarInt()));
+    }
+
+    public static void openEntity(ServerPlayer player, MenuProvider provider, int entityId) {
+        player.openMenu(provider, buffer -> buffer.writeVarInt(entityId));
+    }
+
     public static <M extends AbstractContainerMenu> MenuType<M> simple(MenuType.MenuSupplier<M> factory) {
         return new MenuType<>(factory, FeatureFlags.VANILLA_SET);
     }

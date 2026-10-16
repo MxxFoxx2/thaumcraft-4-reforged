@@ -5,7 +5,7 @@
 - Minecraft 1.21.1, NeoForge `21.1.256`, Java 21 (Gradle runs on Java 25: `export JAVA_HOME=/opt/homebrew/opt/openjdk@25`, toolchain 21), ModDevGradle `2.0.148`
 - Parchment `1.21.1` / `2024.11.17`
 - JEI `19.57.0.451`, TerraBlender `1.21.1-4.1.0.1`, Curios `9.5.1+1.21.1`
-- Branch: `mc/1.21.1`, worktree `~/projects/thaumcraft-4-reforged-1.21.1`
+- Branch: `mc/1.21.1`, worktree `~/projects/thaumcraft-4-reforged/.worktrees/mc-1.21.1`
 
 ## Last synced main commit
 
@@ -126,3 +126,22 @@ In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/moj
 - Added regression GameTests for the fixes, including deterministic primal-orb taint spread, focus loot tier pick/save/load and replacement, excavation shared lazy pricing, canceled focal manipulation, Brain Jar, champion clamping, and warp encounter/effect behavior. The test suite passed as part of the 122/122 run above.
 - Removed only the byte-identical duplicate `vignette.png` and `vignette.png.mcmeta` resource sources; generator-owned copies remain. Resource collision validation found no remaining duplicate paths.
 - The synced base remains `f0c40ed`. No phase 12 or 13 content was backported. Automated checks do not replace visual or user gameplay validation.
+
+## Phases 12–13 and reported port bugs (2026-10-16)
+
+- Ported the complete golem/traveling-trunk and Outer Lands/eldritch feature sets, including registries, components, menus, entity persistence, world generation, encounters and resource generators. The phase baseline is `80b327a`; phase 12–13 behavior corrections through `95dcec5` are included. This does not advance the global synchronization SHA or import phase 14 configuration/JEI changes.
+- Applied the shared port-bug fixes: original trunk dimensions/model origin, guardian population/light checks, grounded natural eldritch spawning, authoritative following-drop movement and velocity updates, and opaque depth-writing eldritch surfaces with batched layers and hidden internal faces.
+- `FollowingItemMotion` owns item movement/lifetime API differences. Access transformers expose only item age and pickup delay in addition to the existing adapters; boss AI uses the same removal of `serverAiStep` finality as main.
+- `OuterLandsData` retains the shared codec through the 1.21.1 SavedData factory. Golem fluid components use immutable `compat/FluidStackTemplate`; transfer and fake-player actions use the existing capability APIs.
+- Client adapters in `client/platform` provide immediate geometry submission, model state, item rendering and block-entity rendering on the 1.21.1 API. The golem model scale is restored after every pose reset. Item predicates use the legacy item-model profile.
+- `runGameTestServer` prepares the Outer Lands pack in `build/gametestworld/datapacks`, with its own world selected explicitly. New encounter tests use separate batches to avoid interference with existing tests. A larger regression structure keeps following drops and their moving target inside active chunks.
+- Resource generation now writes the correct dimension-type and biome spawn formats for both profiles. Portal orientation remains the TC4 behavior; the underspecified vertical-portal report does not justify rotating either portal.
+- Visual acceptance, two-client synchronization and comparative FPS measurements remain manual checks. Automated server tests do not establish those results.
+
+### Automated validation
+
+- 26.3: `build` and all 200 required GameTests pass. The crusher drop/pickup scenario also passes five consecutive repetitions.
+- 1.21.1: `build` and all 173 required GameTests pass, including target removal and dimension-change release of following drops.
+- Both profiles: seam checks, vanilla identifier validation (zero problems), inventory checks, deterministic resource regeneration and headless eldritch geometry checks pass.
+- Separate dedicated-server worlds on both versions generated the maze, spawned a boss after lock activation, completed `/reload` and saved. Restart preserved maze readiness and the altar eye count.
+- During validation, a Gradle compile cache entry restored an incomplete set of classes on main. The final main build and tests used `--no-build-cache`; both final jars were inspected for the required entity/network/world classes.

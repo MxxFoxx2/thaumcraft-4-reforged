@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class TcRenderTypes extends RenderType {
     private static final ShaderStateShard PARTICLE_SHADER = new ShaderStateShard(GameRenderer::getParticleShader);
+    private static final Map<ResourceLocation, RenderType> ELDRITCH = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> ADDITIVE = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> TRANSLUCENT = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> ADDITIVE_NO_DEPTH = new HashMap<>();
@@ -59,6 +60,13 @@ public final class TcRenderTypes extends RenderType {
                 .setWriteMaskState(COLOR_WRITE)
                 .createCompositeState(false)
         );
+    }
+
+    public static RenderType eldritchSurface(ResourceLocation texture) {
+        return ELDRITCH.computeIfAbsent(texture, key -> RenderType.create("thaumcraft_eldritch_surface", DefaultVertexFormat.PARTICLE, VertexFormat.Mode.QUADS, 1536, false, false,
+            RenderType.CompositeState.builder().setShaderState(PARTICLE_SHADER).setTextureState(new TextureStateShard(key, false, false))
+                .setTransparencyState(NO_TRANSPARENCY).setLightmapState(LIGHTMAP).setCullState(NO_CULL).setDepthTestState(LEQUAL_DEPTH_TEST)
+                .setWriteMaskState(COLOR_DEPTH_WRITE).createCompositeState(false)));
     }
 
     public static RenderType additive(ResourceLocation texture) {

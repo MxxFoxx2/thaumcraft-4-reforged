@@ -668,6 +668,9 @@ public final class ModBlocks {
         thaumcraft.device.WardingAuraBlock::new,
         thaumcraft.device.DeviceProperties::wardingAura
     );
+    public static final DeferredBlock<thaumcraft.block.EldritchFieldBlock> STATIC_FIELD = eldritchField("static_field", 10);
+    public static final DeferredBlock<thaumcraft.block.EldritchFieldBlock> SAPPING_FIELD = eldritchField("sapping_field", 11);
+    public static final DeferredBlock<thaumcraft.block.EldritchFieldBlock> IMPASSABLE_FIELD = eldritchField("impassable_field", 12);
     public static final DeferredBlock<thaumcraft.device.ArcaneLampBlock> ARCANE_LAMP = withItem(RegistryHelper.registerBlock(BLOCKS,
         "arcane_lamp",
         thaumcraft.device.ArcaneLampBlock::new,
@@ -786,6 +789,16 @@ public final class ModBlocks {
             .sound(SoundType.WOOD)
             .noOcclusion()
             .ignitedByLava();
+    }
+
+    private static DeferredBlock<thaumcraft.block.EldritchFieldBlock> eldritchField(String name, int kind) {
+        return RegistryHelper.registerBlock(BLOCKS, name, properties -> new thaumcraft.block.EldritchFieldBlock(kind, properties), properties -> {
+            properties.noOcclusion().noLootTable().strength(kind == 12 ? -1.0F : 100.0F, kind == 12 ? Float.MAX_VALUE : 50.0F).lightLevel(state -> kind == 12 ? 0 : 8);
+            if (kind != 12) {
+                properties.replaceable().randomTicks();
+            }
+            return properties;
+        });
     }
 
     private static <B extends Block> DeferredBlock<B> withItem(DeferredBlock<B> block) {

@@ -499,6 +499,46 @@
       "1": {
         "constant": "#00FFFF"
       }
+    },
+    "eldritch_warden_spawn_egg": {
+      "0": {
+        "constant": "#552222"
+      },
+      "1": {
+        "constant": "#404040"
+      }
+    },
+    "eldritch_golem_spawn_egg": {
+      "0": {
+        "constant": "#555555"
+      },
+      "1": {
+        "constant": "#404040"
+      }
+    },
+    "cultist_leader_spawn_egg": {
+      "0": {
+        "constant": "#FF5055"
+      },
+      "1": {
+        "constant": "#505050"
+      }
+    },
+    "cultist_portal_spawn_egg": {
+      "0": {
+        "constant": "#FF5055"
+      },
+      "1": {
+        "constant": "#FF50FF"
+      }
+    },
+    "taintacle_giant_spawn_egg": {
+      "0": {
+        "constant": "#FFC0FF"
+      },
+      "1": {
+        "constant": "#808080"
+      }
     }
   },
   "builtin_entity": {

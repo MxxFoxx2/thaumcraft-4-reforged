@@ -300,6 +300,7 @@ def build_key_map(id_map):
             key_map.setdefault(entry["lang"], None)
         else:
             key_map[entry["lang"]] = f"item.thaumcraft.{entry['id']}"
+    key_map["item.ItemGolemCore.name"] = "item.thaumcraft.golem_core"
     return key_map
 
 

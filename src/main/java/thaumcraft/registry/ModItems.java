@@ -153,7 +153,35 @@ public final class ModItems {
     public static final DeferredItem<SanitizingSoapItem> SANITIZING_SOAP = RegistryHelper.registerItem(ITEMS, "sanitizing_soap", SanitizingSoapItem::new);
     public static final DeferredItem<BottledTaintItem> BOTTLED_TAINT = RegistryHelper.registerItem(ITEMS, "bottled_taint", BottledTaintItem::new);
 
-    public static final DeferredItem<Item> CRIMSON_RITES = RegistryHelper.registerSimpleItem(ITEMS, "crimson_rites", properties -> properties.rarity(Rarity.RARE));
+    public static final DeferredItem<thaumcraft.eldritch.EldritchObjectItem> CRIMSON_RITES = thaumcraft.registry.EldritchContent.CRIMSON_RITES;
+    public static final DeferredItem<thaumcraft.item.golem.TravelingTrunkItem> TRAVELING_TRUNK = RegistryHelper.registerItem(ITEMS, "traveling_trunk", thaumcraft.item.golem.TravelingTrunkItem::new);
+    private static final java.util.List<DeferredItem<? extends Item>> GOLEM_ITEMS = registerGolemItems();
+
+    private static java.util.List<DeferredItem<? extends Item>> registerGolemItems() {
+        var result = new java.util.ArrayList<DeferredItem<? extends Item>>();
+        for (var type : thaumcraft.entity.golem.GolemType.values()) result.add(RegistryHelper.registerItem(ITEMS, type.itemId(), properties -> new thaumcraft.item.golem.GolemPlacerItem(properties, type)));
+        result.add(RegistryHelper.registerItem(ITEMS, "golem_core_blank", properties -> new thaumcraft.item.golem.GolemPartItem(properties, thaumcraft.item.golem.GolemPartItem.Kind.CORE, -1)));
+        for (int i = 0; i < thaumcraft.item.golem.GolemItems.CORES.length; i++) {
+            int index = i;
+            result.add(RegistryHelper.registerItem(ITEMS, "golem_core_" + thaumcraft.item.golem.GolemItems.CORES[i], properties -> new thaumcraft.item.golem.GolemPartItem(properties, thaumcraft.item.golem.GolemPartItem.Kind.CORE, index)));
+        }
+        for (int i = 0; i < 6; i++) {
+            int index = i;
+            result.add(RegistryHelper.registerItem(ITEMS, "golem_upgrade_" + thaumcraft.item.golem.GolemItems.UPGRADES[i], properties -> new thaumcraft.item.golem.GolemPartItem(properties, thaumcraft.item.golem.GolemPartItem.Kind.UPGRADE, index)));
+        }
+        for (int i = 0; i < 8; i++) {
+            int index = i;
+            result.add(RegistryHelper.registerItem(ITEMS, thaumcraft.item.golem.GolemItems.DECORATIONS[i], properties -> new thaumcraft.item.golem.GolemPartItem(properties, thaumcraft.item.golem.GolemPartItem.Kind.DECORATION, index)));
+        }
+        result.add(RegistryHelper.registerItem(ITEMS, "golem_bell", thaumcraft.item.golem.GolemBellItem::new));
+        return java.util.List.copyOf(result);
+    }
+
+    public static final DeferredItem<SpawnEggItem> ELDRITCH_WARDEN_SPAWN_EGG = spawnEgg("eldritch_warden_spawn_egg", EldritchEntities.ELDRITCH_WARDEN, 0x552222, 0x404040);
+    public static final DeferredItem<SpawnEggItem> ELDRITCH_GOLEM_SPAWN_EGG = spawnEgg("eldritch_golem_spawn_egg", EldritchEntities.ELDRITCH_GOLEM, 0x555555, 0x404040);
+    public static final DeferredItem<SpawnEggItem> CULTIST_LEADER_SPAWN_EGG = spawnEgg("cultist_leader_spawn_egg", EldritchEntities.CULTIST_LEADER, 0xFF5055, 0x505050);
+    public static final DeferredItem<SpawnEggItem> CULTIST_PORTAL_SPAWN_EGG = spawnEgg("cultist_portal_spawn_egg", EldritchEntities.CULTIST_PORTAL, 0xFF5055, 0xFF50FF);
+    public static final DeferredItem<SpawnEggItem> TAINTACLE_GIANT_SPAWN_EGG = spawnEgg("taintacle_giant_spawn_egg", EldritchEntities.TAINTACLE_GIANT, 0xFFC0FF, 0x808080);
 
     public static final DeferredItem<Item> AIR_SHARD = RegistryHelper.registerSimpleItem(ITEMS, "air_shard");
     public static final DeferredItem<Item> FIRE_SHARD = RegistryHelper.registerSimpleItem(ITEMS, "fire_shard");
@@ -346,7 +374,7 @@ public final class ModItems {
         int highlightColor
     ) {
         Supplier<? extends EntityType<? extends Mob>> type = entityType::get;
-        return ITEMS.registerItem(name, properties -> new DeferredSpawnEggItem(type, backgroundColor, highlightColor, properties));
+        return RegistryHelper.registerItem(ITEMS, name, properties -> new DeferredSpawnEggItem(type, backgroundColor, highlightColor, properties));
     }
 
     public static void register(IEventBus bus) {

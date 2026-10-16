@@ -1526,5 +1526,10 @@
   "warp.text.8": "Il existe surement un moyen de stopper ces migraines ?",
   "warp.text.9": "Vous vous entez soudainement réticent à casser des choses. ",
   "warp.text.hunger.1": "Votre faim ne peut être satisfaite avec de la nourriture normale.",
-  "warp.text.hunger.2": "Votre faim commence à disparaître."
+  "warp.text.hunger.2": "Votre faim commence à disparaître.",
+  "item.thaumcraft.eldritch_warden_spawn_egg": "Eldritch Warden Spawn Egg",
+  "item.thaumcraft.eldritch_golem_spawn_egg": "Eldritch Golem Spawn Egg",
+  "item.thaumcraft.cultist_leader_spawn_egg": "Cultist Leader Spawn Egg",
+  "item.thaumcraft.cultist_portal_spawn_egg": "Cultist Portal Spawn Egg",
+  "item.thaumcraft.taintacle_giant_spawn_egg": "Giant Taintacle Spawn Egg"
 }

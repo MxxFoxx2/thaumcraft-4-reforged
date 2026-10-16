@@ -164,6 +164,8 @@ class Validator:
         client = jar_names(Path(client_jar) if client_jar else directory / "client.jar")
         self.models = {name[len("assets/minecraft/models/"):-5] for name in client if name.startswith("assets/minecraft/models/") and name.endswith(".json")}
         self.textures = {name[len("assets/minecraft/textures/"):-4] for name in client if name.startswith("assets/minecraft/textures/") and name.endswith(".png")}
+        self.fonts = {"minecraft:" + name[len("assets/minecraft/font/"):-5] for name in client if name.startswith("assets/minecraft/font/") and name.endswith(".json")}
+        self.fonts |= self.asset_ids(out, "font", ".json")
         self.models = {"minecraft:" + model for model in self.models}
         self.textures = {"minecraft:" + texture for texture in self.textures}
         self.models |= self.asset_ids(out, "models", ".json")
@@ -294,6 +296,10 @@ class Validator:
             known = value in self.models or value.split(":", 1)[1] in BUILTIN_MODELS
         elif kind == "shader":
             known = value in self.shader_stages
+        elif kind == "font":
+            known = value in self.fonts
+        elif kind == "font_texture":
+            known = value.removesuffix(".png") in self.textures
         elif kind == "texture":
             known = value in self.textures
         elif kind == "skip":
@@ -346,7 +352,7 @@ class Validator:
         if value.startswith("#"):
             if "matching_block_tag" in keys or (file_kind == "other" and key == "tag"):
                 return "tag:block"
-            if file_kind == "block_tag" or key in ("blocks", "block"):
+            if file_kind == "block_tag" or key in ("blocks", "block", "infiniburn"):
                 return "tag:block"
             if "biomes" in keys:
                 return "tag:biome"
@@ -368,6 +374,8 @@ class Validator:
             return "item"
         if file_kind == "block_tag":
             return "block"
+        if file_kind == "font":
+            return "font" if key == "id" else "font_texture" if key == "file" else "skip"
         if file_kind == "model":
             if "textures" in keys:
                 return "texture"
@@ -396,7 +404,7 @@ class Validator:
                 return "loot_registry"
             if key == "enchantment":
                 return "enchantment"
-            if key in ("blocks", "block"):
+            if key in ("blocks", "block", "infiniburn"):
                 return "block"
             if key == "formula":
                 return "skip" if value in BONUS_FORMULAS else "flat"
@@ -430,6 +438,8 @@ class Validator:
             file_kind = "model"
         elif relative.startswith("assets/") and "/items/" in relative:
             file_kind = "item_model"
+        elif relative.startswith("assets/") and "/font/" in relative:
+            file_kind = "font"
         elif relative.startswith("assets/") and "/post_effect/" in relative:
             file_kind = "post_effect"
         elif "/shaders/program/" in relative:

@@ -37,6 +37,10 @@ public final class ModMenus {
     public static final DeferredHolder<MenuType<?>, MenuType<ArcaneBoreMenu>> ARCANE_BORE = MENUS.register("arcane_bore", () -> Menus.withPos(ArcaneBoreMenu::new));
     public static final DeferredHolder<MenuType<?>, MenuType<ArcaneSpaMenu>> ARCANE_SPA = MENUS.register("arcane_spa", () -> Menus.withPos(ArcaneSpaMenu::new));
     public static final DeferredHolder<MenuType<?>, MenuType<PechTradeMenu>> PECH_TRADE = MENUS.register("pech_trade", () -> IMenuTypeExtension.create((id, inventory, buffer) -> new PechTradeMenu(id, inventory, buffer.readVarInt())));
+    public static final DeferredHolder<MenuType<?>, MenuType<thaumcraft.menu.GolemMenu>> GOLEM = MENUS.register("golem", () -> Menus.withEntity(thaumcraft.menu.GolemMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<thaumcraft.menu.TravelingTrunkMenu>> TRAVELING_TRUNK = MENUS.register("traveling_trunk", () -> Menus.withEntity(thaumcraft.menu.TravelingTrunkMenu::new));
+
     private ModMenus() {
     }
 

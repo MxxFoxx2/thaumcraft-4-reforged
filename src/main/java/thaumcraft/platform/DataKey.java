@@ -38,6 +38,12 @@ public final class DataKey<T> {
         return selfSync != null || allSync != null;
     }
 
+    void syncToTracker(Entity holder, ServerPlayer player) {
+        if (allSync != null && has(holder)) {
+            DataAttachments.sendSync(this, holder, player);
+        }
+    }
+
     @Nullable StreamCodec<? super RegistryFriendlyByteBuf, T> syncCodec() {
         return allSync != null ? allSync : selfSync;
     }

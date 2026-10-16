@@ -37,7 +37,9 @@ public final class FollowingItems {
     }
 
     public static boolean isFollowing(ItemEntity item) {
-        return FOLLOWING.containsKey(item);
+        return item.level().isClientSide()
+            ? ToolKeys.FOLLOWING.has(item) && ToolKeys.FOLLOWING.get(item)
+            : FOLLOWING.containsKey(item);
     }
 
     public static void follow(ItemEntity item, Entity target) {
@@ -48,6 +50,8 @@ public final class FollowingItems {
         item.getPersistentData().putBoolean(SAVED_GRAVITY, item.isNoGravity());
         item.setNoGravity(true);
         item.noPhysics = true;
+        item.setDeltaMovement(Vec3.ZERO);
+        ToolKeys.FOLLOWING.set(item, true);
         FollowingItemMotion.sync(item);
     }
 
@@ -78,7 +82,14 @@ public final class FollowingItems {
 
     @SubscribeEvent
     static void onItemTick(EntityTickEvent.Pre event) {
-        if (!(event.getEntity() instanceof ItemEntity item) || FOLLOWING.isEmpty()) {
+        if (!(event.getEntity() instanceof ItemEntity item)) {
+            return;
+        }
+        if (item.level().isClientSide()) {
+            if (isFollowing(item)) {
+                event.setCanceled(true);
+                FollowingItemMotion.tick(item, item.getDeltaMovement());
+            }
             return;
         }
         Follow follow = FOLLOWING.get(item);
@@ -110,6 +121,7 @@ public final class FollowingItems {
         item.setNoGravity(item.getPersistentData().getBoolean(SAVED_GRAVITY));
         item.getPersistentData().remove(SAVED_GRAVITY);
         item.noPhysics = false;
+        ToolKeys.FOLLOWING.set(item, false);
         FollowingItemMotion.sync(item);
     }
 }

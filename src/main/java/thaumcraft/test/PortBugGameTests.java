@@ -1,5 +1,13 @@
 package thaumcraft.test;
 
+import net.minecraft.core.Direction;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import thaumcraft.item.tool.ToolKeys;
+import thaumcraft.platform.DataAttachments;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.List;
 import java.util.function.Consumer;
@@ -133,33 +141,7 @@ public final class PortBugGameTests {
 
     @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "portbuggametests_crusherdrops")
     public static void crusherDrops(GameTestHelper helper) {
-        var player = player(helper);
-        BlockPos center = helper.absolutePos(new BlockPos(16, 3, 16));
-        player.setPos(center.getX() + 0.5, center.getY() - 1, center.getZ() + 5);
-        player.setNoGravity(true);
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.PRIMAL_CRUSHER.get()));
-        for (int x = -1; x <= 1; x++) {
-            for (int y = -1; y <= 1; y++) {
-                helper.getLevel().setBlockAndUpdate(center.offset(x, y, 0), Blocks.STONE.defaultBlockState());
-            }
-        }
-        helper.onEachTick(player::aiStep);
-        player.gameMode.destroyBlock(center);
-        var area = new net.minecraft.world.phys.AABB(center).inflate(3);
-        var drops = helper.getLevel().getEntitiesOfClass(ItemEntity.class, area);
-        helper.assertValueEqual(drops.stream().mapToInt(item -> item.getItem().getCount()).sum(), 9, "crusher must drop exactly nine blocks including the center");
-        helper.assertTrue(drops.stream().allMatch(FollowingItems::isFollowing), "every crusher drop must follow the player");
-        double initial = drops.stream().mapToDouble(item -> item.distanceToSqr(player)).sum();
-        helper.runAfterDelay(10, () -> {
-            helper.assertTrue(drops.stream().filter(item -> !item.isRemoved()).mapToDouble(item -> item.distanceToSqr(player)).sum() < initial, "crusher drops must approach the player");
-            player.setPos(player.position().add(2, 0, 0));
-        });
-        helper.runAfterDelay(100, () -> {
-            int count = player.getInventory().countItem(Items.COBBLESTONE);
-            helper.assertValueEqual(count, 9, "following drops must reach the moving player and be picked up without loss: " + drops.stream().filter(item -> !item.isRemoved()).map(item -> item.position() + " following=" + FollowingItems.isFollowing(item) + " age=" + item.tickCount).toList());
-            player.discard();
-            helper.succeed();
-        });
+        crusherDrops(helper, false);
     }
 
     @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 1200, batch = "portbuggametests_releasestarget")
@@ -173,6 +155,7 @@ public final class PortBugGameTests {
         player.discard();
         helper.runAfterDelay(2, () -> {
             helper.assertTrue(!FollowingItems.isFollowing(item) && !item.isNoGravity() && !item.noPhysics, "lost target must restore normal item physics");
+            helper.assertFalse(ToolKeys.FOLLOWING.get(item), "release must synchronize normal physics");
             helper.assertValueEqual(item.getItem().getCount(), 7, "releasing target must preserve the stack");
             item.discard();
             helper.succeed();
@@ -205,5 +188,106 @@ public final class PortBugGameTests {
         var trunk = ModEntities.TRAVELING_TRUNK.get().create(helper.getLevel());
         helper.assertTrue(Math.abs(trunk.getBbWidth() - 0.8F) < 0.0001F && Math.abs(trunk.getBbHeight() - 0.8F) < 0.0001F, "trunk dimensions must match TC4");
         helper.succeed();
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 300, batch = "portbuggametests_crusherfloordrops")
+    public static void crusherFloorDrops(GameTestHelper helper) {
+        crusherDrops(helper, true);
+    }
+
+    private static void crusherDrops(GameTestHelper helper, boolean floor) {
+        var player = player(helper);
+        BlockPos center = helper.absolutePos(new BlockPos(16, 3, 16));
+        player.setPos(center.getX() + 0.5, center.getY() + (floor ? 2 : -1), center.getZ() + 5);
+        player.setNoGravity(true);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.PRIMAL_CRUSHER.get()));
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                helper.getLevel().setBlockAndUpdate(center.offset(x, floor ? 0 : y, floor ? y : 0), Blocks.STONE.defaultBlockState());
+            }
+        }
+        // Force every drop through solid blocks on its way to the player.
+        for (int x = -2; x <= 2; x++) {
+            for (int y = -1; y <= 5; y++) {
+                helper.getLevel().setBlockAndUpdate(center.offset(x, y, 2), Blocks.STONE.defaultBlockState());
+            }
+        }
+        helper.onEachTick(player::aiStep);
+        NeoForge.EVENT_BUS.post(new PlayerInteractEvent.LeftClickBlock(player, center, floor ? Direction.UP : Direction.NORTH, PlayerInteractEvent.LeftClickBlock.Action.START));
+        player.gameMode.destroyBlock(center);
+        var area = new net.minecraft.world.phys.AABB(center).inflate(3);
+        var drops = helper.getLevel().getEntitiesOfClass(ItemEntity.class, area);
+        helper.assertValueEqual(drops.stream().mapToInt(item -> item.getItem().getCount()).sum(), 9, "crusher must drop exactly nine blocks including the center");
+        helper.assertTrue(drops.stream().allMatch(FollowingItems::isFollowing), "every crusher drop must follow the player");
+        helper.assertTrue(drops.stream().allMatch(item -> ToolKeys.FOLLOWING.get(item)), "following physics must be synchronized to clients");
+        double initial = drops.stream().mapToDouble(item -> item.distanceToSqr(player)).sum();
+        helper.runAfterDelay(10, () -> {
+            helper.assertTrue(drops.stream().filter(item -> !item.isRemoved()).mapToDouble(item -> item.distanceToSqr(player)).sum() < initial, "crusher drops must approach the player");
+            helper.assertTrue(drops.stream().allMatch(item -> item.tickCount >= 9 && item.tickCount == item.age), "custom motion must advance commonTick and item age once per tick");
+            player.setPos(player.position().add(2, 0, 0));
+        });
+        helper.runAfterDelay(100, () -> {
+            int count = player.getInventory().countItem(Items.COBBLESTONE);
+            helper.assertValueEqual(count, 9, "following drops must reach the moving player and be picked up without loss: " + drops.stream().filter(item -> !item.isRemoved()).map(item -> item.position() + " following=" + FollowingItems.isFollowing(item) + " age=" + item.tickCount).toList());
+            player.discard();
+            helper.succeed();
+        });
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 100, batch = "portbuggametests_followinglifetime")
+    public static void followingLifetime(GameTestHelper helper) {
+        var player = player(helper);
+        BlockPos pos = helper.absolutePos(new BlockPos(1, 3, 1));
+        player.setPos(Vec3.atCenterOf(pos.offset(6, 0, 0)));
+        var item = new ItemEntity(helper.getLevel(), pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.DIAMOND));
+        item.pickupDelay = 10;
+        item.lifespan = 5;
+        helper.getLevel().addFreshEntity(item);
+        FollowingItems.follow(item, player);
+        helper.runAfterDelay(3, () -> {
+            helper.assertTrue(item.tickCount > 0 && item.tickCount == item.age, "following item skipped or duplicated its common tick");
+            helper.assertValueEqual(item.pickupDelay, 10 - item.age, "following item pickup delay must tick normally");
+        });
+        helper.runAfterDelay(8, () -> {
+            helper.assertTrue(item.isRemoved(), "following item ignored its lifespan");
+            player.discard();
+            helper.succeed();
+        });
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 100, batch = "portbuggametests_followingtrackingsync")
+    public static void followingTrackingSync(GameTestHelper helper) {
+        var target = TestSupport.mockServerPlayer(helper);
+        var observer = TestSupport.mockServerPlayer(helper);
+        var received = new java.util.ArrayList<DataAttachments.SyncPayload>();
+        Connection connection = new Connection(PacketFlow.SERVERBOUND);
+        new EmbeddedChannel(connection);
+        observer.connection = new ServerGamePacketListenerImpl(helper.getLevel().getServer(), connection, observer, CommonListenerCookie.createInitial(observer.getGameProfile(), false)) {
+            @Override
+            public void send(Packet<?> packet) {
+                if (packet instanceof ClientboundCustomPayloadPacket custom && custom.payload() instanceof DataAttachments.SyncPayload payload) {
+                    received.add(payload);
+                }
+            }
+        };
+        BlockPos pos = helper.absolutePos(new BlockPos(1, 3, 1));
+        target.setPos(Vec3.atCenterOf(pos.offset(6, 0, 0)));
+        var item = new ItemEntity(helper.getLevel(), pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.DIAMOND));
+        FollowingItems.follow(item, target);
+        helper.getLevel().addFreshEntity(item);
+        NeoForge.EVENT_BUS.post(new PlayerEvent.StartTracking(observer, item));
+        helper.assertTrue(received.size() == 1 && received.getFirst().key().equals("following_item")
+            && received.getFirst().entityId() == item.getId() && received.getFirst().data()[0] == 1,
+            "new observer did not receive attraction initialized before spawn");
+        target.discard();
+        helper.runAfterDelay(2, () -> {
+            helper.assertFalse(FollowingItems.isFollowing(item), "lost target did not release item");
+            received.clear();
+            NeoForge.EVENT_BUS.post(new PlayerEvent.StartTracking(observer, item));
+            helper.assertTrue(received.size() == 1 && received.getFirst().data()[0] == 0,
+                "late observer did not receive restored normal physics");
+            item.discard();
+            helper.succeed();
+        });
     }
 }

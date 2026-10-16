@@ -28,7 +28,8 @@ public final class OuterLandsData extends SavedData {
         Codec.INT.fieldOf("width").forGetter(MazeState::width),
         Codec.INT.fieldOf("height").forGetter(MazeState::height),
         Codec.list(CELL_CODEC).fieldOf("cells").forGetter(MazeState::cells),
-        Codec.list(CellLoc.CODEC).fieldOf("placed").forGetter(MazeState::placed)
+        Codec.list(CellLoc.CODEC).fieldOf("placed").forGetter(MazeState::placed),
+        Codec.BOOL.optionalFieldOf("generation_started", true).forGetter(MazeState::generationStarted)
     ).apply(instance, MazeState::new));
     public static final Codec<OuterLandsData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.unboundedMap(Codec.STRING, MAZE_CODEC).fieldOf("mazes").forGetter(data -> data.mazes),
@@ -97,7 +98,11 @@ public final class OuterLandsData extends SavedData {
     public record CellData(CellLoc location, short value) {
     }
 
-    public record MazeState(long seed, int originX, int originZ, int width, int height, List<CellData> cells, List<CellLoc> placed) {
+    public record MazeState(long seed, int originX, int originZ, int width, int height, List<CellData> cells, List<CellLoc> placed, boolean generationStarted) {
+        public MazeState(long seed, int originX, int originZ, int width, int height, List<CellData> cells, List<CellLoc> placed) {
+            this(seed, originX, originZ, width, height, cells, placed, true);
+        }
+
         public MazeState {
             cells = new ArrayList<>(cells);
             placed = new ArrayList<>(placed);
@@ -106,7 +111,11 @@ public final class OuterLandsData extends SavedData {
         public MazeState withPlaced(CellLoc loc) {
             Set<CellLoc> updated = new HashSet<>(placed);
             updated.add(loc);
-            return new MazeState(seed, originX, originZ, width, height, cells, new ArrayList<>(updated));
+            return new MazeState(seed, originX, originZ, width, height, cells, new ArrayList<>(updated), generationStarted);
+        }
+
+        public MazeState withGenerationStarted() {
+            return new MazeState(seed, originX, originZ, width, height, cells, placed, true);
         }
     }
 }

@@ -1,5 +1,12 @@
 package thaumcraft.test;
 
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import thaumcraft.item.armor.ArmorEvents;
+import thaumcraft.registry.ModEnchantments;
+
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.List;
 import java.util.function.Consumer;
@@ -124,4 +131,44 @@ public final class ArmorGameTests {
         helper.succeed();
     }
 
+
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void travellerElytra(GameTestHelper helper) {
+        ServerPlayer player = mockServerPlayer(helper);
+        ArmorEvents.setMovingForward(player, true);
+        player.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.ELYTRA));
+        player.setItemSlot(EquipmentSlot.FEET, new ItemStack(ModItems.BOOTS_TRAVELLER.get()));
+        var step = player.getAttribute(Attributes.STEP_HEIGHT);
+        double originalStep = step.getValue();
+        player.setOnGround(true);
+        player.setDeltaMovement(Vec3.ZERO);
+        ArmorEvents.onPlayerTick(new PlayerTickEvent.Pre(player));
+        helper.assertTrue(player.getDeltaMovement().horizontalDistance() > 0.05, "boots must still accelerate walking");
+        helper.assertTrue(step.getValue() > originalStep, "boots must still increase step height");
+        ArmorEvents.onJump(new LivingEvent.LivingJumpEvent(player));
+        helper.assertTrue(player.getDeltaMovement().y > 0.27, "boots must still boost jumping");
+        player.setOnGround(false);
+        player.startFallFlying();
+        Vec3 gliding = new Vec3(0.4, -0.05, 0.8);
+        for (var boots : List.of(Items.LEATHER_BOOTS, ModItems.BOOTS_TRAVELLER.get())) {
+            for (int haste : new int[]{0, 3}) {
+                ItemStack stack = new ItemStack(boots);
+                if (haste > 0) {
+                    stack.enchant(helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(ModEnchantments.HASTE), haste);
+                }
+                player.setItemSlot(EquipmentSlot.FEET, stack);
+                player.setDeltaMovement(gliding);
+                for (int tick = 0; tick < 80; tick++) {
+                    ArmorEvents.onPlayerTick(new PlayerTickEvent.Pre(player));
+                }
+                helper.assertTrue(player.getDeltaMovement().equals(gliding), "boots/haste added elytra thrust: " + boots + " haste=" + haste);
+                helper.assertTrue(Math.abs(step.getValue() - originalStep) < 1.0E-6, "gliding must remove the step modifier");
+            }
+        }
+        player.stopFallFlying();
+        player.fallDistance = 3;
+        ArmorEvents.onPlayerTick(new PlayerTickEvent.Pre(player));
+        helper.assertTrue(player.fallDistance < 3, "boots must still reduce fall distance");
+        helper.succeed();
+    }
 }

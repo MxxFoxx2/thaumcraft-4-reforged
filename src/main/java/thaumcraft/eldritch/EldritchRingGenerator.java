@@ -20,6 +20,9 @@ public final class EldritchRingGenerator {
     }
 
     public static boolean generate(WorldGenLevel level, Random random, int chunkX, int chunkZ, int x, int y, int z) {
+        // The decoration origin can be in a different chunk from the actual altar.
+        chunkX = x >> 4;
+        chunkZ = z >> 4;
         int width = 11 + random.nextInt(6) * 2;
         int height = 11 + random.nextInt(6) * 2;
         if (!validSpawn(level, x - 3, y, z - 3)

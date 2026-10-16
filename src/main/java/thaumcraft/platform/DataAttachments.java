@@ -51,19 +51,37 @@ public final class DataAttachments {
     }
 
     static <T> void sendSync(DataKey<T> key, Entity holder, boolean toTracking) {
-        StreamCodec<? super RegistryFriendlyByteBuf, T> codec = key.syncCodec();
-        if (codec == null) {
+        SyncPayload payload = encodeSync(key, holder);
+        if (payload == null) {
             return;
         }
-        RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), holder.registryAccess());
-        codec.encode(buffer, key.current(holder));
-        byte[] data = new byte[buffer.readableBytes()];
-        buffer.readBytes(data);
-        SyncPayload payload = new SyncPayload(key.name(), holder.getId(), data);
         if (toTracking) {
             ModNetwork.sendToTrackingAndSelf(holder, payload);
         } else if (holder instanceof ServerPlayer player) {
             ModNetwork.sendToPlayer(player, payload);
+        }
+    }
+
+    static <T> void sendSync(DataKey<T> key, Entity holder, ServerPlayer player) {
+        SyncPayload payload = encodeSync(key, holder);
+        if (payload != null) {
+            ModNetwork.sendToPlayer(player, payload);
+        }
+    }
+
+    private static <T> SyncPayload encodeSync(DataKey<T> key, Entity holder) {
+        StreamCodec<? super RegistryFriendlyByteBuf, T> codec = key.syncCodec();
+        if (codec == null) {
+            return null;
+        }
+        RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), holder.registryAccess());
+        try {
+            codec.encode(buffer, key.current(holder));
+            byte[] data = new byte[buffer.readableBytes()];
+            buffer.readBytes(data);
+            return new SyncPayload(key.name(), holder.getId(), data);
+        } finally {
+            buffer.release();
         }
     }
 
@@ -85,6 +103,18 @@ public final class DataAttachments {
     private static void syncAll(Entity holder) {
         for (DataKey<?> key : DataKey.KEYS.values()) {
             key.sync(holder);
+        }
+    }
+
+    @SubscribeEvent
+    static void onStartTracking(PlayerEvent.StartTracking event) {
+        // Item drops can receive their attachments before they are spawned. Send
+        // their current state after the spawn packet, also for late observers.
+        Entity target = event.getTarget();
+        if (event.getEntity() instanceof ServerPlayer player) {
+            for (DataKey<?> key : DataKey.KEYS.values()) {
+                key.syncToTracker(target, player);
+            }
         }
     }
 

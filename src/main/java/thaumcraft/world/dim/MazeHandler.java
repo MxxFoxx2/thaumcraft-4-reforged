@@ -49,12 +49,26 @@ public final class MazeHandler {
     }
 
     public static boolean ensureMaze(ServerLevel level, int originChunkX, int originChunkZ, int width, int height, long requestedSeed) {
+        return requestMaze(level, originChunkX, originChunkZ, width, height, requestedSeed, true);
+    }
+
+    private static boolean requestMaze(ServerLevel level, int originChunkX, int originChunkZ, int width, int height, long requestedSeed, boolean startGeneration) {
         synchronized (NATURAL_RING_LOCK) {
             OuterLandsData data = data(level);
             String id = mazeId(originChunkX, originChunkZ);
             OuterLandsData.MazeState state = data.maze(id);
             if (state == null) {
-                OuterLandsData.MazeState requestedMaze = createMaze(originChunkX, originChunkZ, width, height, requestedSeed);
+                // An eye can be inserted before the next tick drains the worldgen queue.
+                MazeRequest reservation = REQUESTS.stream()
+                    .filter(request -> request.server() == level.getServer() && request.worldSeed() == level.getSeed()
+                        && request.originChunkX() == originChunkX && request.originChunkZ() == originChunkZ)
+                    .findFirst().orElse(null);
+                if (reservation != null) {
+                    width = reservation.width();
+                    height = reservation.height();
+                    requestedSeed = reservation.seed();
+                }
+                OuterLandsData.MazeState requestedMaze = createMaze(originChunkX, originChunkZ, width, height, requestedSeed, startGeneration);
                 OuterLandsData.MazeState overlap = data.mazes().values().stream()
                     .filter(existing -> Math.abs(existing.originX() - originChunkX) <= (existing.width() + requestedMaze.width()) / 2
                         && Math.abs(existing.originZ() - originChunkZ) <= (existing.height() + requestedMaze.height()) / 2)
@@ -76,6 +90,10 @@ public final class MazeHandler {
                     data.putAlias(id, overlapId);
                     state = overlap;
                 }
+            }
+            if (startGeneration && !state.generationStarted()) {
+                state = state.withGenerationStarted();
+                data.updateMaze(id, state);
             }
             publishSnapshot(level);
             return isReady(state);
@@ -323,7 +341,7 @@ public final class MazeHandler {
         return chunkX + "," + chunkZ;
     }
 
-    private static OuterLandsData.MazeState createMaze(int originChunkX, int originChunkZ, int requestedWidth, int requestedHeight, long requestedSeed) {
+    private static OuterLandsData.MazeState createMaze(int originChunkX, int originChunkZ, int requestedWidth, int requestedHeight, long requestedSeed, boolean startGeneration) {
         long seed = requestedSeed;
         Random random = new Random(seed);
         int width = requestedWidth > 0 ? requestedWidth : 15 + random.nextInt(8) * 2;
@@ -345,11 +363,11 @@ public final class MazeHandler {
         }
         cells.sort(Comparator.comparing((OuterLandsData.CellData cell) -> cell.location().z())
             .thenComparing(cell -> cell.location().x()));
-        return new OuterLandsData.MazeState(seed, originChunkX, originChunkZ, width, height, cells, List.of());
+        return new OuterLandsData.MazeState(seed, originChunkX, originChunkZ, width, height, cells, List.of(), startGeneration);
     }
 
     private static boolean isReady(OuterLandsData.MazeState maze) {
-        return maze.placed().size() >= maze.cells().size();
+        return maze.generationStarted() && maze.placed().size() >= maze.cells().size();
     }
 
     public static boolean reserveNaturalRing(MinecraftServer server, long worldSeed, int originChunkX, int originChunkZ, int width, int height, long seed) {
@@ -358,7 +376,7 @@ public final class MazeHandler {
             if (naturalRingOverlaps(key, originChunkX, originChunkZ, width, height)) {
                 return false;
             }
-            OuterLandsData.MazeState maze = createMaze(originChunkX, originChunkZ, width, height, seed);
+            OuterLandsData.MazeState maze = createMaze(originChunkX, originChunkZ, width, height, seed, false);
             MazeRequest request = new MazeRequest(server, worldSeed, originChunkX, originChunkZ, width, height, seed,
                 maze.cells().stream().map(OuterLandsData.CellData::location).collect(java.util.stream.Collectors.toUnmodifiableSet()));
             REQUESTS.add(request);
@@ -427,7 +445,7 @@ public final class MazeHandler {
             for (ServerLevel candidate : event.getServer().getAllLevels()) {
                 if (candidate.dimension().equals(OuterLands.OUTER_LANDS) && candidate.getSeed() == request.worldSeed()) {
                     synchronized (NATURAL_RING_LOCK) {
-                        ensureMaze(candidate, request.originChunkX(), request.originChunkZ(), request.width(), request.height(), request.seed());
+                        requestMaze(candidate, request.originChunkX(), request.originChunkZ(), request.width(), request.height(), request.seed(), false);
                         REQUESTS.remove(request);
                     }
                     break;
@@ -444,6 +462,9 @@ public final class MazeHandler {
             }
             for (Map.Entry<String, OuterLandsData.MazeState> entry : data.mazes().entrySet()) {
                 OuterLandsData.MazeState maze = entry.getValue();
+                if (!maze.generationStarted()) {
+                    continue;
+                }
                 Set<CellLoc> completed = new HashSet<>(maze.placed());
                 OuterLandsData.CellData pending = maze.cells().stream()
                     .filter(cell -> !completed.contains(cell.location()))

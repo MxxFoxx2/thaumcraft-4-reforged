@@ -69,7 +69,7 @@ public final class ArmorEvents {
     private static void tickBoots(Player player) {
         ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
         boolean traveller = boots.is(ModItems.BOOTS_TRAVELLER.get());
-        boolean flying = player.getAbilities().flying;
+        boolean flying = player.getAbilities().flying || player.isFallFlying();
         boolean forward = movingForward(player);
         AttributeInstance step = player.getAttribute(Attributes.STEP_HEIGHT);
         if (step != null) {
@@ -78,7 +78,7 @@ public final class ArmorEvents {
                 if (!active) {
                     step.addTransientModifier(TRAVELLER_STEP);
                 }
-            } else if (active && (!traveller || player.isShiftKeyDown())) {
+            } else if (active && (!traveller || flying || player.isShiftKeyDown())) {
                 step.removeModifier(TRAVELLER_STEP.id());
             }
         }

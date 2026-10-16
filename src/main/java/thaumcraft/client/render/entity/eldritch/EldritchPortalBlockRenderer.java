@@ -12,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
+import thaumcraft.client.geom.EldritchSurfaceGeometry;
 import thaumcraft.client.platform.EntityQuadSink;
 import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.eldritch.EldritchPortalBlockEntity;
@@ -50,18 +51,12 @@ public final class EldritchPortalBlockRenderer implements StateBlockRenderer<Eld
             return;
         }
         int frame = (int) (System.nanoTime() / 50_000_000L) & 15;
-        float u0 = frame / 16.0F;
-        float u1 = u0 + 1.0F / 16.0F;
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
-        poseStack.mulPose(camera.orientation);
         collector.submitCustomGeometry(poseStack, TcRenderTypes.translucent(TEXTURE), (pose, buffer) -> {
             EntityQuadSink sink = new EntityQuadSink(pose, buffer);
             int color = FastColor.ARGB32.color(255, 255, 255, 255);
-            sink.vertex(-width, -height, 0.0F, u0, 1.0F, color, 0xF000F0);
-            sink.vertex(width, -height, 0.0F, u1, 1.0F, color, 0xF000F0);
-            sink.vertex(width, height, 0.0F, u1, 0.0F, color, 0xF000F0);
-            sink.vertex(-width, height, 0.0F, u0, 0.0F, color, 0xF000F0);
+            EldritchSurfaceGeometry.portal(sink, width, height, frame, color, 0xF000F0);
         });
         poseStack.popPose();
     }

@@ -33,6 +33,19 @@ public final class EldritchSurfaceGeometryTest {
         }
         if (vertices != 40) throw new AssertionError("Two adjacent cubes must emit ten exterior faces");
         if (EldritchSurfaceGeometry.exposed(false, true)) throw new AssertionError("Solid neighbor must hide a face");
+        for (int frame = 0; frame < 16; frame++) {
+            final float u0 = frame / 16.0F;
+            final float u1 = u0 + 1.0F / 16.0F;
+            final int[] count = {0};
+            EldritchSurfaceGeometry.portal((x, y, z, u, v, color, light) -> {
+                if (y != 0 || Math.abs(x) != 0.75F || Math.abs(z) != 0.25F) {
+                    throw new AssertionError("Portal must lie in XZ with the requested opening size");
+                }
+                if ((u != u0 && u != u1) || (v != 0 && v != 1)) throw new AssertionError("Portal frame UV");
+                count[0]++;
+            }, 0.75F, 0.25F, frame, -1, 0xF000F0);
+            if (count[0] != 4) throw new AssertionError("Portal must emit one quad");
+        }
         System.out.println("Eldritch geometry passed: ten exterior faces, no internal face, finite UVs.");
     }
 }

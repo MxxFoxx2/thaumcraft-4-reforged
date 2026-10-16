@@ -20,6 +20,8 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
@@ -37,6 +39,7 @@ import thaumcraft.node.NodeBlockEntity;
 import thaumcraft.node.NodeGenerator;
 import thaumcraft.node.NodeType;
 import thaumcraft.registry.ModBlocks;
+import thaumcraft.registry.ModItems;
 import thaumcraft.network.PlayerCompletePayload;
 import thaumcraft.network.ScanPayload;
 import thaumcraft.research.Knowledge;
@@ -188,6 +191,31 @@ public final class ThaumcraftGameTests {
         helper.assertTrue(floor != null && floor.aspects() != null, "server must accept the underwater block");
         helper.getLevel().setBlockAndUpdate(waterPos, Blocks.OAK_SLAB.defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, true));
         helper.assertTrue(!ScanManager.resolveBlock(helper.getLevel(), waterPos).key().equals(water.key()), "waterlogged blocks must keep their own scan");
+        helper.succeed();
+    }
+
+    @GameTest(template = "test/platform", timeoutTicks = 200)
+    public static void scanContinuousUse(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setPos(helper.absoluteVec(new net.minecraft.world.phys.Vec3(2.5, 4, 2.5)));
+        player.setNoGravity(true);
+        for (InteractionHand hand : InteractionHand.values()) {
+            ItemStack stack = new ItemStack(ModItems.THAUMOMETER.get());
+            player.setItemInHand(hand, stack);
+            InteractionResult result = stack.getItem().use(helper.getLevel(), player, hand).getResult();
+            helper.assertTrue(result.consumesAction() && !result.shouldSwing(), "scanning must start without a hand swing");
+            for (int tick = 0; tick < 60; tick++) {
+                player.tick();
+            }
+            helper.assertTrue(player.isUsingItem() && player.getUsedItemHand() == hand, "holding the scanner must not end and restart every 25 ticks");
+            helper.assertValueEqual(player.getTicksUsingItem(), 60, "held scanner use must advance continuously");
+            player.releaseUsingItem();
+            helper.assertFalse(player.isUsingItem(), "releasing the scanner must end use");
+            stack.getItem().use(helper.getLevel(), player, hand);
+            player.setItemInHand(hand, ItemStack.EMPTY);
+            player.tick();
+            helper.assertFalse(player.isUsingItem(), "changing the held item must end scanner use");
+        }
         helper.succeed();
     }
 

@@ -23,14 +23,14 @@ public final class ThaumometerItemRenderer {
     }
 
     private static void transform(PoseStack poseStack, LegacyItemView view) {
+        if (view == LegacyItemView.EQUIPPED) {
+            poseStack.translate(0.5F, 0.5F, 0.2F);
+            poseStack.scale(0.25F, 0.25F, 0.25F);
+            return;
+        }
         view.apply(poseStack);
         poseStack.scale(0.5F, 0.5F, 0.5F);
         switch (view) {
-            case EQUIPPED -> {
-                poseStack.translate(1.6F, 0.3F, 2.0F);
-                poseStack.mulPose(Axis.XN.rotationDegrees(90.0F));
-                poseStack.mulPose(Axis.ZN.rotationDegrees(30.0F));
-            }
             case INVENTORY -> {
                 poseStack.mulPose(Axis.XP.rotationDegrees(60.0F));
                 poseStack.mulPose(Axis.ZN.rotationDegrees(30.0F));

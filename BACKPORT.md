@@ -23,6 +23,10 @@
 
 In the main checkout (gitignored): `reference/1.21.1/mc` (net/minecraft, com/mojang) and `reference/1.21.1/neo` (net/neoforged). The Thaumcraft 3 port of the same classes lives in `~/projects/thaumcraft-reforged-1.21.1` (branch `mc/1.21.1` of TC3 Reforged): a class that exists there is taken from there.
 
+## Thaumometer fixes
+
+Fixes from `6651f14`: localized names for itemless fluid targets, continuous held scanning and a centered third-person hand pose. The lifecycle uses NeoForge's shared `onStopUsing` hook; the regression test uses 1.21.1 interaction results and GameTest annotations. This targeted backport does not advance the global synchronization SHA.
+
 ## Branch-only differences (TC4)
 
 - Baubles: `platform/Baubles` is backed by Curios (`amulet`, `ring` x2, `belt` slots). The own slot implementation of `main` (`platform/baubles/*`, `client/platform/baubles/*`) does not exist on this branch

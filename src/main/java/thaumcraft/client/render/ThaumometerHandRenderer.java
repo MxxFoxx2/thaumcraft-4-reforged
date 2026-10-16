@@ -137,6 +137,8 @@ public final class ThaumometerHandRenderer {
         } else if (target.kind() == ScanKind.OBJECT) {
             if (!target.clueStack().isEmpty()) {
                 text = target.clueStack().getHoverName();
+            } else if (hit.kind() == ScanManager.KIND_BLOCK) {
+                text = level.getBlockState(hit.pos()).getBlock().getName();
             }
             if (scanned) {
                 aspects = target.aspects();

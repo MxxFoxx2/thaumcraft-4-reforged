@@ -23,8 +23,7 @@ import thaumcraft.research.ScanKind;
 import thaumcraft.research.ScanManager;
 
 public final class ThaumometerClient implements ScanClientHooks.Scanner {
-    private static final int DURATION = 25;
-    private static final int COMPLETE_AT = 5;
+    private static final int SCAN_TICKS = 20;
 
     public record Hit(int kind, BlockPos pos, int entityId, ScanManager.Target target) {
         boolean sameAs(@Nullable Hit other) {
@@ -33,6 +32,8 @@ public final class ThaumometerClient implements ScanClientHooks.Scanner {
     }
 
     private @Nullable Hit startScan;
+    private int scanTicks;
+    private boolean attempted;
 
     public static void register() {
         ScanClientHooks.setScanner(new ThaumometerClient());
@@ -46,37 +47,43 @@ public final class ThaumometerClient implements ScanClientHooks.Scanner {
         }
         Player player = (Player) entity;
         Hit scan = doScan(level, player);
-        if (ticksRemaining >= DURATION - 1 && startScan == null) {
+        if (scan == null || !scan.sameAs(startScan)) {
             startScan = scan;
+            scanTicks = 0;
+            attempted = false;
         }
-        if (scan != null && scan.sameAs(startScan)) {
-            if (ticksRemaining <= COMPLETE_AT) {
-                startScan = null;
-                player.stopUsingItem();
-                if (ScanManager.validScan(scan.target().aspects(), player)) {
-                    ClientNetwork.sendToServer(new ScanPayload(scan.kind(), scan.pos(), scan.entityId()));
-                }
+        if (scan == null || attempted) {
+            return;
+        }
+        scanTicks++;
+        if (scanTicks % 2 == 0) {
+            level.playLocalSound(
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                ModSounds.CAMERATICKS.get(),
+                SoundSource.PLAYERS,
+                0.2F,
+                0.45F + level.getRandom().nextFloat() * 0.1F,
+                false
+            );
+        }
+        if (scanTicks >= SCAN_TICKS) {
+            attempted = true;
+            if (ScanManager.validScan(scan.target().aspects(), player)) {
+                ClientNetwork.sendToServer(new ScanPayload(scan.kind(), scan.pos(), scan.entityId()));
             }
-            if (ticksRemaining % 2 == 0) {
-                level.playLocalSound(
-                    player.getX(),
-                    player.getY(),
-                    player.getZ(),
-                    ModSounds.CAMERATICKS.get(),
-                    SoundSource.PLAYERS,
-                    0.2F,
-                    0.45F + level.getRandom().nextFloat() * 0.1F,
-                    false
-                );
-            }
-        } else {
-            startScan = null;
         }
     }
 
     @Override
     public void stopUsing(LivingEntity entity) {
+        if (entity != Minecraft.getInstance().player) {
+            return;
+        }
         startScan = null;
+        scanTicks = 0;
+        attempted = false;
     }
 
     private @Nullable Hit doScan(Level level, Player player) {

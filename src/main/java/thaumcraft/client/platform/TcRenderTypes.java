@@ -4,12 +4,29 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalDouble;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
 public final class TcRenderTypes extends RenderType {
     private static final ShaderStateShard PARTICLE_SHADER = new ShaderStateShard(GameRenderer::getParticleShader);
+    private static final RenderType BLOCK_HIGHLIGHT = RenderType.create(
+        "thaumcraft_block_highlight",
+        DefaultVertexFormat.POSITION_COLOR_NORMAL,
+        VertexFormat.Mode.LINES,
+        1536,
+        RenderType.CompositeState.builder()
+            .setShaderState(RENDERTYPE_LINES_SHADER)
+            .setLineState(new LineStateShard(OptionalDouble.empty()))
+            .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+            .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+            .setOutputState(ITEM_ENTITY_TARGET)
+            .setDepthTestState(LEQUAL_DEPTH_TEST)
+            .setWriteMaskState(COLOR_WRITE)
+            .setCullState(NO_CULL)
+            .createCompositeState(false)
+    );
     private static final Map<ResourceLocation, RenderType> ELDRITCH = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> ADDITIVE = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> TRANSLUCENT = new HashMap<>();
@@ -131,5 +148,9 @@ public final class TcRenderTypes extends RenderType {
 
     public static RenderType outline(ResourceLocation texture) {
         return RenderType.outline(texture);
+    }
+
+    public static RenderType blockHighlight() {
+        return BLOCK_HIGHLIGHT;
     }
 }

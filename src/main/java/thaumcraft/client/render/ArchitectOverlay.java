@@ -34,24 +34,7 @@ import thaumcraft.wand.focus.FocusItem;
 public final class ArchitectOverlay {
     private static final ResourceLocation ARROWS = Thaumcraft.id("textures/misc/architect_arrows.png");
     private static final int LIGHT = 200;
-    public static final int[] CONNECTED = {
-        0, 0, 6, 6, 0, 0, 6, 6, 3, 3, 19, 15, 3, 3, 19, 15,
-        1, 1, 18, 18, 1, 1, 13, 13, 2, 2, 23, 31, 2, 2, 27, 14,
-        0, 0, 6, 6, 0, 0, 6, 6, 3, 3, 19, 15, 3, 3, 19, 15,
-        1, 1, 18, 18, 1, 1, 13, 13, 2, 2, 23, 31, 2, 2, 27, 14,
-        4, 4, 5, 5, 4, 4, 5, 5, 17, 17, 22, 26, 17, 17, 22, 26,
-        16, 16, 20, 20, 16, 16, 28, 28, 21, 21, 46, 42, 21, 21, 43, 38,
-        4, 4, 5, 5, 4, 4, 5, 5, 9, 9, 30, 12, 9, 9, 30, 12,
-        16, 16, 20, 20, 16, 16, 28, 28, 25, 25, 45, 37, 25, 25, 40, 32,
-        0, 0, 6, 6, 0, 0, 6, 6, 3, 3, 19, 15, 3, 3, 19, 15,
-        1, 1, 18, 18, 1, 1, 13, 13, 2, 2, 23, 31, 2, 2, 27, 14,
-        0, 0, 6, 6, 0, 0, 6, 6, 3, 3, 19, 15, 3, 3, 19, 15,
-        1, 1, 18, 18, 1, 1, 13, 13, 2, 2, 23, 31, 2, 2, 27, 14,
-        4, 4, 5, 5, 4, 4, 5, 5, 17, 17, 22, 26, 17, 17, 22, 26,
-        7, 7, 24, 24, 7, 7, 10, 10, 29, 29, 44, 41, 29, 29, 39, 33,
-        4, 4, 5, 5, 4, 4, 5, 5, 9, 9, 30, 12, 9, 9, 30, 12,
-        7, 7, 24, 24, 7, 7, 10, 10, 8, 8, 36, 35, 8, 8, 34, 11
-    };
+    public static final int[] CONNECTED = thaumcraft.client.geom.ConnectedTextureGeometry.CONNECTED;
     private static int lastHash;
     private static List<BlockPos> blocks = List.of();
 
@@ -146,42 +129,9 @@ public final class ArchitectOverlay {
     }
 
     private static TextureAtlasSprite icon(TextureAtlas atlas, Frame current, int x, int y, int z, int side) {
-        boolean[] bits = new boolean[8];
-        if (side == 0 || side == 1) {
-            bits[0] = connected(current, x - 1, y, z - 1);
-            bits[1] = connected(current, x, y, z - 1);
-            bits[2] = connected(current, x + 1, y, z - 1);
-            bits[3] = connected(current, x - 1, y, z);
-            bits[4] = connected(current, x + 1, y, z);
-            bits[5] = connected(current, x - 1, y, z + 1);
-            bits[6] = connected(current, x, y, z + 1);
-            bits[7] = connected(current, x + 1, y, z + 1);
-        } else if (side == 2 || side == 3) {
-            bits[0] = connected(current, x + (side == 2 ? 1 : -1), y + 1, z);
-            bits[1] = connected(current, x, y + 1, z);
-            bits[2] = connected(current, x + (side == 3 ? 1 : -1), y + 1, z);
-            bits[3] = connected(current, x + (side == 2 ? 1 : -1), y, z);
-            bits[4] = connected(current, x + (side == 3 ? 1 : -1), y, z);
-            bits[5] = connected(current, x + (side == 2 ? 1 : -1), y - 1, z);
-            bits[6] = connected(current, x, y - 1, z);
-            bits[7] = connected(current, x + (side == 3 ? 1 : -1), y - 1, z);
-        } else {
-            bits[0] = connected(current, x, y + 1, z + (side == 5 ? 1 : -1));
-            bits[1] = connected(current, x, y + 1, z);
-            bits[2] = connected(current, x, y + 1, z + (side == 4 ? 1 : -1));
-            bits[3] = connected(current, x, y, z + (side == 5 ? 1 : -1));
-            bits[4] = connected(current, x, y, z + (side == 4 ? 1 : -1));
-            bits[5] = connected(current, x, y - 1, z + (side == 5 ? 1 : -1));
-            bits[6] = connected(current, x, y - 1, z);
-            bits[7] = connected(current, x, y - 1, z + (side == 4 ? 1 : -1));
-        }
-        int id = 0;
-        for (int index = 0; index < 8; index++) {
-            if (bits[index]) {
-                id |= 1 << index;
-            }
-        }
-        return atlas.getSprite(Thaumcraft.id("block/warded_glass_" + (CONNECTED[id] + 1)));
+        int texture = thaumcraft.client.geom.ConnectedTextureGeometry.texture(side,
+            (dx, dy, dz) -> connected(current, x + dx, y + dy, z + dz));
+        return atlas.getSprite(Thaumcraft.id("block/warded_glass_" + texture));
     }
 
     private static void overlayBlock(QuadSink sink, TextureAtlas atlas, Frame current, BlockPos pos, Vec3 camera) {

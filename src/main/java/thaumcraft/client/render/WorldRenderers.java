@@ -15,6 +15,8 @@ public final class WorldRenderers {
     @SubscribeEvent
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.NODE.get(), AuraNodeBlockRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.HOLE.get(), FocusBlockRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.WARDED.get(), FocusBlockRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ENERGIZED_NODE.get(), EnergizedNodeRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.NODE_JAR.get(), JarNodeRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.NODE_STABILIZER.get(), NodeStabilizerRenderer::new);

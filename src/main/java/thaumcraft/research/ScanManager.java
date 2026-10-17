@@ -15,6 +15,9 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -86,6 +89,9 @@ public final class ScanManager {
         if (state.isAir()) {
             return null;
         }
+        if (state.is(Blocks.FIRE)) {
+            return new Target(ScanKind.OBJECT, "minecraft:fire", new AspectList().add(Aspect.FIRE, 4), ItemStack.EMPTY, null);
+        }
         if (state.is(Blocks.WATER)) {
             return new Target(ScanKind.OBJECT, "minecraft:water", new AspectList().add(Aspect.WATER, 4), ItemStack.EMPTY, null);
         }
@@ -102,11 +108,11 @@ public final class ScanManager {
     public static BlockHitResult pickBlock(Level level, Player player) {
         Vec3 eye = player.getEyePosition();
         Vec3 end = eye.add(player.getLookAngle().scale(player.blockInteractionRange()));
-        BlockHitResult solid = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+        BlockHitResult solid = clipBlock(level, player, eye, end, ClipContext.Fluid.NONE);
         if (!level.getFluidState(BlockPos.containing(eye)).isEmpty()) {
             return solid;
         }
-        BlockHitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.SOURCE_ONLY, player));
+        BlockHitResult hit = clipBlock(level, player, eye, end, ClipContext.Fluid.SOURCE_ONLY);
         if (hit.getType() == HitResult.Type.BLOCK && !hit.getBlockPos().equals(solid.getBlockPos())) {
             Target target = resolveBlock(level, hit.getBlockPos());
             if (target != null && hasBeenScanned(player, target) && solid.getType() == HitResult.Type.BLOCK) {
@@ -114,6 +120,15 @@ public final class ScanManager {
             }
         }
         return hit;
+    }
+
+    private static BlockHitResult clipBlock(Level level, Player player, Vec3 eye, Vec3 end, ClipContext.Fluid fluids) {
+        return level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, fluids, player) {
+            @Override
+            public VoxelShape getBlockShape(BlockState state, BlockGetter view, BlockPos pos) {
+                return state.is(Blocks.FIRE) ? Shapes.block() : super.getBlockShape(state, view, pos);
+            }
+        });
     }
 
     public static @Nullable Target resolveStack(ItemStack stack) {

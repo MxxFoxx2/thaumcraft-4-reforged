@@ -239,6 +239,7 @@ public class FocalManipulatorScreen extends AbstractContainerScreen<FocalManipul
                 upgradeTooltip(graphics, upgrades.get(index), fixedX, fixedY, wrap);
             }
         }
+        renderTooltip(graphics, mouseX, mouseY);
     }
 
     private void upgradeTooltip(GuiGraphics graphics, FocusUpgradeType type, int x, int y, int wrap) {

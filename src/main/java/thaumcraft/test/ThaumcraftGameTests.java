@@ -170,6 +170,35 @@ public final class ThaumcraftGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "test/platform", timeoutTicks = 200, batch = "scan_fire_targets")
+    public static void scanFireTargets(GameTestHelper helper) {
+        var level = helper.getLevel();
+        ServerPlayer player = mockServerPlayer(helper);
+        BlockPos pos = helper.absolutePos(new BlockPos(3, 2, 3));
+        level.setBlockAndUpdate(pos.below(), Blocks.NETHERRACK.defaultBlockState());
+        level.setBlockAndUpdate(pos, Blocks.FIRE.defaultBlockState());
+        level.setBlockAndUpdate(pos.south(), Blocks.STONE.defaultBlockState());
+        player.moveTo(pos.getX() + 0.5, pos.getY() + 0.5 - player.getEyeHeight(), pos.getZ() - 1.5, 0.0F, 0.0F);
+        var hit = ScanManager.pickBlock(level, player);
+        helper.assertTrue(hit.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(pos), "scanner must target the flame rather than the block behind it");
+        var target = ScanManager.resolveChecked(player, new ScanPayload(ScanManager.KIND_BLOCK, pos, 0));
+        helper.assertTrue(target != null && target.key().equals("minecraft:fire") && target.clueStack().isEmpty(), "itemless fire must be a scan target");
+        helper.assertValueEqual(target.aspects().getAmount(Aspect.FIRE), 4, "original fire aspect amount");
+        int pool = Knowledge.get(player).getAspectPool(Aspect.FIRE);
+        helper.assertTrue(ScanManager.completeScan(player, target), "fire scan did not complete");
+        helper.assertValueEqual(Knowledge.get(player).getAspectPool(Aspect.FIRE), pool + 4, "fire scan award");
+        level.setBlockAndUpdate(pos, Blocks.FIRE.defaultBlockState().setValue(net.minecraft.world.level.block.FireBlock.AGE, 8));
+        helper.assertTrue(ScanManager.hasBeenScanned(player, ScanManager.resolveBlock(level, pos)), "fire age changed the scan identity");
+        ScanManager.handleScan(new ScanPayload(ScanManager.KIND_BLOCK, pos, 0), player);
+        helper.assertValueEqual(Knowledge.get(player).getAspectPool(Aspect.FIRE), pool + 4, "repeated fire scan awarded aspects");
+        level.setBlockAndUpdate(pos.north(), Blocks.STONE.defaultBlockState());
+        hit = ScanManager.pickBlock(level, player);
+        helper.assertTrue(hit.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(pos.north()), "fire targeting must respect solid obstructions");
+        player.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() - 10.0);
+        helper.assertTrue(ScanManager.resolveChecked(player, new ScanPayload(ScanManager.KIND_BLOCK, pos, 0)) == null, "server accepted fire outside scan range");
+        helper.succeed();
+    }
+
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void scanBlocksThroughWater(GameTestHelper helper) {
         ServerPlayer player = mockServerPlayer(helper);

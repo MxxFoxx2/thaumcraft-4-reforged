@@ -48,6 +48,7 @@ public final class Transfer {
 
         public void setFluid(FluidStack stack) {
             handler.setFluid(stack);
+            handler.onContentsChanged();
         }
 
         public int getAmount() {

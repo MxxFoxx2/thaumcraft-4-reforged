@@ -331,7 +331,7 @@ public final class GolemGameTests {
         helper.assertTrue(loaded.getStay(), "trunk stay save");
         helper.succeed();
     }
-    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_jarlighting")
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_jarlighting", skyAccess = true)
     public static void jarLighting(GameTestHelper helper) {
         var level = helper.getLevel();
         var jars = List.of(ModBlocks.WARDED_JAR.get(), ModBlocks.VOID_JAR.get(), ModBlocks.BRAIN_JAR.get(), ModBlocks.NODE_JAR.get());
@@ -340,7 +340,6 @@ public final class GolemGameTests {
             var block = jars.get(index).defaultBlockState();
             helper.assertTrue(block.getShadeBrightness(level, base) == 1.0F, "glass jar darkens ambient lighting");
             helper.assertTrue(block.getLightBlock(level, base) == 0 && block.propagatesSkylightDown(level, base), "jar blocks skylight");
-            for (int y = 6; y < 12; y++) level.setBlockAndUpdate(base.above(y), Blocks.AIR.defaultBlockState());
             for (int y = 0; y < 6; y++) level.setBlockAndUpdate(base.above(y), block);
         }
         helper.succeedWhen(() -> {
@@ -448,13 +447,13 @@ public final class GolemGameTests {
         return logs;
     }
 
-    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopoak")
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopoak", attempts = 3, requiredSuccesses = 3)
     public static void chopOak(GameTestHelper helper) { chopTree(helper, Blocks.OAK_LOG, 4, 1, 17, GolemType.WOOD); }
-    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopbirch")
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopbirch", attempts = 3, requiredSuccesses = 3)
     public static void chopBirch(GameTestHelper helper) { chopTree(helper, Blocks.BIRCH_LOG, 4, 1, 31, GolemType.STRAW); }
-    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_choptall")
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_choptall", attempts = 3, requiredSuccesses = 3)
     public static void chopTall(GameTestHelper helper) { chopTree(helper, Blocks.SPRUCE_LOG, 7, 1, 47, GolemType.IRON); }
-    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopwide")
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopwide", attempts = 3, requiredSuccesses = 3)
     public static void chopWide(GameTestHelper helper) { chopTree(helper, Blocks.DARK_OAK_LOG, 5, 2, 61, GolemType.IRON); }
 
     private static void chopTree(GameTestHelper helper, net.minecraft.world.level.block.Block wood, int height, int width, long seed, GolemType type) {
@@ -466,7 +465,7 @@ public final class GolemGameTests {
         });
     }
 
-    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopunreachable")
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopunreachable", attempts = 3, requiredSuccesses = 3)
     public static void chopUnreachable(GameTestHelper helper) {
         GolemBase golem = lumberjack(helper, 73, GolemType.IRON);
         BlockPos blocked = new BlockPos(7, 2, 10);
@@ -483,7 +482,7 @@ public final class GolemGameTests {
         });
     }
 
-    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopremoved")
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopremoved", attempts = 3, requiredSuccesses = 3)
     public static void chopRemoved(GameTestHelper helper) {
         GolemBase golem = lumberjack(helper, 89, GolemType.IRON);
         var removed = tree(helper, new BlockPos(14, 2, 10), Blocks.OAK_LOG, 4, 1);
@@ -497,7 +496,7 @@ public final class GolemGameTests {
         });
     }
 
-    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopcancelled")
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopcancelled", attempts = 3, requiredSuccesses = 3)
     public static void chopCancelled(GameTestHelper helper) {
         GolemBase golem = lumberjack(helper, 97, GolemType.IRON);
         var protectedLogs = tree(helper, new BlockPos(11, 2, 10), Blocks.OAK_LOG, 4, 1);

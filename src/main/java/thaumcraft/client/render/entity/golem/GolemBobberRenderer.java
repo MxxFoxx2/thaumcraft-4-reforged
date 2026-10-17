@@ -6,15 +6,15 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import thaumcraft.client.platform.CameraRenderState;
 import net.minecraft.util.Mth;
-import thaumcraft.client.fx.ParticleFx;
+import thaumcraft.client.platform.FishingLines;
 import thaumcraft.client.platform.Billboards;
 import thaumcraft.client.platform.TcRenderTypes;
-import thaumcraft.client.render.WorldRendering;
 import thaumcraft.entity.golem.GolemBobber;
 
 import net.minecraft.resources.ResourceLocation;
 
 public final class GolemBobberRenderer extends EntityRenderer<GolemBobber> {
+    private static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/fishing_hook.png");
     public GolemBobberRenderer(EntityRendererProvider.Context context) {
         super(context);
         shadowRadius = 0.0F;
@@ -32,9 +32,10 @@ public final class GolemBobberRenderer extends EntityRenderer<GolemBobber> {
         var fisher = entity.getFisher();
         state.hasFisher = fisher != null;
         if (fisher != null) {
-            state.fisherX = Mth.lerp(partialTicks, fisher.xo, fisher.getX());
+            float yaw = Mth.rotLerp(partialTicks, fisher.yBodyRotO, fisher.yBodyRot) * Mth.DEG_TO_RAD;
+            state.fisherX = Mth.lerp(partialTicks, fisher.xo, fisher.getX()) - Mth.cos(yaw) * 0.25 - Mth.sin(yaw) * 0.7;
             state.fisherY = Mth.lerp(partialTicks, fisher.yo, fisher.getY()) + fisher.getEyeHeight() - 0.4;
-            state.fisherZ = Mth.lerp(partialTicks, fisher.zo, fisher.getZ());
+            state.fisherZ = Mth.lerp(partialTicks, fisher.zo, fisher.getZ()) - Mth.sin(yaw) * 0.25 + Mth.cos(yaw) * 0.7;
         }
     }
 
@@ -48,35 +49,23 @@ public final class GolemBobberRenderer extends EntityRenderer<GolemBobber> {
             poseStack,
             collector,
             camera,
-            TcRenderTypes.entityCutoutNoCull(ParticleFx.PARTICLES),
-            1.0F / 16.0F,
-            2.0F / 16.0F,
-            2.0F / 16.0F,
-            3.0F / 16.0F,
-            0.25F,
+            TcRenderTypes.entityCutoutNoCull(TEXTURE),
+            0, 1, 0, 1,
+            0.5F,
             0xFFFFFFFF,
-            0xF000F0
+            light
         );
         if (state.hasFisher) {
-            WorldRendering.submitFloatyLine(
-                buffers,
-                poseStack,
-                net.minecraft.core.BlockPos.containing(state.bobberX, state.bobberY, state.bobberZ),
-                state.fisherX,
-                state.fisherY,
-                state.fisherZ,
-                state.bobberX,
-                state.bobberY,
-                state.bobberZ,
-                0xFF202020,
-                32.0F,
-                System.nanoTime()
-            );
+            FishingLines.submit(poseStack, collector, (float) (state.fisherX - state.bobberX),
+                (float) (state.fisherY - state.bobberY - 0.25), (float) (state.fisherZ - state.bobberZ));
         }
         super.render(entity, yaw, partialTicks, poseStack, buffers, light);
     }
     @Override
     public ResourceLocation getTextureLocation(GolemBobber entity) {
-        return thaumcraft.Thaumcraft.id("textures/misc/particles.png");
+        return TEXTURE;
     }
+
+    @Override
+    public boolean shouldRender(GolemBobber entity, net.minecraft.client.renderer.culling.Frustum frustum, double x, double y, double z) { return entity.shouldRender(x, y, z); }
 }

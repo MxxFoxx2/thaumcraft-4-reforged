@@ -44,9 +44,10 @@ import thaumcraft.block.GolemFetterBlock;
 import thaumcraft.item.golem.GolemPartItem;
 import thaumcraft.menu.GolemMenu;
 import thaumcraft.platform.Menus;
+import thaumcraft.platform.GolemContainers;
 import thaumcraft.registry.ModBlocks;
 
-public class GolemBase extends PathfinderMob implements MenuProvider {
+public class GolemBase extends PathfinderMob implements MenuProvider, GolemContainers.User {
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> CORE = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> ADVANCED = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BOOLEAN);
@@ -66,6 +67,7 @@ public class GolemBase extends PathfinderMob implements MenuProvider {
     private int essentiaAmount;
     private int viewers;
     private int regenTimer;
+    private final GolemContainers containers = new GolemContainers(this);
     public boolean inactive;
     public float bootup;
     public int action;
@@ -80,6 +82,15 @@ public class GolemBase extends PathfinderMob implements MenuProvider {
             navigation.setCanOpenDoors(true);
             navigation.setCanFloat(true);
         }
+    }
+
+    @Override
+    public GolemContainers containers() { return containers; }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        if (!level().isClientSide()) containers.close();
+        super.remove(reason);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -315,6 +326,7 @@ public class GolemBase extends PathfinderMob implements MenuProvider {
 
     @Override
     public void aiStep() {
+        if (!level().isClientSide()) containers.tick();
         var state = level().getBlockState(blockPosition().below());
         inactive = state.is(ModBlocks.GOLEM_FETTER.get()) && state.getValue(GolemFetterBlock.ACTIVE);
         float speed = getGolemType().speed * (getGolemDecoration().contains("B") ? 1.1F : 1) * (getGolemDecoration().contains("P") ? 0.88F : 1) * (1 + getUpgradeAmount(0) * 0.15F) * (isAdvanced() ? 1.1F : 1);

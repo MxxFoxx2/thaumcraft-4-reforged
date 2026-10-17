@@ -5,6 +5,9 @@ import java.util.ArrayDeque;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
@@ -18,6 +21,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.pathfinder.Path;
 import net.neoforged.neoforge.fluids.FluidStack;
 import javax.annotation.Nullable;
 import thaumcraft.alchemy.AlembicBlockEntity;
@@ -150,7 +157,7 @@ public final class LogisticsGoals {
         @Override
         protected boolean interact(BlockPos pos) {
             BlockPos home = GolemLogistics.homeContainer(golem);
-            golem.setCarried(Transfer.insert(golem.level(), home, golem.getHomeFacing(), golem.getCarried(), false));
+            golem.setCarried(insertItems(golem, home, golem.getHomeFacing(), golem.getCarried()));
             golem.startLeftArmTimer();
             return true;
         }
@@ -203,7 +210,7 @@ public final class LogisticsGoals {
         @Override
         protected boolean interact(BlockPos pos) {
             BlockPos home = GolemLogistics.homeContainer(golem);
-            golem.setCarried(Transfer.insert(golem.level(), home, golem.getHomeFacing(), golem.getCarried(), false));
+            golem.setCarried(insertItems(golem, home, golem.getHomeFacing(), golem.getCarried()));
             golem.startLeftArmTimer();
             return true;
         }
@@ -255,6 +262,7 @@ public final class LogisticsGoals {
                 if (core == 1 && !hasMarkerDestination(golem, candidate)) continue;
                 ItemStack extracted = Transfer.extract(golem.level(), source, side, match, golem.getCarrySpace(), false);
                 if (!extracted.isEmpty()) {
+                    golem.containers().open(source);
                     golem.setCarried(extracted);
                     break;
                 }
@@ -298,6 +306,7 @@ public final class LogisticsGoals {
             if (source == null || selected.isEmpty()) return true;
             ItemStack taken = Transfer.extract(golem.level(), pos, source.side(), stack -> golem.matchesFilter(selected, stack), Math.min(golem.getCarrySpace(), GolemLogistics.missingAtHome(golem, selected)), false);
             if (!taken.isEmpty()) golem.setCarried(taken);
+            if (!taken.isEmpty()) golem.containers().open(pos);
             return true;
         }
 
@@ -341,7 +350,7 @@ public final class LogisticsGoals {
         @Override
         protected boolean interact(BlockPos pos) {
             if (destination == null) return true;
-            golem.setCarried(Transfer.insert(golem.level(), pos, destination.side(), golem.getCarried(), false));
+            golem.setCarried(insertItems(golem, pos, destination.side(), golem.getCarried()));
             golem.startRightArmTimer();
             return true;
         }
@@ -385,7 +394,10 @@ public final class LogisticsGoals {
 
     private static final class PickupGoal extends Goal {
         private final GolemBase golem;
+        private final Map<UUID, Long> rejected = new HashMap<>();
         private @Nullable ItemEntity target;
+        private @Nullable Path path;
+        private int age;
 
         private PickupGoal(GolemBase golem) {
             this.golem = golem;
@@ -396,33 +408,73 @@ public final class LogisticsGoals {
         public boolean canUse() {
             if (!golem.isWorking() || golem.tickCount % GolemLogistics.GOLEM_DELAY != 0) return false;
             double range = golem.getRange();
-            target = golem.level().getEntitiesOfClass(ItemEntity.class, new AABB(golem.getRestrictCenter()).inflate(range), item ->
-                item.isAlive() && !item.hasPickUpDelay() && (golem.inventory().isEmpty() || GolemLogistics.filters(golem).stream().anyMatch(filter -> golem.matchesFilter(filter, item.getItem())))
-                    && (golem.getCarried().isEmpty() || ItemStack.isSameItemSameComponents(golem.getCarried(), item.getItem()) && golem.getCarrySpace() > 0)
-            ).stream().min(Comparator.comparingDouble(golem::distanceToSqr)).orElse(null);
-            return target != null;
+            rejected.values().removeIf(until -> until <= golem.level().getGameTime());
+            target = null;
+            path = null;
+            var candidates = golem.level().getEntitiesOfClass(ItemEntity.class, new AABB(golem.getRestrictCenter()).inflate(range), this::canTake);
+            candidates.sort(Comparator.comparingDouble(golem::distanceToSqr));
+            for (ItemEntity item : candidates) {
+                if (rejected.containsKey(item.getUUID())) continue;
+                if (canPickUp(item)) {
+                    target = item;
+                    return true;
+                }
+                Path approach = golem.getNavigation().createPath(item, 0);
+                if (approach != null && approach.canReach()) {
+                    target = item;
+                    path = approach;
+                    return true;
+                }
+                rejected.put(item.getUUID(), golem.level().getGameTime() + 100);
+            }
+            return false;
         }
 
         @Override
-        public boolean canContinueToUse() { return golem.isWorking() && target != null && target.isAlive() && (!golem.getNavigation().isDone() || golem.distanceToSqr(target) <= 2.0); }
+        public boolean canContinueToUse() { return golem.isWorking() && age < 200 && target != null && canTake(target) && (!golem.getNavigation().isDone() || canPickUp(target)); }
 
         @Override
-        public void start() { if (target != null) golem.getNavigation().moveTo(target, 1.0); }
+        public void start() {
+            age = 0;
+            if (path != null) golem.getNavigation().moveTo(path, 1.0);
+        }
+
+        private boolean canTake(ItemEntity item) {
+            return item.isAlive() && !item.hasPickUpDelay() && golem.getCarrySpace() > 0
+                && item.distanceToSqr(Vec3.atCenterOf(golem.getRestrictCenter())) <= golem.getRange() * golem.getRange()
+                && (golem.inventory().isEmpty() || GolemLogistics.filters(golem).stream().anyMatch(filter -> golem.matchesFilter(filter, item.getItem())))
+                && (golem.getCarried().isEmpty() || ItemStack.isSameItemSameComponents(golem.getCarried(), item.getItem()));
+        }
+
+        private boolean canPickUp(ItemEntity item) {
+            return golem.distanceToSqr(item) <= 2.0 && golem.level().clip(new ClipContext(golem.getEyePosition(),
+                item.position().add(0, item.getBbHeight() * 0.5, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, golem)).getType() == HitResult.Type.MISS;
+        }
 
         @Override
         public void tick() {
             if (target == null) return;
+            age++;
             golem.getLookControl().setLookAt(target, 30, 30);
-            if (golem.distanceToSqr(target) <= 2.0) {
+            if (age % 20 == 0 && !canPickUp(target)) {
+                path = golem.getNavigation().createPath(target, 0);
+                if (path == null || !path.canReach() || !golem.getNavigation().moveTo(path, 1.0)) {
+                    rejected.put(target.getUUID(), golem.level().getGameTime() + 100);
+                    target = null;
+                    golem.getNavigation().stop();
+                    return;
+                }
+            }
+            if (canTake(target) && canPickUp(target)) {
                 ItemStack stack = target.getItem();
-                if (!golem.inventory().isEmpty() && GolemLogistics.filters(golem).stream().noneMatch(filter -> golem.matchesFilter(filter, stack))
-                    || !golem.getCarried().isEmpty() && !ItemStack.isSameItemSameComponents(golem.getCarried(), stack)) { target = null; return; }
                 int amount = Math.min(stack.getCount(), golem.getCarrySpace());
                 if (amount > 0) {
                     ItemStack taken = stack.copyWithCount(amount);
                     stack.shrink(amount);
                     golem.setCarried(golem.getCarried().isEmpty() ? taken : golem.getCarried().copyWithCount(golem.getCarried().getCount() + amount));
                     golem.startActionTimer();
+                    golem.level().playSound(null, target.getX(), target.getY(), target.getZ(), net.minecraft.sounds.SoundEvents.ITEM_PICKUP,
+                        net.minecraft.sounds.SoundSource.NEUTRAL, 0.2F, ((golem.getRandom().nextFloat() - golem.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
                     if (stack.isEmpty()) target.discard();
                 }
                 target = null;
@@ -430,7 +482,18 @@ public final class LogisticsGoals {
         }
 
         @Override
-        public void stop() { target = null; golem.getNavigation().stop(); }
+        public void stop() {
+            if (target != null && target.isAlive()) rejected.put(target.getUUID(), golem.level().getGameTime() + 100);
+            target = null;
+            path = null;
+            golem.getNavigation().stop();
+        }
+    }
+
+    private static ItemStack insertItems(GolemBase golem, BlockPos pos, Direction side, ItemStack stack) {
+        ItemStack remainder = Transfer.insert(golem.level(), pos, side, stack, false);
+        if (remainder.getCount() < stack.getCount()) golem.containers().open(pos);
+        return remainder;
     }
 
     private static final class EssentiaGatherGoal extends Goal {

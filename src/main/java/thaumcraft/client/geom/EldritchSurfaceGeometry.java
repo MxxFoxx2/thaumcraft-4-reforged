@@ -50,13 +50,13 @@ public final class EldritchSurfaceGeometry {
     private EldritchSurfaceGeometry() {
     }
 
-    public static void portal(QuadSink sink, float width, float depth, int frame, int color, int light) {
+    public static void portal(QuadSink sink, float width, float height, int frame, int color, int light) {
         float u0 = (frame & 15) / 16.0F;
         float u1 = u0 + 1.0F / 16.0F;
-        sink.vertex(-width, 0, -depth, u0, 1, color, light);
-        sink.vertex(width, 0, -depth, u1, 1, color, light);
-        sink.vertex(width, 0, depth, u1, 0, color, light);
-        sink.vertex(-width, 0, depth, u0, 0, color, light);
+        sink.vertex(-width, -height, 0, u1, 1, color, light);
+        sink.vertex(width, -height, 0, u1, 0, color, light);
+        sink.vertex(width, height, 0, u0, 0, color, light);
+        sink.vertex(-width, height, 0, u0, 1, color, light);
     }
 
     public static void cubeFace(QuadSink sink, int side, float uvScale, float rotation, int color, int light) {

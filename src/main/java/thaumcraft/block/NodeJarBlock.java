@@ -24,6 +24,7 @@ import thaumcraft.blockentity.NodeJarBlockEntity;
 import thaumcraft.item.NodeJarData;
 import thaumcraft.item.NodeJarItem;
 import thaumcraft.node.Node;
+import thaumcraft.node.NodeBlockEntity;
 import thaumcraft.node.NodeModifier;
 import thaumcraft.node.NodeType;
 import thaumcraft.registry.ModBlocks;
@@ -84,6 +85,9 @@ public class NodeJarBlock extends Block implements EntityBlock, WandInteractable
                 node.setNodeModifier(modifier);
                 node.setNodeType(type);
                 node.setId(id);
+                if (node instanceof NodeBlockEntity released) {
+                    released.sync();
+                }
             }
         }
         level.levelEvent(2001, pos, Block.getId(defaultBlockState()));

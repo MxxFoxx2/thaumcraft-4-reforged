@@ -29,7 +29,7 @@ import thaumcraft.aspect.AspectList;
 import thaumcraft.aspect.AspectRegistry;
 import thaumcraft.aspect.EntityAspects;
 import thaumcraft.network.ScanPayload;
-import thaumcraft.node.Node;
+import thaumcraft.node.NodeView;
 
 public final class ScanManager {
     public static final int KIND_BLOCK = 1;
@@ -79,7 +79,7 @@ public final class ScanManager {
 
     public static @Nullable Target resolveBlock(Level level, BlockPos pos) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof Node) {
+        if (blockEntity instanceof NodeView) {
             return resolveNode(level, pos);
         }
         BlockState state = level.getBlockState(pos);
@@ -123,7 +123,7 @@ public final class ScanManager {
     }
 
     public static @Nullable Target resolveNode(Level level, BlockPos pos) {
-        if (!(level.getBlockEntity(pos) instanceof Node node)) {
+        if (!(level.getBlockEntity(pos) instanceof NodeView node)) {
             return null;
         }
         return new Target(ScanKind.PHENOMENON, "NODE" + node.getId(), nodeAspects(node), ItemStack.EMPTY, null);
@@ -199,7 +199,7 @@ public final class ScanManager {
         return AspectHelper.getEntityTags(entity);
     }
 
-    public static @Nullable AspectList nodeAspects(Node node) {
+    public static @Nullable AspectList nodeAspects(NodeView node) {
         AspectList tags = new AspectList();
         AspectList base = node.getAspects();
         for (Aspect aspect : base.getAspectsSorted()) {

@@ -51,6 +51,94 @@ public final class GolemGameTests {
     private GolemGameTests() { }
 
 
+    private static net.minecraft.world.phys.BlockHitResult golemHit(BlockPos pos, Direction face) {
+        return new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos).add(face.getStepX() * 0.5, face.getStepY() * 0.5, face.getStepZ() * 0.5), face, pos, false);
+    }
+    @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 1200, batch = "golem_interactions")
+    public static void placeOnChest(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos chestPos = helper.absolutePos(new BlockPos(2, 2, 2));
+        level.setBlockAndUpdate(chestPos, Blocks.CHEST.defaultBlockState());
+        var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) level.getBlockEntity(chestPos);
+        var player = TestSupport.mockServerPlayer(helper);
+        player.setPos(chestPos.getX() + 0.5, chestPos.getY(), chestPos.getZ() - 2.0);
+        for (Direction face : List.of(Direction.UP, Direction.EAST)) {
+            ItemStack packed = new ItemStack(BuiltInRegistries.ITEM.get(Thaumcraft.id("wood_golem")));
+            GolemKeys.STATE.set(packed, state(2));
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, packed);
+            var result = player.gameMode.useItemOn(player, level, packed, net.minecraft.world.InteractionHand.MAIN_HAND, golemHit(chestPos, face));
+            helper.assertTrue(result.consumesAction(), "chest intercepts golem placement");
+            helper.assertTrue(player.containerMenu == player.inventoryMenu, "placing a golem opens the chest");
+            var placed = level.getEntitiesOfClass(GolemBase.class, new net.minecraft.world.phys.AABB(chestPos).inflate(3));
+            helper.assertValueEqual(placed.size(), 1, "placement must create exactly one golem");
+            GolemBase golem = placed.getFirst();
+            helper.assertTrue(golem.getRestrictCenter().equals(chestPos.relative(face)) && golem.getHomeFacing() == face, "placement loses chest attachment");
+            helper.assertTrue(player.getMainHandItem().isEmpty(), "placement must consume exactly one packed golem");
+            golem.setCarried(new ItemStack(Items.WHEAT, 3));
+            GoalSelector goals = new GoalSelector(() -> level.getProfiler());
+            LogisticsGoals.install(golem, goals);
+            goals.tick();
+            helper.assertTrue(golem.getCarried().isEmpty(), "gather golem cannot deposit into its placement chest");
+            golem.discard();
+        }
+        helper.assertValueEqual(chest.getItem(0).getCount(), 6, "placement chest loses gathered items");
+        level.setBlockAndUpdate(chestPos.above(), Blocks.STONE.defaultBlockState());
+        ItemStack blocked = new ItemStack(BuiltInRegistries.ITEM.get(Thaumcraft.id("wood_golem")));
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, blocked);
+        var failed = player.gameMode.useItemOn(player, level, blocked, net.minecraft.world.InteractionHand.MAIN_HAND, golemHit(chestPos, Direction.UP));
+        helper.assertTrue(failed == net.minecraft.world.InteractionResult.FAIL && blocked.getCount() == 1, "blocked placement consumes a golem");
+        helper.assertTrue(level.getEntitiesOfClass(GolemBase.class, new net.minecraft.world.phys.AABB(chestPos).inflate(3)).isEmpty(), "blocked placement spawns a golem inside a block");
+        helper.succeed();
+    }
+    @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 1200, batch = "golem_interactions")
+    public static void bellRebindChest(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos oldChest = helper.absolutePos(new BlockPos(1, 2, 2));
+        BlockPos newChest = oldChest.east(3);
+        level.setBlockAndUpdate(oldChest, Blocks.CHEST.defaultBlockState());
+        level.setBlockAndUpdate(newChest, Blocks.CHEST.defaultBlockState());
+        GolemBase golem = golem(helper, GolemType.WOOD, 2);
+        golem.setHome(oldChest.above(), Direction.UP);
+        golem.setPos(oldChest.getX() + 0.5, oldChest.getY() + 1, oldChest.getZ() + 0.5);
+        golem.inventory().setItem(0, new ItemStack(Items.WHEAT));
+        golem.setCarried(new ItemStack(Items.WHEAT, 7));
+        level.addFreshEntity(golem);
+        var before = golem.snapshot();
+        var player = TestSupport.mockServerPlayer(helper);
+        player.setPos(oldChest.getX() + 0.5, oldChest.getY(), oldChest.getZ() - 1);
+        ItemStack bell = new ItemStack(BuiltInRegistries.ITEM.get(Thaumcraft.id("golem_bell")));
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, bell);
+        var unbound = player.gameMode.useItemOn(player, level, bell, net.minecraft.world.InteractionHand.MAIN_HAND, golemHit(newChest, Direction.WEST));
+        helper.assertTrue(unbound == net.minecraft.world.InteractionResult.SUCCESS && player.containerMenu == player.inventoryMenu, "unbound bell opens chest instead of swinging");
+        helper.assertTrue(player.interactOn(golem, net.minecraft.world.InteractionHand.MAIN_HAND).consumesAction(), "bell cannot select the golem");
+        helper.assertTrue(GolemKeys.BELL.get(bell).entity().equals(golem.getUUID()), "bell selects the wrong golem");
+        player.gameMode.useItemOn(player, level, bell, net.minecraft.world.InteractionHand.MAIN_HAND, golemHit(newChest, Direction.WEST));
+        helper.assertValueEqual(golem.getMarkers().size(), 1, "chest intercepts the bell marker");
+        helper.assertTrue(player.containerMenu == player.inventoryMenu, "bell opens chest instead of marking it");
+        helper.assertTrue(golem.getRestrictCenter().equals(oldChest.above()), "ordinary marker changes the home");
+        var markers = golem.getMarkers();
+        player.setShiftKeyDown(true);
+        for (int repeat = 0; repeat < 2; repeat++) {
+            var result = player.gameMode.useItemOn(player, level, bell, net.minecraft.world.InteractionHand.MAIN_HAND, golemHit(newChest, Direction.WEST));
+            helper.assertTrue(result == net.minecraft.world.InteractionResult.SUCCESS, "rebind must request the bell swing");
+            helper.assertTrue(golem.getRestrictCenter().equals(newChest.west()) && golem.getHomeFacing() == Direction.WEST, "bell does not rebind chest and face");
+        }
+        helper.assertTrue(golem.getMarkers().equals(markers), "rebind changes work markers");
+        helper.assertTrue(GolemKeys.BELL.get(bell).home().pos().equals(newChest.west()), "bell overlay retains the old home");
+        helper.assertTrue(golem.getCarried().getCount() == 7 && golem.inventory().getItem(0).getCount() == 1 && golem.getCore() == before.core(), "rebind loses carried items, filters or core");
+        helper.assertTrue(bell.getCount() == 1, "rebind consumes the bell");
+        golem.setPos(newChest.getX() - 0.5, newChest.getY(), newChest.getZ() + 0.5);
+        GoalSelector goals = new GoalSelector(() -> level.getProfiler());
+        LogisticsGoals.install(golem, goals);
+        goals.tick();
+        var destination = (net.minecraft.world.level.block.entity.ChestBlockEntity) level.getBlockEntity(newChest);
+        var original = (net.minecraft.world.level.block.entity.ChestBlockEntity) level.getBlockEntity(oldChest);
+        helper.assertTrue(golem.getCarried().isEmpty() && destination.getItem(0).getCount() == 7 && original.isEmpty(), "rebound gather golem deposits into the wrong chest");
+        player.setShiftKeyDown(false);
+        player.gameMode.useItemOn(player, level, bell, net.minecraft.world.InteractionHand.MAIN_HAND, golemHit(newChest, Direction.WEST));
+        helper.assertTrue(golem.getMarkers().isEmpty(), "ordinary bell click cannot remove a chest marker");
+        helper.succeed();
+    }
     private static GolemSnapshot state(int core) { return new GolemSnapshot(core, false, List.of(), "", List.of(), ItemContainerContents.EMPTY, List.of(), 0); }
     private static GolemBase golem(GameTestHelper helper, GolemType type, int core) {
         GolemBase golem = new GolemBase(ModEntities.GOLEM.get(), helper.getLevel());

@@ -13,7 +13,7 @@ import thaumcraft.aspect.AspectList;
 import thaumcraft.registry.ModBlockEntities;
 import thaumcraft.vis.VisNode;
 
-public class EnergizedNodeBlockEntity extends VisNode {
+public class EnergizedNodeBlockEntity extends VisNode implements NodeView {
     private AspectList auraBase = new AspectList()
         .add(Aspect.AIR, 20)
         .add(Aspect.FIRE, 20)
@@ -94,7 +94,16 @@ public class EnergizedNodeBlockEntity extends VisNode {
     }
 
     public String getId() {
+        if ((id.isEmpty() || id.equals("blank")) && level != null) {
+            id = level.dimension().location() + ":" + worldPosition.getX() + ":" + worldPosition.getY() + ":" + worldPosition.getZ();
+            setChanged();
+        }
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+        setChanged();
     }
 
     public AspectList getAuraBase() {
@@ -142,7 +151,7 @@ public class EnergizedNodeBlockEntity extends VisNode {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        output.putString("nodeId", id);
+        output.putString("nodeId", getId());
         output.store("type", NodeType.CODEC, nodeType);
         output.storeNullable("modifier", NodeModifier.CODEC, nodeModifier);
         output.store("visBase", AspectList.CODEC, visBase);

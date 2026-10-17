@@ -28,6 +28,7 @@ public final class TcRenderTypes extends RenderType {
             .createCompositeState(false)
     );
     private static final Map<ResourceLocation, RenderType> ELDRITCH = new HashMap<>();
+    private static final Map<ResourceLocation, RenderType> ELDRITCH_PORTAL = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> ADDITIVE = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> TRANSLUCENT = new HashMap<>();
     private static final Map<ResourceLocation, RenderType> ADDITIVE_NO_DEPTH = new HashMap<>();
@@ -77,6 +78,26 @@ public final class TcRenderTypes extends RenderType {
                 .setWriteMaskState(COLOR_WRITE)
                 .createCompositeState(false)
         );
+    }
+
+    public static RenderType eldritchPortal(ResourceLocation texture) {
+        return ELDRITCH_PORTAL.computeIfAbsent(texture, key -> RenderType.create(
+            "thaumcraft_eldritch_portal",
+            DefaultVertexFormat.PARTICLE,
+            VertexFormat.Mode.QUADS,
+            1536,
+            false,
+            true,
+            RenderType.CompositeState.builder()
+                .setShaderState(PARTICLE_SHADER)
+                .setTextureState(new TextureStateShard(key, false, false))
+                .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                .setLightmapState(LIGHTMAP)
+                .setCullState(NO_CULL)
+                .setDepthTestState(LEQUAL_DEPTH_TEST)
+                .setWriteMaskState(COLOR_DEPTH_WRITE)
+                .createCompositeState(false)
+        ));
     }
 
     public static RenderType eldritchSurface(ResourceLocation texture) {

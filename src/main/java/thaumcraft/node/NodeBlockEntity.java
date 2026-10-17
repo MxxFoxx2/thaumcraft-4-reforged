@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -67,6 +70,8 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
     private boolean catchUp = false;
     private @Nullable Entity drainEntity = null;
     private @Nullable HitResult drainCollision = null;
+    private int drainEntityId = -1;
+    private int drainTicks;
     private int drainColor = 0xFFFFFF;
     private int targetColor = 0xFFFFFF;
     private int color = 0xFFFFFF;
@@ -92,7 +97,7 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
 
     @Override
     public void setId(String id) {
-        this.id = id;
+        this.id = id.isEmpty() ? null : id;
         setChanged();
     }
 
@@ -115,11 +120,24 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
     }
 
     public @Nullable Entity getDrainEntity() {
+        if (drainEntity == null && drainTicks > 0 && level != null) {
+            return level.getEntity(drainEntityId);
+        }
         return drainEntity;
     }
 
     public @Nullable HitResult getDrainCollision() {
+        if (drainCollision == null && drainTicks > 0) {
+            return new BlockHitResult(Vec3.atCenterOf(worldPosition), Direction.UP, worldPosition, false);
+        }
         return drainCollision;
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        tag.putInt("drainEntity", drainEntity == null ? -1 : drainEntity.getId());
+        return tag;
     }
 
     public boolean isHungry() {
@@ -272,6 +290,11 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
         aspects = input.read("aspects", AspectList.CODEC).orElseGet(AspectList::new);
         aspectsBase = input.read("aspectsBase", AspectList.CODEC).orElseGet(AspectList::new);
         drainColor = input.getIntOr("drainColor", 0xFFFFFF);
+        targetColor = drainColor;
+        drainEntityId = input.getIntOr("drainEntity", -1);
+        drainTicks = drainEntityId < 0 ? 0 : 10;
+        drainEntity = null;
+        drainCollision = null;
         int regen = baseRegeneration(nodeModifier);
         long inc = regen * 75L;
         if (regen > 0 && lastActive > 0L && System.currentTimeMillis() > lastActive + inc) {
@@ -302,6 +325,18 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
     }
 
     public void tick(Level tickLevel) {
+        if (tickLevel.isClientSide()) {
+            if (drainTicks > 0) {
+                drainTicks--;
+            }
+            int red = ((targetColor >> 16) & 255) + ((color >> 16) & 255) * 4;
+            int green = ((targetColor >> 8) & 255) + ((color >> 8) & 255) * 4;
+            int blue = (targetColor & 255) + (color & 255) * 4;
+            color = ((red / 5) << 16) | ((green / 5) << 8) | (blue / 5);
+        } else if (drainEntity instanceof Player player && (!player.isUsingItem() || player.isRemoved())) {
+            clearDrain();
+            sync();
+        }
         if (id == null) {
             generateId();
         }
@@ -704,9 +739,16 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
         if (hit instanceof BlockHitResult blockHit && hit.getType() == HitResult.Type.BLOCK) {
             if (!blockHit.getBlockPos().equals(worldPosition)) {
                 player.stopUsingItem();
+                onWandStoppedUsing(wand, useLevel, player, remaining);
+                return;
             }
         } else {
             player.stopUsingItem();
+            onWandStoppedUsing(wand, useLevel, player, remaining);
+            return;
+        }
+        if (useLevel.isClientSide()) {
+            return;
         }
         if (remaining % 5 == 0) {
             int tap = 1;
@@ -747,24 +789,29 @@ public class NodeBlockEntity extends TcBlockEntity implements Node, WandInteract
                 drainCollision = hit;
                 targetColor = drainColor;
             } else {
-                drainEntity = null;
-                drainCollision = null;
+                changed |= drainEntity != null;
+                clearDrain();
             }
             if (changed) {
                 sync();
             }
         }
-        if (useLevel.isClientSide()) {
-            int red = ((targetColor >> 16) & 255) + ((color >> 16) & 255) * 4;
-            int green = ((targetColor >> 8) & 255) + ((color >> 8) & 255) * 4;
-            int blue = (targetColor & 255) + (color & 255) * 4;
-            color = ((red / 5) << 16) | ((green / 5) << 8) | (blue / 5);
-        }
     }
 
     @Override
     public void onWandStoppedUsing(ItemStack wand, Level useLevel, Player player, int remaining) {
+        if (drainEntity == player) {
+            clearDrain();
+            if (!useLevel.isClientSide()) {
+                sync();
+            }
+        }
+    }
+
+    private void clearDrain() {
         drainEntity = null;
         drainCollision = null;
+        drainEntityId = -1;
+        drainTicks = 0;
     }
 }

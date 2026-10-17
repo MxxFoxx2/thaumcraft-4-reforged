@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.AABB;
 import javax.annotation.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.client.geom.EldritchSurfaceGeometry;
@@ -53,11 +54,17 @@ public final class EldritchPortalBlockRenderer implements StateBlockRenderer<Eld
         int frame = (int) (System.nanoTime() / 50_000_000L) & 15;
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.5F, 0.5F);
-        collector.submitCustomGeometry(poseStack, TcRenderTypes.translucent(TEXTURE), (pose, buffer) -> {
+        poseStack.mulPose(camera.orientation);
+        collector.submitCustomGeometry(poseStack, TcRenderTypes.eldritchPortal(TEXTURE), (pose, buffer) -> {
             EntityQuadSink sink = new EntityQuadSink(pose, buffer);
             int color = FastColor.ARGB32.color(255, 255, 255, 255);
             EldritchSurfaceGeometry.portal(sink, width, height, frame, color, 0xF000F0);
         });
         poseStack.popPose();
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(EldritchPortalBlockEntity entity) {
+        return new AABB(entity.getBlockPos()).inflate(1.0);
     }
 }

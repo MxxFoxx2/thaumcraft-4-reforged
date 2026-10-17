@@ -1665,5 +1665,15 @@
   "item.thaumcraft.eldritch_golem_spawn_egg": "Eldritch Golem Spawn Egg",
   "item.thaumcraft.cultist_leader_spawn_egg": "Cultist Leader Spawn Egg",
   "item.thaumcraft.cultist_portal_spawn_egg": "Cultist Portal Spawn Egg",
-  "item.thaumcraft.taintacle_giant_spawn_egg": "Giant Taintacle Spawn Egg"
+  "item.thaumcraft.taintacle_giant_spawn_egg": "Giant Taintacle Spawn Egg",
+  "effect.thaumcraft.blurred_vision": "Blurred Vision",
+  "effect.thaumcraft.death_gaze": "Death Gaze",
+  "effect.thaumcraft.infectious_vis_exhaust": "Infectious Vis Exhaust",
+  "effect.thaumcraft.sun_scorned": "Sun Scorned",
+  "effect.thaumcraft.taint_poison": "Taint Poison",
+  "effect.thaumcraft.thaumarhia": "Thaumarhia",
+  "effect.thaumcraft.unnatural_hunger": "Unnatural Hunger",
+  "effect.thaumcraft.vis_exhaust": "Vis Exhaust",
+  "effect.thaumcraft.warp_ward": "Warp Ward",
+  "item.thaumcraft.golem_core": "Golem Animation Core"
 }

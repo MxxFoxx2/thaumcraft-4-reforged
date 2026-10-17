@@ -29,7 +29,7 @@ import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.client.research.ThaumometerClient;
-import thaumcraft.node.Node;
+import thaumcraft.node.NodeView;
 import thaumcraft.node.NodeModifier;
 import thaumcraft.registry.ModItems;
 import thaumcraft.research.ScanKind;
@@ -147,10 +147,8 @@ public final class ThaumometerHandRenderer {
             BlockPos pos = hit.pos();
             BlockState state = level.getBlockState(pos);
             ItemStack picked = state.getBlock().getCloneItemStack(level, pos, state);
-            if (!picked.isEmpty()) {
-                text = picked.getHoverName();
-            }
-            if (scanned && level.getBlockEntity(pos) instanceof Node node) {
+            text = picked.isEmpty() ? level.getBlockState(pos).getBlock().getName() : picked.getHoverName();
+            if (scanned && level.getBlockEntity(pos) instanceof NodeView node) {
                 aspects = node.getAspects();
                 Component nodeText = Component.translatable(node.getNodeType().getTranslationKey());
                 NodeModifier modifier = node.getNodeModifier();

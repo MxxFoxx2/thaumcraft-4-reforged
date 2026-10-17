@@ -5,7 +5,7 @@ import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectContainer;
 import thaumcraft.aspect.AspectList;
 
-public interface Node extends AspectContainer {
+public interface Node extends AspectContainer, NodeView {
     String getId();
 
     default void setId(String id) {

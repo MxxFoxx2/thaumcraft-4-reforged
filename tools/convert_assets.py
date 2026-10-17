@@ -189,7 +189,7 @@ def convert_effect_icons():
     destination.mkdir(parents=True, exist_ok=True)
     for name, (column, row) in icons.items():
         left = column * 18
-        top = row * 18
+        top = 198 + row * 18
         atlas.crop((left, top, left + 18, top + 18)).save(destination / f"{name}.png")
 
 

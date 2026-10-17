@@ -15,6 +15,10 @@ public class GolemPlacerItem extends Item {
     private final GolemType type;
     public GolemPlacerItem(Properties properties, GolemType type) { super(properties.stacksTo(1)); this.type = type; }
     @Override
+    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
+        return useOn(context);
+    }
+    @Override
     public InteractionResult useOn(UseOnContext context) {
         if (context.getPlayer() == null || context.getPlayer().isShiftKeyDown()) return InteractionResult.PASS;
         if (!context.getLevel().isClientSide()) {

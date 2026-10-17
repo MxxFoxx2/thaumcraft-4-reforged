@@ -33,19 +33,28 @@ public final class EldritchSurfaceGeometryTest {
         }
         if (vertices != 40) throw new AssertionError("Two adjacent cubes must emit ten exterior faces");
         if (EldritchSurfaceGeometry.exposed(false, true)) throw new AssertionError("Solid neighbor must hide a face");
-        for (int frame = 0; frame < 16; frame++) {
-            final float u0 = frame / 16.0F;
-            final float u1 = u0 + 1.0F / 16.0F;
-            final int[] count = {0};
-            EldritchSurfaceGeometry.portal((x, y, z, u, v, color, light) -> {
-                if (y != 0 || Math.abs(x) != 0.75F || Math.abs(z) != 0.25F) {
-                    throw new AssertionError("Portal must lie in XZ with the requested opening size");
+        for (float width : new float[] {0.2F, 0.75F, 1.0F}) {
+            for (float height : new float[] {1.0F / 30.0F, 0.25F, 1.0F}) {
+                for (int frame = 0; frame < 16; frame++) {
+                    final float u0 = frame / 16.0F;
+                    final float u1 = u0 + 1.0F / 16.0F;
+                    final int[] count = {0};
+                    final int[] corners = {0};
+                    EldritchSurfaceGeometry.portal((x, y, z, u, v, color, light) -> {
+                        if (z != 0 || Math.abs(x) != width || Math.abs(y) != height) {
+                            throw new AssertionError("Portal must stand in local XY before camera orientation is applied");
+                        }
+                        if (u != (y < 0 ? u1 : u0) || v != (x < 0 ? 1 : 0)) {
+                            throw new AssertionError("Portal frame must rotate 90 degrees clockwise inside its atlas frame");
+                        }
+                        if (color != -1 || light != 0xF000F0) throw new AssertionError("Portal lost its color or light");
+                        corners[0] |= 1 << ((x > 0 ? 1 : 0) | (y > 0 ? 2 : 0));
+                        count[0]++;
+                    }, width, height, frame, -1, 0xF000F0);
+                    if (count[0] != 4 || corners[0] != 15) throw new AssertionError("Portal must emit four distinct corners");
                 }
-                if ((u != u0 && u != u1) || (v != 0 && v != 1)) throw new AssertionError("Portal frame UV");
-                count[0]++;
-            }, 0.75F, 0.25F, frame, -1, 0xF000F0);
-            if (count[0] != 4) throw new AssertionError("Portal must emit one quad");
+            }
         }
-        System.out.println("Eldritch geometry passed: ten exterior faces, no internal face, finite UVs.");
+        System.out.println("Eldritch geometry passed: ten exterior faces, camera-facing portal plane, horizontal image, all 16 frames and opening sizes.");
     }
 }

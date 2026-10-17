@@ -1664,5 +1664,15 @@
   "item.thaumcraft.eldritch_golem_spawn_egg": "Яйцо призыва древнего голема",
   "item.thaumcraft.cultist_leader_spawn_egg": "Яйцо призыва претора",
   "item.thaumcraft.cultist_portal_spawn_egg": "Яйцо призыва багрового портала",
-  "item.thaumcraft.taintacle_giant_spawn_egg": "Яйцо призыва гигантского заражённого щупальца"
+  "item.thaumcraft.taintacle_giant_spawn_egg": "Яйцо призыва гигантского заражённого щупальца",
+  "effect.thaumcraft.blurred_vision": "Затуманенное зрение",
+  "effect.thaumcraft.death_gaze": "Смертельный взгляд",
+  "effect.thaumcraft.infectious_vis_exhaust": "Заразное истощение vis",
+  "effect.thaumcraft.sun_scorned": "Проклятие солнца",
+  "effect.thaumcraft.taint_poison": "Яд порчи",
+  "effect.thaumcraft.thaumarhia": "Таумария",
+  "effect.thaumcraft.unnatural_hunger": "Неестественный голод",
+  "effect.thaumcraft.vis_exhaust": "Истощение vis",
+  "effect.thaumcraft.warp_ward": "Защита от искажений",
+  "item.thaumcraft.golem_core": "Сердце голема"
 }

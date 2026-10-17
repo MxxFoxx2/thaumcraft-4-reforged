@@ -128,37 +128,72 @@ public final class EldritchGameTests {
 
     @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 1200, batch = "eldritchgametests_altarvisactivation")
     public static void altarVisActivation(GameTestHelper helper) {
-        BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
-        helper.getLevel().setBlockAndUpdate(pos, EldritchContent.ELDRITCH_ALTAR.get().defaultBlockState());
-        helper.getLevel().setBlockAndUpdate(pos.above(), ModBlocks.AURA_NODE.get().defaultBlockState());
-        EldritchBlockEntity altar = (EldritchBlockEntity) helper.getLevel().getBlockEntity(pos);
-        NodeBlockEntity node = (NodeBlockEntity) helper.getLevel().getBlockEntity(pos.above());
-        node.setNodeType(NodeType.DARK);
-        for (int index = 0; index < 4; index++) {
-            altar.addEye();
+        var level = helper.getLevel();
+        BlockPos center = helper.absolutePos(new BlockPos(4, 4, 4)).offset(64000, 0, 64000);
+        for (int x = -3; x <= 3; x++) {
+            for (int z = -3; z <= 3; z++) {
+                level.setBlockAndUpdate(center.offset(x, -1, z), net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+                for (int y = 0; y <= 8; y++) {
+                    level.setBlockAndUpdate(center.offset(x, y, z), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+                }
+            }
         }
+        helper.assertTrue(thaumcraft.world.gen.NodeHooks.eldritchRing(level, new java.util.Random(37L), center.getX() >> 4, center.getZ() >> 4, center.getX(), center.getY(), center.getZ()), "natural obelisk generation failed");
+        BlockPos pos = center.above();
+        EldritchBlockEntity altar = (EldritchBlockEntity) level.getBlockEntity(pos);
+        helper.assertTrue(level.getBlockEntity(pos.above()) instanceof NodeBlockEntity node && node.getNodeType() == NodeType.DARK, "natural obelisk has no dark node");
         helper.assertTrue(helper.getLevel().getServer().getLevel(thaumcraft.world.dim.OuterLands.OUTER_LANDS) != null, "test preset must include Outer Lands");
         ServerPlayer player = mockPlayer(helper);
         player.moveTo(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 0.0F, 0.0F);
-        ResearchManager.complete(player, "OCULUS");
-        ItemStack wand = Wands.create(WandRegistry.CAP_SILVER, WandRegistry.ROD_SILVERWOOD, false);
-        for (Aspect aspect : Aspect.getPrimalAspects()) {
-            Wands.storeVis(wand, aspect, Wands.getMaxVis(wand));
+        player.setNoGravity(true);
+        player.getAbilities().invulnerable = true;
+        ItemStack eyes = new ItemStack(EldritchContent.ELDRITCH_EYE.get(), 4);
+        player.setItemInHand(InteractionHand.MAIN_HAND, eyes);
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), net.minecraft.core.Direction.UP, pos, false);
+        for (int index = 0; index < 4; index++) {
+            player.gameMode.useItemOn(player, level, eyes, InteractionHand.MAIN_HAND, hit);
         }
+        helper.assertTrue(eyes.isEmpty() && altar.eyeCount() == 4, "natural altar did not accept all four eyes");
+        ItemStack wand = Wands.create(WandRegistry.CAP_SILVER, WandRegistry.ROD_SILVERWOOD, false);
+        Wands.fill(wand);
         player.setItemInHand(InteractionHand.MAIN_HAND, wand);
-        helper.succeedWhen(() -> {
-            WandTriggers.perform(helper.getLevel(), wand, player, pos, net.minecraft.core.Direction.UP);
-            helper.assertTrue(altar.isOpen(), "four-eyed altar did not activate when the outer maze became ready");
+        player.gameMode.useItemOn(player, level, wand, InteractionHand.MAIN_HAND, hit);
+        helper.assertTrue(!altar.isOpen() && level.getBlockState(pos.above()).is(ModBlocks.AURA_NODE.get()), "altar activated without OCULUS research");
+        for (Aspect aspect : Aspect.getPrimalAspects()) {
+            helper.assertValueEqual(Wands.getVis(wand, aspect), Wands.getMaxVis(wand), "rejected activation consumed vis");
+        }
+        ResearchManager.complete(player, "OCULUS");
+        helper.startSequence().thenWaitUntil(() -> {
+            var outer = level.getServer().getLevel(thaumcraft.world.dim.OuterLands.OUTER_LANDS);
+            helper.assertTrue(thaumcraft.world.dim.MazeHandler.ensureMaze(outer, pos), "outer maze is not ready yet");
+        }).thenExecute(() -> {
+            EldritchBlockEntity currentAltar = (EldritchBlockEntity) level.getBlockEntity(pos);
+            Wands.storeVis(wand, Aspect.AIR, 0);
+            player.gameMode.useItemOn(player, level, wand, InteractionHand.MAIN_HAND, hit);
+            helper.assertTrue(!currentAltar.isOpen() && level.getBlockState(pos.above()).is(ModBlocks.AURA_NODE.get()), "altar activated without enough vis");
+            for (Aspect aspect : Aspect.getPrimalAspects()) {
+                helper.assertValueEqual(Wands.getVis(wand, aspect), aspect == Aspect.AIR ? 0 : Wands.getMaxVis(wand), "failed activation partially consumed vis");
+            }
+            Wands.fill(wand);
+            player.gameMode.useItemOn(player, level, wand, InteractionHand.MAIN_HAND, hit);
+            helper.assertTrue(currentAltar.isOpen(), "four-eyed altar did not activate: block=" + level.getBlockState(pos) + ", node=" + level.getBlockEntity(pos.above()) + ", eyes=" + currentAltar.eyeCount() + ", research=" + ResearchManager.isComplete(player, "OCULUS") + ", held=" + player.getMainHandItem() + ", alive=" + player.isAlive() + ", trigger=" + WandTriggers.hasTrigger(level.getBlockState(pos)));
             helper.assertTrue(helper.getLevel().getBlockState(pos.above()).is(EldritchContent.ELDRITCH_PORTAL.get()), "altar activation should replace the dark node with a portal");
             for (Aspect aspect : Aspect.getPrimalAspects()) {
                 int cost = (int)(10000 * ((WandItem) wand.getItem()).getConsumptionModifier(wand, player, aspect, true));
                 helper.assertValueEqual(Wands.getVis(wand, aspect), 10000 - cost, "altar activation should consume 100 vis of each primal aspect");
             }
+            helper.assertTrue(level.getBlockEntity(pos) == currentAltar, "activation destroyed the altar");
+            for (int y = 2; y <= 6; y++) {
+                helper.assertTrue(level.getBlockState(pos.above(y)).is(EldritchContent.ELDRITCH_OBELISK.get()), "activation destroyed the obelisk");
+            }
+            AspectList remaining = Wands.getAllVis(wand).copy();
+            player.gameMode.useItemOn(player, level, wand, InteractionHand.MAIN_HAND, hit);
+            helper.assertTrue(remaining.equals(Wands.getAllVis(wand)), "repeated activation consumed vis again");
             helper.assertTrue(EldritchPortalTravel.tryTravel(helper.getLevel(), pos.above(), player), "ready portal should transfer the player");
             helper.assertTrue(player.level().dimension().equals(thaumcraft.world.dim.OuterLands.OUTER_LANDS), "portal should enter the Outer Lands");
             helper.assertTrue(ResearchManager.isComplete(player, "ENTEROUTER"), "first portal entry should complete ENTEROUTER research");
             helper.assertValueEqual(player.getPortalCooldown(), 100, "portal transfer should set its cooldown");
-            helper.assertTrue(!EldritchPortalTravel.tryTravel(player.serverLevel(), player.blockPosition(), player), "portal cooldown should prevent an immediate second transfer");
-        });
+            helper.assertTrue(!EldritchPortalTravel.tryTravel((net.minecraft.server.level.ServerLevel) player.level(), player.blockPosition(), player), "portal cooldown should prevent an immediate second transfer");
+        }).thenSucceed();
     }
 }

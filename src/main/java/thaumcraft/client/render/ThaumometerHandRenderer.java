@@ -65,7 +65,7 @@ public final class ThaumometerHandRenderer {
         if (!player.isUsingItem()) {
             poseStack.translate(-swingSqrt * 0.4F, Mth.sin(Mth.sqrt(swing) * Mth.PI * 2.0F) * 0.2F, -Mth.sin(swing * Mth.PI) * 0.2F);
         }
-        poseStack.translate(0.7F * 0.8F, -0.65F * 0.8F - hidden * 0.6F, -0.9F * 0.8F);
+        poseStack.translate(0.7F * 0.8F, -0.65F * 0.8F - hidden * 1.5F, -0.9F * 0.8F);
         poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
         poseStack.mulPose(Axis.YP.rotationDegrees(-Mth.sin(swing * swing * Mth.PI) * 20.0F));
         poseStack.mulPose(Axis.ZP.rotationDegrees(-swingSqrt * 20.0F));
@@ -80,7 +80,7 @@ public final class ThaumometerHandRenderer {
         float yBob = Mth.lerp(partialTick, player.yBobO, player.yBob);
         poseStack.mulPose(Axis.XP.rotationDegrees((player.getViewXRot(partialTick) - xBob) * 0.1F));
         poseStack.mulPose(Axis.YP.rotationDegrees((player.getViewYRot(partialTick) - yBob) * 0.1F));
-        poseStack.translate(-0.7F * 0.8F, 0.65F * 0.8F + hidden * 1.5F, 0.9F * 0.8F);
+        poseStack.translate(-0.7F * 0.8F, 0.65F * 0.8F, 0.9F * 0.8F);
         poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
         poseStack.translate(0.0F, 0.0F, -0.9F * 0.8F);
         poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));

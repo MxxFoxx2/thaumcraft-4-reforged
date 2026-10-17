@@ -165,7 +165,9 @@ public class EldritchGolem extends ThaumcraftBoss implements RangedAttackMob, th
 
     @Override
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float damage) {
-        ServerLevel level = (ServerLevel) level();
+        if (!(this.level() instanceof ServerLevel level)) {
+            return false;
+        }
         if (damage > this.getHealth() && !this.isHeadless()) {
             this.setHeadless(true);
             this.setSpawnTimer(100);

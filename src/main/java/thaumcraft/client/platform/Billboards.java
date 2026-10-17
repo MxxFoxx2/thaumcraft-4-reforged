@@ -17,7 +17,7 @@ public final class Billboards {
         poseStack.pushPose();
         poseStack.mulPose(camera.rotation());
         poseStack.scale(scale, scale, scale);
-        VertexQuadSink sink = new VertexQuadSink(poseStack.last(), buffers.getBuffer(renderType));
+        EntityQuadSink sink = new EntityQuadSink(poseStack.last(), buffers.getBuffer(renderType));
         sink.vertex(-0.5F, -0.5F, 0.0F, u0, v1, argb, light);
         sink.vertex(0.5F, -0.5F, 0.0F, u1, v1, argb, light);
         sink.vertex(0.5F, 0.5F, 0.0F, u1, v0, argb, light);

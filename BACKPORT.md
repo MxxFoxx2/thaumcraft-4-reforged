@@ -48,6 +48,8 @@ Fixes from `6651f14`: localized names for itemless fluid targets, continuous hel
 
 ## API differences (26.3 vs 1.21.1)
 
+- `hurtServer(ServerLevel, ...)` runs only on the server in 26.3. Its 1.21.1 `hurt(...)` adapter is also called by client attacks: reject non-server levels before accessing server state or changing boss phases. A direct `ServerLevel` cast here crashes the client.
+
 | Area | 26.3 | 1.21.1 |
 |---|---|---|
 | Ids | `Identifier` | `ResourceLocation` |

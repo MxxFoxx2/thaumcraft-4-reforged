@@ -122,7 +122,8 @@ public class GolemBobber extends Entity {
 
     @Override
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float damage) {
-        ServerLevel level = (ServerLevel) level(); return false; }
+        return false;
+    }
 
     @Override
     public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {

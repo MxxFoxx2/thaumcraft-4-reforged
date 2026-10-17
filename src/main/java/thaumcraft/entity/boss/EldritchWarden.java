@@ -232,7 +232,9 @@ public class EldritchWarden extends ThaumcraftBoss implements RangedAttackMob, t
 
     @Override
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float damage) {
-        ServerLevel level = (ServerLevel) level();
+        if (!(this.level() instanceof ServerLevel)) {
+            return false;
+        }
         boolean hit = super.hurt(source, damage);
         if (hit && !this.frenzyUsed && this.getAbsorptionAmount() <= 0.0F) {
             this.frenzyUsed = true;

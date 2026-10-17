@@ -442,7 +442,9 @@ public class Pech extends Monster implements RangedAttackMob, net.minecraft.worl
 
     @Override
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
-        ServerLevel level = (ServerLevel) this.level();
+        if (!(this.level() instanceof ServerLevel level)) {
+            return false;
+        }
         if (source.getEntity() instanceof Player player) {
             for (Pech neighbor : level.getEntitiesOfClass(Pech.class, this.getBoundingBox().inflate(32.0, 16.0, 32.0))) {
                 neighbor.becomeAngryAt(player);

@@ -66,6 +66,7 @@ def tables(ctx):
 
     ctx.block_model("research_table", {
         "parent": "minecraft:block/block",
+        **({"render_type": "minecraft:solid"} if ctx.profile.explicit_render_types else {}),
         "textures": {"particle": ctx.ref("research_table_model"), "t": ctx.ref("research_table_model")},
         "elements": [
             mc_box((-8, 0, -8), (32, 4, 16), (0, 0), (128, 64)),

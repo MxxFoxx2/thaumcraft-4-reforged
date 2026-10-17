@@ -144,6 +144,8 @@ def model_textures(name, seen=None):
 def apply_render_types():
     order = ["solid", "cutout", "translucent"]
     for name in BLOCK_MODELS:
+        if "render_type" in BLOCK_MODELS[name]:
+            continue
         layers = [texture_layer(texture) for texture in model_textures(name)]
         if not layers:
             continue

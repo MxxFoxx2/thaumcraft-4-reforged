@@ -1,5 +1,6 @@
 {
   "parent": "minecraft:block/block",
+  "render_type": "minecraft:solid",
   "textures": {
     "particle": "thaumcraft:block/research_table_model",
     "t": "thaumcraft:block/research_table_model"
@@ -413,6 +414,5 @@
         }
       }
     }
-  ],
-  "render_type": "minecraft:translucent"
+  ]
 }

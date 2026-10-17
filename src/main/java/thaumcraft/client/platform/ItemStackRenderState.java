@@ -20,6 +20,10 @@ public final class ItemStackRenderState {
         return stack.isEmpty();
     }
 
+    public boolean usesBlockLight() {
+        return Minecraft.getInstance().getItemRenderer().getModel(stack, level, null, seed).usesBlockLight();
+    }
+
     public void submit(PoseStack poses, ImmediateGeometry geometry, int light, int overlay, int outline) {
         Minecraft.getInstance().getItemRenderer().renderStatic(stack, context, light, overlay, poses, geometry.buffers, level, seed);
     }

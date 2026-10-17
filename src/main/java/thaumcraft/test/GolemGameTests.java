@@ -331,4 +331,192 @@ public final class GolemGameTests {
         helper.assertTrue(loaded.getStay(), "trunk stay save");
         helper.succeed();
     }
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_jarlighting")
+    public static void jarLighting(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var jars = List.of(ModBlocks.WARDED_JAR.get(), ModBlocks.VOID_JAR.get(), ModBlocks.BRAIN_JAR.get(), ModBlocks.NODE_JAR.get());
+        for (int index = 0; index < jars.size(); index++) {
+            BlockPos base = helper.absolutePos(new BlockPos(12 + index, 2, 12));
+            var block = jars.get(index).defaultBlockState();
+            helper.assertTrue(block.getShadeBrightness(level, base) == 1.0F, "glass jar darkens ambient lighting");
+            helper.assertTrue(block.getLightBlock(level, base) == 0 && block.propagatesSkylightDown(level, base), "jar blocks skylight");
+            for (int y = 6; y < 12; y++) level.setBlockAndUpdate(base.above(y), Blocks.AIR.defaultBlockState());
+            for (int y = 0; y < 6; y++) level.setBlockAndUpdate(base.above(y), block);
+        }
+        helper.succeedWhen(() -> {
+            for (int index = 0; index < jars.size(); index++) {
+                BlockPos base = helper.absolutePos(new BlockPos(12 + index, 2, 12));
+                helper.assertValueEqual(level.getBrightness(net.minecraft.world.level.LightLayer.SKY, base), 15, "stack of jars reduces skylight");
+            }
+        });
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 1200, batch = "reported_carrieddisplay")
+    public static void carriedDisplay(GameTestHelper helper) {
+        GolemBase alchemist = golem(helper, GolemType.IRON, 6);
+        helper.assertTrue(alchemist.getCarriedForDisplay().getItem() instanceof thaumcraft.essentia.FilledJarItem, "alchemy golem has no rendered jar");
+        alchemist.setEssentia(Aspect.AIR, 8);
+        var contents = thaumcraft.aspect.AspectKeys.ASPECTS.get(alchemist.getCarriedForDisplay());
+        helper.assertTrue(contents != null && contents.getAmount(Aspect.AIR) > 0, "display jar loses essentia");
+        GolemBase decanter = golem(helper, GolemType.IRON, 5);
+        helper.assertTrue(decanter.getCarriedForDisplay().is(Items.BUCKET), "decanter has no empty bucket");
+        decanter.setFluidCarried(new FluidStack(Fluids.WATER, 1000));
+        helper.assertTrue(decanter.getCarriedForDisplay().is(Items.WATER_BUCKET), "decanter has no filled bucket");
+        decanter.setFluidCarried(FluidStack.EMPTY);
+        helper.assertTrue(decanter.getCarriedForDisplay().is(Items.BUCKET), "decanter retains a stale fluid display");
+        GolemBase carrier = golem(helper, GolemType.WOOD, 2);
+        for (var item : List.of(Items.WHEAT, Items.OAK_LOG, Items.IRON_AXE)) {
+            carrier.setCarried(new ItemStack(item));
+            helper.assertTrue(carrier.getCarriedForDisplay().is(item), "carried item display is missing");
+        }
+        carrier.setCarried(ItemStack.EMPTY);
+        helper.assertTrue(carrier.getCarriedForDisplay().isEmpty(), "carried display was not cleared");
+        helper.succeed();
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/platform", timeoutTicks = 1200, batch = "reported_chestsound")
+    public static void chestSound(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(2, 2, 2));
+        level.setBlockAndUpdate(pos, ModBlocks.HUNGRY_CHEST.get().defaultBlockState());
+        HungryChestBlockEntity chest = (HungryChestBlockEntity) level.getBlockEntity(pos);
+        int[] counts = new int[2];
+        Consumer<net.neoforged.neoforge.event.PlayLevelSoundEvent.AtPosition> positional = event -> {
+            if (event.getLevel() == level && event.getSound().value() == net.minecraft.sounds.SoundEvents.GENERIC_EAT
+                && event.getPosition().distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)) < 1) {
+                counts[0]++;
+                helper.assertTrue(event.getOriginalVolume() == 0.25F, "eating sound volume changed");
+                helper.assertTrue(event.getOriginalPitch() >= 0.8F && event.getOriginalPitch() <= 1.2F, "eating sound pitch changed");
+            }
+        };
+        Consumer<net.neoforged.neoforge.event.PlayLevelSoundEvent.AtEntity> attached = event -> {
+            if (event.getLevel() == level && event.getEntity().blockPosition().equals(pos)
+                && event.getSound().value() == net.minecraft.sounds.SoundEvents.GENERIC_EAT) counts[1]++;
+        };
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(positional);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(attached);
+        try {
+            for (int i = 0; i < 3; i++) {
+                var item = feedChest(helper, pos, new ItemStack(Items.COBBLESTONE, 10));
+                helper.assertTrue(item.isRemoved(), "fully absorbed item survived");
+            }
+            helper.assertValueEqual(counts[0], 3, "successive throws lost eating sounds");
+            for (int slot = 0; slot < chest.getContainerSize(); slot++) chest.setItem(slot, new ItemStack(Items.COBBLESTONE, 64));
+            chest.setItem(0, new ItemStack(Items.COBBLESTONE, 60));
+            var partial = feedChest(helper, pos, new ItemStack(Items.COBBLESTONE, 10));
+            helper.assertTrue(!partial.isRemoved() && partial.getItem().getCount() == 6, "partial absorption lost leftovers");
+            helper.assertValueEqual(counts[0], 4, "partial absorption has no sound");
+            var full = feedChest(helper, pos, new ItemStack(Items.COBBLESTONE, 10));
+            helper.assertTrue(!full.isRemoved() && full.getItem().getCount() == 10, "full chest changed the item");
+            helper.assertValueEqual(counts[0], 4, "full chest played an eating sound");
+            helper.assertValueEqual(counts[1], 0, "eating sound follows a discarded item entity");
+        } finally {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(positional);
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(attached);
+        }
+        helper.succeed();
+    }
+
+    private static net.minecraft.world.entity.item.ItemEntity feedChest(GameTestHelper helper, BlockPos pos, ItemStack stack) {
+        var level = helper.getLevel();
+        var item = new net.minecraft.world.entity.item.ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, stack);
+        level.addFreshEntity(item);
+        level.getBlockState(pos).entityInside(level, pos, item);
+        return item;
+    }
+
+    private static GolemBase lumberjack(GameTestHelper helper, long seed, GolemType type) {
+        var level = helper.getLevel();
+        for (BlockPos pos : BlockPos.betweenClosed(2, 1, 2, 22, 1, 22)) {
+            level.setBlockAndUpdate(helper.absolutePos(pos), Blocks.STONE.defaultBlockState());
+        }
+        GolemBase golem = golem(helper, type, 7);
+        BlockPos home = helper.absolutePos(new BlockPos(10, 2, 10));
+        golem.setHome(home, Direction.EAST);
+        golem.setPos(home.getX() + 0.5, home.getY(), home.getZ() + 0.5);
+        golem.getRandom().setSeed(seed);
+        return golem;
+    }
+
+    private static List<BlockPos> tree(GameTestHelper helper, BlockPos relative, net.minecraft.world.level.block.Block wood, int height, int width) {
+        var logs = new java.util.ArrayList<BlockPos>();
+        for (int x = 0; x < width; x++) for (int z = 0; z < width; z++) for (int y = 0; y < height; y++) {
+            BlockPos pos = helper.absolutePos(relative.offset(x, y, z));
+            helper.getLevel().setBlockAndUpdate(pos, wood.defaultBlockState());
+            logs.add(pos);
+        }
+        return logs;
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopoak")
+    public static void chopOak(GameTestHelper helper) { chopTree(helper, Blocks.OAK_LOG, 4, 1, 17, GolemType.WOOD); }
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopbirch")
+    public static void chopBirch(GameTestHelper helper) { chopTree(helper, Blocks.BIRCH_LOG, 4, 1, 31, GolemType.STRAW); }
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_choptall")
+    public static void chopTall(GameTestHelper helper) { chopTree(helper, Blocks.SPRUCE_LOG, 7, 1, 47, GolemType.IRON); }
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopwide")
+    public static void chopWide(GameTestHelper helper) { chopTree(helper, Blocks.DARK_OAK_LOG, 5, 2, 61, GolemType.IRON); }
+
+    private static void chopTree(GameTestHelper helper, net.minecraft.world.level.block.Block wood, int height, int width, long seed, GolemType type) {
+        GolemBase golem = lumberjack(helper, seed, type);
+        var logs = tree(helper, new BlockPos(14, 2, 10), wood, height, width);
+        helper.getLevel().addFreshEntity(golem);
+        helper.succeedWhen(() -> {
+            for (BlockPos log : logs) helper.assertFalse(helper.getLevel().getBlockState(log).is(wood), "lumberjack did not finish reachable tree");
+        });
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopunreachable")
+    public static void chopUnreachable(GameTestHelper helper) {
+        GolemBase golem = lumberjack(helper, 73, GolemType.IRON);
+        BlockPos blocked = new BlockPos(7, 2, 10);
+        tree(helper, blocked, Blocks.OAK_LOG, 4, 1);
+        for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++) {
+            if (x == 0 && z == 0) continue;
+            for (int y = 0; y < 4; y++) helper.getLevel().setBlockAndUpdate(helper.absolutePos(blocked.offset(x, y, z)), Blocks.BEDROCK.defaultBlockState());
+        }
+        var accessible = tree(helper, new BlockPos(14, 2, 10), Blocks.BIRCH_LOG, 4, 1);
+        helper.getLevel().addFreshEntity(golem);
+        helper.succeedWhen(() -> {
+            for (BlockPos log : accessible) helper.assertFalse(helper.getLevel().getBlockState(log).is(Blocks.BIRCH_LOG), "unreachable tree blocks other work");
+            helper.assertTrue(helper.getLevel().getBlockState(helper.absolutePos(blocked)).is(Blocks.OAK_LOG), "enclosed tree was harvested through a wall");
+        });
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopremoved")
+    public static void chopRemoved(GameTestHelper helper) {
+        GolemBase golem = lumberjack(helper, 89, GolemType.IRON);
+        var removed = tree(helper, new BlockPos(14, 2, 10), Blocks.OAK_LOG, 4, 1);
+        helper.getLevel().addFreshEntity(golem);
+        helper.runAfterDelay(25, () -> {
+            for (BlockPos log : removed) helper.getLevel().setBlockAndUpdate(log, Blocks.AIR.defaultBlockState());
+            var replacement = tree(helper, new BlockPos(10, 2, 14), Blocks.BIRCH_LOG, 4, 1);
+            helper.succeedWhen(() -> {
+                for (BlockPos log : replacement) helper.assertFalse(helper.getLevel().getBlockState(log).is(Blocks.BIRCH_LOG), "removed target stalls lumberjack");
+            });
+        });
+    }
+
+    @net.minecraft.gametest.framework.GameTest(template = "test/eldritch_regression", timeoutTicks = 1200, batch = "reported_chopcancelled")
+    public static void chopCancelled(GameTestHelper helper) {
+        GolemBase golem = lumberjack(helper, 97, GolemType.IRON);
+        var protectedLogs = tree(helper, new BlockPos(11, 2, 10), Blocks.OAK_LOG, 4, 1);
+        var allowedLogs = tree(helper, new BlockPos(10, 2, 14), Blocks.BIRCH_LOG, 4, 1);
+        int[] denied = {0};
+        Consumer<net.neoforged.neoforge.event.level.BlockEvent.BreakEvent> listener = event -> {
+            if (event.getLevel() == helper.getLevel() && protectedLogs.contains(event.getPos())) {
+                denied[0]++;
+                event.setCanceled(true);
+            }
+        };
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(listener);
+        helper.getLevel().addFreshEntity(golem);
+        helper.runAfterDelay(800, () -> {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);
+            helper.assertTrue(denied[0] > 0 && denied[0] <= 4, "lumberjack repeatedly retries protected tree without a cooldown");
+            for (BlockPos log : protectedLogs) helper.assertTrue(helper.getLevel().getBlockState(log).is(Blocks.OAK_LOG), "protected log removed");
+            for (BlockPos log : allowedLogs) helper.assertFalse(helper.getLevel().getBlockState(log).is(Blocks.BIRCH_LOG), "denied harvest stalls other work");
+            helper.succeed();
+        });
+    }
 }

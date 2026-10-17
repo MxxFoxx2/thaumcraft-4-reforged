@@ -1,18 +1,25 @@
 package thaumcraft.entity.golem.goal.work;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 import thaumcraft.entity.golem.GolemBase;
 import thaumcraft.platform.GolemActions;
 
@@ -26,6 +33,9 @@ public final class LogHarvestGoal extends Goal {
     private int maxDelay = 1;
     private int step = 1;
     private int count;
+    private Path approach;
+    private boolean finished;
+    private final Map<BlockPos, Long> rejected = new HashMap<>();
 
     public LogHarvestGoal(GolemBase golem) {
         this.golem = golem;
@@ -36,6 +46,7 @@ public final class LogHarvestGoal extends Goal {
     @Override
     public boolean canUse() {
         if (!golem.isWorking() || delay >= 0 || golem.tickCount % GOLEM_DELAY != 0 || !golem.getNavigation().isDone()) return false;
+        rejected.values().removeIf(until -> until <= golem.level().getGameTime());
         target = findLog();
         if (target == null) return false;
         targetState = golem.level().getBlockState(target);
@@ -47,23 +58,32 @@ public final class LogHarvestGoal extends Goal {
         BlockState state = target == null ? null : golem.level().getBlockState(target);
         return golem.isWorking()
             && target != null
+            && !finished
             && state == targetState
             && isLog(state)
-            && count-- > 0
-            && (delay > 0 || isLog(state) || !golem.getNavigation().isDone());
+            && count-- > 0;
     }
 
     @Override
     public void start() {
         count = 200;
-        golem.getNavigation().moveTo(target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5, 1.0);
+        finished = false;
+        if (inReach(target)) {
+            golem.getNavigation().stop();
+        } else if (approach == null || !golem.getNavigation().moveTo(approach, 1.0)) {
+            rejectTarget();
+        }
     }
 
     @Override
     public void tick() {
         if (target == null) return;
         golem.getLookControl().setLookAt(target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5, 30, 30);
-        if (golem.distanceToSqr(target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5) > 4.0) return;
+        if (!inReach(target)) {
+            if (golem.getNavigation().isDone()) rejectTarget();
+            return;
+        }
+        golem.getNavigation().stop();
         if (delay < 0) {
             delay = (int) Math.max(5.0F, (20.0F - golem.getGolemStrength() * 3.0F) * targetState.getDestroySpeed(golem.level(), target));
             maxDelay = delay;
@@ -80,10 +100,14 @@ public final class LogHarvestGoal extends Goal {
             if (golem.level() instanceof ServerLevel server) server.destroyBlockProgress(golem.getId(), target, (int) (9.0F * (1.0F - (float) delay / maxDelay)));
         }
         if (delay == 0) {
-            harvest();
+            if (!harvest()) {
+                rejectTarget();
+                return;
+            }
             if (isLog(golem.level().getBlockState(target))) {
                 delay = -1;
                 targetState = golem.level().getBlockState(target);
+                approach = null;
                 start();
             } else {
                 checkAdjacent();
@@ -97,6 +121,8 @@ public final class LogHarvestGoal extends Goal {
         delay = -1;
         target = null;
         targetState = null;
+        approach = null;
+        golem.getNavigation().stop();
     }
 
     private BlockPos findLog() {
@@ -114,7 +140,10 @@ public final class LogHarvestGoal extends Goal {
                 lowest = candidate.below(down);
                 distance = golem.distanceToSqr(x + 0.5, y - down + 0.5, z + 0.5);
             }
-            return lowest;
+            if (rejected.containsKey(lowest)) continue;
+            approach = inReach(lowest) ? null : findApproach(lowest);
+            if (approach != null || inReach(lowest)) return lowest;
+            rejected.put(lowest.immutable(), golem.level().getGameTime() + 200);
         }
         return null;
     }
@@ -126,7 +155,12 @@ public final class LogHarvestGoal extends Goal {
             if (Math.abs(home.getX() - pos.getX()) <= range
                 && Math.abs(home.getY() - pos.getY()) <= range
                 && Math.abs(home.getZ() - pos.getZ()) <= range
+                && !rejected.containsKey(pos)
                 && isLog(golem.level().getBlockState(pos))) {
+                Path path = inReach(pos) ? null : findApproach(pos);
+                if (path == null && !inReach(pos)) continue;
+                if (golem.level() instanceof ServerLevel server) server.destroyBlockProgress(golem.getId(), target, -1);
+                approach = path;
                 target = pos;
                 targetState = golem.level().getBlockState(pos);
                 delay = -1;
@@ -134,16 +168,50 @@ public final class LogHarvestGoal extends Goal {
                 return;
             }
         }
+        finished = true;
     }
 
-    private void harvest() {
+    private boolean harvest() {
         count = 200;
         if (golem.level() instanceof ServerLevel server) {
-            server.levelEvent(2001, target, Block.getId(targetState));
             BlockPos furthest = furthestLog(target, targetState.getBlock());
-            GolemActions.harvest(golem, furthest);
-            golem.startActionTimer();
+            BlockState before = server.getBlockState(furthest);
+            boolean worked = GolemActions.harvest(golem, furthest) && server.getBlockState(furthest) != before;
+            if (worked) {
+                server.levelEvent(2001, target, Block.getId(targetState));
+                golem.startActionTimer();
+            }
+            return worked;
         }
+        return false;
+    }
+
+    private boolean inReach(BlockPos pos) {
+        return golem.distanceToSqr(Vec3.atCenterOf(pos)) <= 4.0;
+    }
+
+    private Path findApproach(BlockPos log) {
+        List<BlockPos> candidates = new ArrayList<>();
+        for (BlockPos pos : BlockPos.betweenClosed(log.offset(-1, -1, -1), log.offset(1, 1, 1))) {
+            Vec3 feet = Vec3.atBottomCenterOf(pos);
+            if (feet.distanceToSqr(Vec3.atCenterOf(log)) > 4.0
+                || !golem.level().hasChunkAt(pos)
+                || !golem.level().getBlockState(pos.below()).isFaceSturdy(golem.level(), pos.below(), Direction.UP)
+                || !golem.level().noCollision(golem, golem.getBoundingBox().move(feet.subtract(golem.position())))) continue;
+            candidates.add(pos.immutable());
+        }
+        candidates.sort(Comparator.comparingDouble(pos -> golem.distanceToSqr(Vec3.atBottomCenterOf(pos))));
+        for (BlockPos pos : candidates) {
+            Path path = golem.getNavigation().createPath(pos, 0);
+            if (path != null && path.canReach()) return path;
+        }
+        return null;
+    }
+
+    private void rejectTarget() {
+        rejected.put(target.immutable(), golem.level().getGameTime() + 200);
+        finished = true;
+        golem.getNavigation().stop();
     }
 
     private BlockPos furthestLog(BlockPos origin, net.minecraft.world.level.block.Block block) {

@@ -90,7 +90,7 @@ public final class WandSpecialRenderer {
     private static final int BLEND_ADDITIVE = 1;
 
     private static void animate(PoseStack poseStack, State state, LegacyItemView view) {
-        if (state.useTicks() < 0.0F) {
+        if ((view != LegacyItemView.FIRST_PERSON && view != LegacyItemView.EQUIPPED) || state.useTicks() < 0.0F) {
             return;
         }
         float t = Math.min(state.useTicks(), 3.0F);

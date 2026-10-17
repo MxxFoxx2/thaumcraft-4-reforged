@@ -74,12 +74,13 @@ public final class GolemRenderer extends MobRenderer<GolemBase, GolemModel> {
         ItemStack carried = entity.getCarriedForDisplay();
         state.carrying = !carried.isEmpty() && entity.deathTime == 0 && !state.fishing;
         state.carriedJar = entity.getCore() == 6 || carried.getItem() instanceof thaumcraft.essentia.FilledJarItem;
-        state.carriedBlock = carried.getItem() instanceof BlockItem && !state.carriedJar;
+        state.carriedBlock = false;
         state.carriedScale = state.carriedJar && entity.getCore() == 6
             ? 0.5F + Math.min(64, entity.getCarryLimit()) / 128.0F
             : 1.0F;
         if (state.carrying) {
             itemResolver.updateForLiving(state.carried, carried, ItemDisplayContext.NONE, entity);
+            state.carriedBlock = carried.getItem() instanceof BlockItem && !state.carriedJar && state.carried.usesBlockLight();
         } else {
             state.carried.clear();
         }
@@ -191,21 +192,8 @@ public final class GolemRenderer extends MobRenderer<GolemBase, GolemModel> {
                 return;
             }
             poseStack.pushPose();
-            poseStack.scale(0.4F * state.carriedScale, 0.4F * state.carriedScale, 0.4F * state.carriedScale);
-            if (state.carriedBlock) {
-                poseStack.translate(0.0F, 2.5F, -1.25F);
-                poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
-                poseStack.mulPose(Axis.XP.rotationDegrees(20.0F));
-                poseStack.mulPose(Axis.YP.rotationDegrees(45.0F));
-                poseStack.translate(-0.5F, -0.5F, -0.5F);
-            } else {
-                poseStack.translate(-0.5F, 2.5F, state.carriedJar ? -1.8F : -1.25F);
-                poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
-                poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
-                poseStack.mulPose(Axis.ZN.rotationDegrees(335.0F));
-                poseStack.mulPose(Axis.YN.rotationDegrees(50.0F));
-                poseStack.translate(0.0F, 0.0F, -0.5F);
-            }
+            poseStack.mulPose(state.carriedJar ? GolemItemTransforms.carriedJar(state.carriedScale)
+                : state.carriedBlock ? GolemItemTransforms.carriedBlock() : GolemItemTransforms.carriedItem());
             state.carried.submit(poseStack, collector, light, OverlayTexture.NO_OVERLAY, state.outlineColor);
             poseStack.popPose();
         }

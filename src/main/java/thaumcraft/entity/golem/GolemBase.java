@@ -180,9 +180,12 @@ public class GolemBase extends PathfinderMob implements MenuProvider {
 
     public void updateCarried() {
         ItemStack display = getCarried().copy();
-        if (display.isEmpty() && getCore() == 5 && !fluidCarried.isEmpty()) display = new ItemStack(fluidCarried.getFluid().getBucket());
+        if (display.isEmpty() && getCore() == 5) {
+            display = new ItemStack(fluidCarried.isEmpty() ? net.minecraft.world.item.Items.BUCKET : fluidCarried.getFluid().getBucket());
+            if (display.isEmpty()) display = new ItemStack(net.minecraft.world.item.Items.BUCKET);
+        }
         if (display.isEmpty() && getCore() == 6) {
-            display = new ItemStack(ModBlocks.WARDED_JAR.get());
+            display = new ItemStack(ModBlocks.FILLED_JAR.get());
             if (essentia != null && essentiaAmount > 0) thaumcraft.aspect.AspectKeys.ASPECTS.set(display, new thaumcraft.aspect.AspectList().add(essentia, (int) (64.0F * essentiaAmount / getCarryLimit())));
         }
         entityData.set(DISPLAY, display);
@@ -253,6 +256,7 @@ public class GolemBase extends PathfinderMob implements MenuProvider {
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(2 + getGolemStrength() + getUpgradeAmount(1) + (state.decoration().contains("M") ? 2 : 0));
         setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.WATER, type.ordinal() >= 5 ? 0 : 8);
         rebuildGoals();
+        updateCarried();
     }
 
     public static boolean hasInventory(int core) { return core == 0 || core == 1 || core == 2 || core == 5 || core == 8; }

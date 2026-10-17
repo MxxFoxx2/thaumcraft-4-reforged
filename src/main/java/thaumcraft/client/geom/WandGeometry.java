@@ -4,7 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public final class WandGeometry {
-    private static final float TEXTURE_WIDTH = 64.0F;
+    private static final float TEXTURE_WIDTH = 32.0F;
     private static final float TEXTURE_HEIGHT = 32.0F;
 
     private WandGeometry() {
@@ -170,12 +170,12 @@ public final class WandGeometry {
         float rightU = textureX + depth + width;
         float backU = textureX + 2 * depth + width;
         float sideV = textureY + depth;
-        quad(sink, matrix, light, argb, x1, y2, z1, x2, y2, z1, x2, y1, z1, x1, y1, z1, frontU, sideV, frontU + width, sideV + height);
-        quad(sink, matrix, light, argb, x2, y2, z2, x1, y2, z2, x1, y1, z2, x2, y1, z2, backU, sideV, backU + width, sideV + height);
-        quad(sink, matrix, light, argb, x2, y2, z1, x2, y2, z2, x2, y1, z2, x2, y1, z1, rightU, sideV, rightU + depth, sideV + height);
-        quad(sink, matrix, light, argb, x1, y2, z2, x1, y2, z1, x1, y1, z1, x1, y1, z2, textureX, sideV, textureX + depth, sideV + height);
-        quad(sink, matrix, light, argb, x1, y1, z1, x2, y1, z1, x2, y1, z2, x1, y1, z2, frontU, textureY, frontU + width, textureY + depth);
-        quad(sink, matrix, light, argb, x1, y2, z2, x2, y2, z2, x2, y2, z1, x1, y2, z1, rightU, textureY, rightU + width, textureY + depth);
+        quad(sink, matrix, light, argb, x2, y1, z2, x2, y1, z1, x2, y2, z1, x2, y2, z2, rightU, sideV, rightU + depth, sideV + height);
+        quad(sink, matrix, light, argb, x1, y1, z1, x1, y1, z2, x1, y2, z2, x1, y2, z1, textureX, sideV, textureX + depth, sideV + height);
+        quad(sink, matrix, light, argb, x2, y1, z2, x1, y1, z2, x1, y1, z1, x2, y1, z1, frontU, textureY, frontU + width, textureY + depth);
+        quad(sink, matrix, light, argb, x2, y2, z1, x1, y2, z1, x1, y2, z2, x2, y2, z2, rightU, sideV, rightU + width, textureY);
+        quad(sink, matrix, light, argb, x2, y1, z1, x1, y1, z1, x1, y2, z1, x2, y2, z1, frontU, sideV, frontU + width, sideV + height);
+        quad(sink, matrix, light, argb, x1, y1, z2, x2, y1, z2, x2, y2, z2, x1, y2, z2, backU, sideV, backU + width, sideV + height);
     }
 
     private static void quad(
@@ -202,12 +202,12 @@ public final class WandGeometry {
     ) {
         Vector3f point = new Vector3f();
         matrix.transformPosition(ax, ay, az, point);
-        sink.vertex(point.x, point.y, point.z, u0 / TEXTURE_WIDTH, v1 / TEXTURE_HEIGHT, argb, light);
-        matrix.transformPosition(bx, by, bz, point);
-        sink.vertex(point.x, point.y, point.z, u1 / TEXTURE_WIDTH, v1 / TEXTURE_HEIGHT, argb, light);
-        matrix.transformPosition(cx, cy, cz, point);
         sink.vertex(point.x, point.y, point.z, u1 / TEXTURE_WIDTH, v0 / TEXTURE_HEIGHT, argb, light);
-        matrix.transformPosition(dx, dy, dz, point);
+        matrix.transformPosition(bx, by, bz, point);
         sink.vertex(point.x, point.y, point.z, u0 / TEXTURE_WIDTH, v0 / TEXTURE_HEIGHT, argb, light);
+        matrix.transformPosition(cx, cy, cz, point);
+        sink.vertex(point.x, point.y, point.z, u0 / TEXTURE_WIDTH, v1 / TEXTURE_HEIGHT, argb, light);
+        matrix.transformPosition(dx, dy, dz, point);
+        sink.vertex(point.x, point.y, point.z, u1 / TEXTURE_WIDTH, v1 / TEXTURE_HEIGHT, argb, light);
     }
 }

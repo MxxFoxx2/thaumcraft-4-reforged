@@ -10,6 +10,7 @@ public final class ModPayloads {
     }
 
     public static void register() {
+        ModNetwork.toClient(BoreDigPayload.TYPE, BoreDigPayload.STREAM_CODEC);
         ModNetwork.toClient(BeamPulsePayload.TYPE, BeamPulsePayload.STREAM_CODEC);
         ModNetwork.toClient(AspectTagsPayload.TYPE, AspectTagsPayload.STREAM_CODEC);
         ModNetwork.toClient(NodeZapPayload.TYPE, NodeZapPayload.STREAM_CODEC);

@@ -514,6 +514,11 @@ public final class ClientFx implements FxProxy {
     }
 
     @Override
+    public void wardingStone(Level level, BlockPos pos) {
+        DeviceFx.wardingStone(level, pos);
+    }
+
+    @Override
     public void nitorParticles(Level level, BlockPos pos) {
         DeviceFx.nitorParticles(level, pos);
     }

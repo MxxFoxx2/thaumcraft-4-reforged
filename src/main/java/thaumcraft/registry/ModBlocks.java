@@ -778,7 +778,8 @@ public final class ModBlocks {
     }
 
     private static BlockBehaviour.Properties jar(BlockBehaviour.Properties properties) {
-        return properties.mapColor(MapColor.NONE).strength(0.3F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 9);
+        return properties.mapColor(MapColor.NONE).strength(0.3F).sound(SoundType.GLASS).noOcclusion().lightLevel(state -> 9)
+            .isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false);
     }
 
     private static BlockBehaviour.Properties tableProperties(BlockBehaviour.Properties properties) {

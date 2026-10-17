@@ -8,6 +8,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface FxProxy {
+    default void wardingStone(Level level, BlockPos pos) {
+    }
+
     default void beamPulse(Level level, Entity source, Entity target, int color) {
     }
 

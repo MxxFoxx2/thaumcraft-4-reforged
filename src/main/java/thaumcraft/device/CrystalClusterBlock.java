@@ -36,6 +36,16 @@ public class CrystalClusterBlock extends Block implements EntityBlock, InfusionS
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.UP));
     }
 
+    @Override
+    protected boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+        return true;
+    }
+
+    @Override
+    protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
+        return 0;
+    }
+
     public int getKind() {
         return kind;
     }
@@ -73,6 +83,11 @@ public class CrystalClusterBlock extends Block implements EntityBlock, InfusionS
             return Blocks.AIR.defaultBlockState();
         }
         return super.updateShape(state, directionToNeighbour, neighbourState, level, pos, neighbourPos);
+    }
+
+    @Override
+    protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos) {
+        return 1.0F;
     }
 
     @Override

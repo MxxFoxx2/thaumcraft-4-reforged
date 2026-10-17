@@ -25,6 +25,7 @@ import thaumcraft.aspect.AspectList;
 import thaumcraft.client.platform.EntityQuadSink;
 import thaumcraft.client.platform.TcRenderTypes;
 import thaumcraft.item.gear.Goggles;
+import thaumcraft.node.NodeView;
 import thaumcraft.research.Knowledge;
 
 @EventBusSubscriber(modid = Thaumcraft.MODID, value = Dist.CLIENT)
@@ -53,10 +54,15 @@ public final class AspectContainerOverlay {
             return;
         }
         BlockPos pos = hit.getBlockPos();
-        if (!(minecraft.level.getBlockEntity(pos) instanceof AspectContainer container)) {
+        var entity = minecraft.level.getBlockEntity(pos);
+        AspectList contents;
+        if (entity instanceof NodeView node) {
+            contents = node.getAspects();
+        } else if (entity instanceof AspectContainer container) {
+            contents = container.getAspects();
+        } else {
             return;
         }
-        AspectList contents = container.getAspects();
         if (contents == null || contents.isEmpty()) {
             return;
         }

@@ -340,12 +340,19 @@ public final class GolemGameTests {
             var block = jars.get(index).defaultBlockState();
             helper.assertTrue(block.getShadeBrightness(level, base) == 1.0F, "glass jar darkens ambient lighting");
             helper.assertTrue(block.getLightBlock(level, base) == 0 && block.propagatesSkylightDown(level, base), "jar blocks skylight");
+            for (int y = base.getY() + 6; y < level.getMaxBuildHeight(); y++) {
+                level.removeBlock(new BlockPos(base.getX(), y, base.getZ()), false);
+            }
             for (int y = 0; y < 6; y++) level.setBlockAndUpdate(base.above(y), block);
         }
         helper.succeedWhen(() -> {
             for (int index = 0; index < jars.size(); index++) {
                 BlockPos base = helper.absolutePos(new BlockPos(12 + index, 2, 12));
-                helper.assertValueEqual(level.getBrightness(net.minecraft.world.level.LightLayer.SKY, base), 15, "stack of jars reduces skylight");
+                helper.assertValueEqual(level.getBrightness(net.minecraft.world.level.LightLayer.SKY, base), 15,
+                    "stack of jars reduces skylight: " + jars.get(index) + ", above="
+                        + level.getBrightness(net.minecraft.world.level.LightLayer.SKY, base.above(6))
+                        + ", seesSky=" + level.canSeeSky(base.above(6)) + ", height="
+                        + level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, base.getX(), base.getZ()));
             }
         });
     }

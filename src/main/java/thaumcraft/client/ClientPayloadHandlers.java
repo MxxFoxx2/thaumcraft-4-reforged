@@ -1,36 +1,38 @@
 package thaumcraft.client;
 
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import thaumcraft.aspect.AspectRegistry;
-import thaumcraft.platform.DataAttachments;
+import thaumcraft.client.fx.ShieldRunesFx;
+import thaumcraft.client.hud.GearHud;
 import thaumcraft.client.platform.ClientNetwork;
+import thaumcraft.client.platform.WorldFxRenderer;
 import thaumcraft.client.research.ResearchNotifications;
+import thaumcraft.device.ArcaneBoreBlockEntity;
 import thaumcraft.fx.Fx;
 import thaumcraft.infusion.InfusionMatrixBlockEntity;
-import thaumcraft.platform.DataAttachments.SyncPayload;
 import thaumcraft.network.AspectDiscoveryPayload;
 import thaumcraft.network.AspectPoolPayload;
 import thaumcraft.network.AspectTagsPayload;
 import thaumcraft.network.BeamPulsePayload;
 import thaumcraft.network.BlockBubbleFxPayload;
 import thaumcraft.network.BlockSparkleFxPayload;
-import thaumcraft.network.RunicChargePayload;
-import thaumcraft.network.ShieldFxPayload;
-import thaumcraft.network.ShockZapPayload;
-import thaumcraft.client.fx.ShieldRunesFx;
-import thaumcraft.client.hud.GearHud;
-import thaumcraft.client.platform.WorldFxRenderer;
+import thaumcraft.network.BoreDigPayload;
 import thaumcraft.network.EssentiaSourceFxPayload;
 import thaumcraft.network.InfusionSourceFxPayload;
 import thaumcraft.network.NodeZapPayload;
 import thaumcraft.network.ResearchCompletePayload;
+import thaumcraft.network.RunicChargePayload;
+import thaumcraft.network.ShieldFxPayload;
+import thaumcraft.network.ShockZapPayload;
 import thaumcraft.network.VisDrainFxPayload;
-import thaumcraft.network.WarpMessagePayload;
 import thaumcraft.network.WarpEventPayload;
+import thaumcraft.network.WarpMessagePayload;
+import thaumcraft.platform.DataAttachments.SyncPayload;
+import thaumcraft.platform.DataAttachments;
 import thaumcraft.registry.ModSounds;
 
 public final class ClientPayloadHandlers {
@@ -38,6 +40,12 @@ public final class ClientPayloadHandlers {
     }
 
     public static void register() {
+        ClientNetwork.handle(BoreDigPayload.TYPE, (payload, player) -> {
+            Level level = player.level();
+            if (level.getBlockEntity(payload.bore()) instanceof ArcaneBoreBlockEntity bore) {
+                bore.receiveDig(payload.target(), payload.stateId(), payload.broken());
+            }
+        });
         ClientNetwork.handle(SyncPayload.TYPE, DataAttachments::receive);
         ClientNetwork.handle(BeamPulsePayload.TYPE, ClientPayloadHandlers::beamPulse);
         ClientNetwork.handle(AspectTagsPayload.TYPE, ClientPayloadHandlers::aspectTags);

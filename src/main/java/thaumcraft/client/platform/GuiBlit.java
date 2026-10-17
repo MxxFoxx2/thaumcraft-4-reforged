@@ -14,6 +14,24 @@ public final class GuiBlit {
         blit(graphics, texture, x, y, width, height, u, v, width, height, textureWidth, textureHeight, color);
     }
 
+    public static void sparkle(GuiGraphics graphics, ResourceLocation texture, int x, int y, int frame, int color) {
+        graphics.flush();
+        float[] previous = RenderSystem.getShaderColor().clone();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
+            com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
+        RenderSystem.disableDepthTest();
+        try {
+            RenderSystem.setShaderColor(FastColor.ARGB32.red(color) / 255.0F, FastColor.ARGB32.green(color) / 255.0F,
+                FastColor.ARGB32.blue(color) / 255.0F, FastColor.ARGB32.alpha(color) / 255.0F);
+            graphics.blit(texture, x - 4, y - 4, 8, 8, frame * 16.0F, 112.0F, 16, 16, 256, 256);
+        } finally {
+            RenderSystem.setShaderColor(previous[0], previous[1], previous[2], previous[3]);
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.enableDepthTest();
+        }
+    }
+
     private GuiBlit() {
     }
 

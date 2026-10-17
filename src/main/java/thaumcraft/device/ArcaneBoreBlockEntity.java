@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -14,10 +15,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Containers;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -32,24 +33,25 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import thaumcraft.compat.ValueInput;
-import thaumcraft.compat.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import javax.annotation.Nullable;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectHelper;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.blockentity.TcBlockEntity;
+import thaumcraft.compat.ValueInput;
+import thaumcraft.compat.ValueOutput;
 import thaumcraft.item.armor.ArmorSupport;
 import thaumcraft.item.gear.Repairable;
 import thaumcraft.item.gear.RepairableExtended;
 import thaumcraft.item.tool.ElementalPickaxeItem;
 import thaumcraft.item.tool.SpecialMining;
+import thaumcraft.network.BoreDigPayload;
+import thaumcraft.platform.ModNetwork;
 import thaumcraft.platform.Transfer;
 import thaumcraft.registry.ModBlockEntities;
 import thaumcraft.registry.ModBlocks;
@@ -62,8 +64,6 @@ import thaumcraft.wand.focus.FocusUpgradeType;
 public class ArcaneBoreBlockEntity extends TcBlockEntity implements Container, MenuProvider {
     public static final int FOCUS_SLOT = 0;
     public static final int PICKAXE_SLOT = 1;
-    public static final int EVENT_DIG = 4;
-    public static final int EVENT_BROKEN = 99;
     public static final int MAX_RADIUS = 2;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(2, ItemStack.EMPTY);
@@ -490,7 +490,8 @@ public class ArcaneBoreBlockEntity extends TcBlockEntity implements Container, M
         if (silk) {
             treasure = 0;
         }
-        level.blockEvent(pos, ModBlocks.ARCANE_BORE.get(), EVENT_BROKEN, Block.getId(targetState));
+        ModNetwork.sendToNear(level, null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 64.0,
+            new BoreDigPayload(pos, target, Block.getId(targetState), true));
         for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(target).inflate(1.0))) {
             drops.add(entity.getItem().copy());
             entity.discard();
@@ -654,10 +655,9 @@ public class ArcaneBoreBlockEntity extends TcBlockEntity implements Container, M
     }
 
     private void sendDigEvent(ServerLevel level, BlockPos pos) {
-        int dx = digX - pos.getX() + 64;
-        int dy = digY - pos.getY() + 64;
-        int dz = digZ - pos.getZ() + 64;
-        level.blockEvent(pos, getBlockState().getBlock(), EVENT_DIG, (dx & 0xFF) << 16 | (dy & 0xFF) << 8 | dz & 0xFF);
+        BlockPos target = new BlockPos(digX, digY, digZ);
+        ModNetwork.sendToNear(level, null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 64.0,
+            new BoreDigPayload(pos, target, Block.getId(level.getBlockState(target)), false));
     }
 
     private void digClient(Level level, BlockPos pos) {
@@ -683,7 +683,7 @@ public class ArcaneBoreBlockEntity extends TcBlockEntity implements Container, M
             paused = 0;
             beamLength = 64;
             BlockPos target = new BlockPos(digX, digY, digZ);
-            maxPause = 10 + Math.max(10 - speed, (int) (level.getBlockState(target).getDestroySpeed(level, target) * 2.0F) - speed * 2);
+            maxPause = 10 + Math.max(10 - speed, (int) ((digState == null ? level.getBlockState(target) : digState).getDestroySpeed(level, target) * 2.0F) - speed * 2);
             if (speedyTime <= 0.0F) {
                 maxPause *= 4;
             }
@@ -753,7 +753,7 @@ public class ArcaneBoreBlockEntity extends TcBlockEntity implements Container, M
             by = hit.getLocation().y;
             bz = hit.getLocation().z;
             impact = 5;
-            BlockPos hitPos = BlockPos.containing(bx, by, bz);
+            BlockPos hitPos = hit.getBlockPos();
             BlockState hitState = level.getBlockState(hitPos);
             if (!hitState.isAir()) {
                 MachineFx.get().boreDig(level, hitPos, pos.relative(orientation), hitState);
@@ -762,47 +762,30 @@ public class ArcaneBoreBlockEntity extends TcBlockEntity implements Container, M
         topRotation += beamLength / 6;
         beam1 = MachineFx.get().boreBeam(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, bx, by, bz, 1, 65382, true, impact > 0 ? 2.0F : 0.0F, beam1, impact);
         beam2 = MachineFx.get().boreBeam(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, bx, by, bz, 2, 16746581, false, impact > 0 ? 2.0F : 0.0F, beam2, impact);
-        BlockPos dig = new BlockPos(digX, digY, digZ);
-        if (digState != null && level.getBlockState(dig).isAir() && !digState.isAir()) {
-            blockBrokenFx(level, digState);
+    }
+
+    public void receiveDig(BlockPos target, int stateId, boolean broken) {
+        if (level == null || !level.isClientSide()) {
+            return;
+        }
+        BlockState state = Block.stateById(stateId);
+        if (broken) {
+            if (!state.isAir()) {
+                blockBrokenFx(level, target, state);
+            }
             digState = null;
+        } else {
+            digX = target.getX();
+            digY = target.getY();
+            digZ = target.getZ();
+            toDig = true;
+            digState = state;
         }
     }
 
-    @Override
-    public boolean triggerEvent(int id, int param) {
-        if (level == null) {
-            return false;
-        }
-        if (id == EVENT_DIG) {
-            if (level.isClientSide()) {
-                int dx = (param >> 16 & 0xFF) - 64;
-                int dy = (param >> 8 & 0xFF) - 64;
-                int dz = (param & 0xFF) - 64;
-                digX = worldPosition.getX() + dx;
-                digY = worldPosition.getY() + dy;
-                digZ = worldPosition.getZ() + dz;
-                toDig = true;
-                digState = level.getBlockState(new BlockPos(digX, digY, digZ));
-            }
-            return true;
-        }
-        if (id == EVENT_BROKEN) {
-            if (level.isClientSide()) {
-                BlockState broken = Block.stateById(param);
-                if (!broken.isAir()) {
-                    blockBrokenFx(level, broken);
-                }
-            }
-            return true;
-        }
-        return super.triggerEvent(id, param);
-    }
-
-    private void blockBrokenFx(Level level, BlockState broken) {
-        BlockPos dig = new BlockPos(digX, digY, digZ);
+    private void blockBrokenFx(Level level, BlockPos dig, BlockState broken) {
         var sound = broken.getSoundType();
-        level.playLocalSound(digX + 0.5F, digY + 0.5F, digZ + 0.5F, sound.getBreakSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F, false);
+        level.playLocalSound(dig.getX() + 0.5F, dig.getY() + 0.5F, dig.getZ() + 0.5F, sound.getBreakSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F, false);
         for (int index = 0; index < MachineFx.get().particleCount(10); index++) {
             MachineFx.get().boreDig(level, dig, worldPosition.relative(orientation), broken);
         }

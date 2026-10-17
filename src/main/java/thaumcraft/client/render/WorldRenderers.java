@@ -38,6 +38,7 @@ public final class WorldRenderers {
         event.registerBlockEntityRenderer(ModBlockEntities.BELLOWS.get(), BellowsRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.FLUX_SCRUBBER.get(), FluxScrubberRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ARCANE_WORKBENCH.get(), ArcaneWorkbenchRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.FOCAL_MANIPULATOR.get(), FocalManipulatorRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.VIS_CHARGE_RELAY.get(), ChargeRelayRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.DECONSTRUCTION_TABLE.get(), DeconstructionTableRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.PEDESTAL.get(), ArcanePedestalRenderer::new);

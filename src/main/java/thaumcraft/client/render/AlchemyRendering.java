@@ -80,13 +80,12 @@ public final class AlchemyRendering {
 
     public static void crucibleWater(MultiBufferSource buffers, PoseStack poseStack, float height, int argb, int light) {
         TextureAtlasSprite sprite = EssentiaRendering.blockSprite(ResourceLocation.withDefaultNamespace("block/water_still"));
-        ItemGeometry.solid(buffers, poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> doubleSided(
-            sink,
-            new float[][] {{0.0F, height, 0.0F}, {0.0F, height, 1.0F}, {1.0F, height, 1.0F}, {1.0F, height, 0.0F}},
-            new float[][] {{sprite.getU0(), sprite.getV0()}, {sprite.getU0(), sprite.getV1()}, {sprite.getU1(), sprite.getV1()}, {sprite.getU1(), sprite.getV0()}},
-            argb,
-            light
-        ));
+        ItemGeometry.solid(buffers, poseStack, TextureAtlas.LOCATION_BLOCKS, true, sink -> {
+            sink.vertex(0.0F, height, 0.0F, sprite.getU0(), sprite.getV0(), argb, light);
+            sink.vertex(0.0F, height, 1.0F, sprite.getU0(), sprite.getV1(), argb, light);
+            sink.vertex(1.0F, height, 1.0F, sprite.getU1(), sprite.getV1(), argb, light);
+            sink.vertex(1.0F, height, 0.0F, sprite.getU1(), sprite.getV0(), argb, light);
+        });
     }
 
     private static void rotateAlembic(PoseStack poseStack, Direction facing, Axis axis) {

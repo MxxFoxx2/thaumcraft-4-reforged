@@ -1,5 +1,6 @@
 {
   "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
   "textures": {
     "particle": "thaumcraft:block/crucible3",
     "side": "thaumcraft:block/crucible3",
@@ -149,6 +150,5 @@
         }
       }
     }
-  ],
-  "render_type": "minecraft:translucent"
+  ]
 }

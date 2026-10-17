@@ -233,6 +233,7 @@ def flat(face, start, end, texture):
 def crucible(ctx):
     ctx.block_model("crucible", {
         "parent": "minecraft:block/block",
+        **({"render_type": "minecraft:cutout"} if ctx.profile.explicit_render_types else {}),
         "textures": {
             "particle": ctx.ref("crucible3"), "side": ctx.ref("crucible3"), "top": ctx.ref("crucible1"),
             "bottom": ctx.ref("crucible2"), "inner": ctx.ref("crucible5"), "floor": ctx.ref("crucible6"),

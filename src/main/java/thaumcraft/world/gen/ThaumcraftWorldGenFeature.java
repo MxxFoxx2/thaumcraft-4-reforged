@@ -3,7 +3,6 @@ package thaumcraft.world.gen;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
@@ -19,7 +18,6 @@ import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.neoforged.neoforge.common.Tags;
 import thaumcraft.Thaumcraft;
-import thaumcraft.aspect.Aspect;
 import thaumcraft.registry.ModBlocks;
 import thaumcraft.world.WorldGenConfig;
 import thaumcraft.world.tree.GreatwoodTreeGenerator;
@@ -64,7 +62,7 @@ public class ThaumcraftWorldGenFeature extends Feature<NoneFeatureConfiguration>
         if (WorldGenConfig.genTrees && !flat) {
             generateVegetation(level, random, chunkX, chunkZ);
         }
-        generateOres(level, random, chunkX, chunkZ);
+        OreGeneration.generate(level, random, chunkX, chunkZ);
         if (WorldGenConfig.genAura) {
             if (NodeHooks.templeNode(level, random, chunkX, chunkZ)) {
                 auraGen = true;
@@ -110,68 +108,6 @@ public class ThaumcraftWorldGenFeature extends Feature<NoneFeatureConfiguration>
         if (sandy && biome.value().getBaseTemperature() > 1.0F && random.nextInt(30) == 0) {
             generateFlowers(level, random, x, y, z, ModBlocks.CINDERPEARL.get().defaultBlockState());
         }
-    }
-
-    private static void generateOres(WorldGenLevel level, Random random, int chunkX, int chunkZ) {
-        if (WorldGenConfig.genCinnibar) {
-            for (int i = 0; i < 18; i++) {
-                int x = chunkX * 16 + random.nextInt(16);
-                int y = random.nextInt(256 / 5);
-                int z = chunkZ * 16 + random.nextInt(16);
-                if (LegacyGen.get(level, x, y, z).is(BlockTags.STONE_ORE_REPLACEABLES)) {
-                    LegacyGen.set(level, x, y, z, ModBlocks.CINNABAR_ORE.get().defaultBlockState());
-                }
-            }
-        }
-        if (WorldGenConfig.genAmber) {
-            for (int i = 0; i < 20; i++) {
-                int x = chunkX * 16 + random.nextInt(16);
-                int z = chunkZ * 16 + random.nextInt(16);
-                int y = height(level, x, z) - random.nextInt(25);
-                if (LegacyGen.get(level, x, y, z).is(BlockTags.STONE_ORE_REPLACEABLES)) {
-                    LegacyGen.set(level, x, y, z, ModBlocks.AMBER_ORE.get().defaultBlockState());
-                }
-            }
-        }
-        if (WorldGenConfig.genInfusedStone) {
-            for (int i = 0; i < 8; i++) {
-                int x = chunkX * 16 + random.nextInt(16);
-                int z = chunkZ * 16 + random.nextInt(16);
-                int y = random.nextInt(Math.max(5, height(level, x, z) - 5));
-                int type = random.nextInt(6) + 1;
-                if (random.nextInt(3) == 0) {
-                    Holder<Biome> biome = level.getBiome(new BlockPos(x, y, z));
-                    Aspect tag = BiomeHandler.getRandomBiomeTag(biome, random);
-                    if (tag == null) {
-                        type = 1 + random.nextInt(6);
-                    } else if (tag == Aspect.AIR) {
-                        type = 1;
-                    } else if (tag == Aspect.FIRE) {
-                        type = 2;
-                    } else if (tag == Aspect.WATER) {
-                        type = 3;
-                    } else if (tag == Aspect.EARTH) {
-                        type = 4;
-                    } else if (tag == Aspect.ORDER) {
-                        type = 5;
-                    } else if (tag == Aspect.ENTROPY) {
-                        type = 6;
-                    }
-                }
-                LegacyMinable.generate(level, random, x, y, z, 6, infusedStone(type));
-            }
-        }
-    }
-
-    private static BlockState infusedStone(int type) {
-        return switch (type) {
-            case 1 -> ModBlocks.AIR_INFUSED_STONE.get().defaultBlockState();
-            case 2 -> ModBlocks.FIRE_INFUSED_STONE.get().defaultBlockState();
-            case 3 -> ModBlocks.WATER_INFUSED_STONE.get().defaultBlockState();
-            case 4 -> ModBlocks.EARTH_INFUSED_STONE.get().defaultBlockState();
-            case 5 -> ModBlocks.ORDER_INFUSED_STONE.get().defaultBlockState();
-            default -> ModBlocks.ENTROPY_INFUSED_STONE.get().defaultBlockState();
-        };
     }
 
     public static boolean generateFlowers(WorldGenLevel level, Random random, int x, int y, int z, BlockState flower) {

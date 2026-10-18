@@ -1,7 +1,6 @@
 package thaumcraft.world.gen;
 
 import java.util.Random;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -43,7 +42,7 @@ public final class LegacyMinable {
                     }
                     for (int blockZ = minZ; blockZ <= maxZ; blockZ++) {
                         double dz = (blockZ + 0.5 - cz) / (width / 2.0);
-                        if (dx * dx + dy * dy + dz * dz < 1.0 && LegacyGen.get(level, blockX, blockY, blockZ).is(BlockTags.STONE_ORE_REPLACEABLES)) {
+                        if (dx * dx + dy * dy + dz * dz < 1.0 && !level.isOutsideBuildHeight(blockY) && OreGeneration.isReplaceable(LegacyGen.get(level, blockX, blockY, blockZ))) {
                             LegacyGen.set(level, blockX, blockY, blockZ, state);
                         }
                     }

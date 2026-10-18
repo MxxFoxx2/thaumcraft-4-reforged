@@ -151,3 +151,8 @@ Fixes from `6651f14`: localized names for itemless fluid targets, continuous hel
 - Both profiles: seam checks, vanilla identifier validation (zero problems), inventory checks, deterministic resource regeneration and headless eldritch geometry checks pass.
 - Separate dedicated-server worlds on both versions generated the maze, spawned a boss after lock activation, completed `/reload` and saved. Restart preserved maze readiness and the altar eye count.
 - During validation, a Gradle compile cache entry restored an incomplete set of classes on main. The final main build and tests used `--no-build-cache`; both final jars were inspected for the required entity/network/world classes.
+
+## Ore depth adaptation
+
+- Shared with main: infused stone spans the world bottom to the surface minus five, with attempts scaled from TC4's eight to preserve approximate density; cinnabar spans the bottom fifth with 18 attempts per 51 layers. Amber retains 20 near-surface attempts. Stone/deepslate ore replacement tags and tuff are accepted. Surface biome controls crystal aspect bias. Existing chunks are not regenerated.
+- Uses the branch's existing `WorldGenConfig` switches, `getMinBuildHeight()` and annotation-based GameTests. The global synchronization SHA is unchanged.

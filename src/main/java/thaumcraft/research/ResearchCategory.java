@@ -40,11 +40,12 @@ public final class ResearchCategory {
     }
 
     public Collection<ResearchItem> research() {
-        return Collections.unmodifiableCollection(research.values());
+        return research.values().stream().filter(ResearchItem::isAvailable).toList();
     }
 
     public @Nullable ResearchItem get(String researchKey) {
-        return research.get(researchKey);
+        ResearchItem item = research.get(researchKey);
+        return item != null && item.isAvailable() ? item : null;
     }
 
     public int minColumn() {

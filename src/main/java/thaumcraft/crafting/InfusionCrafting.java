@@ -115,7 +115,7 @@ public final class InfusionCrafting {
     }
 
     public static boolean isTagResult(TcStack result) {
-        return !result.data().isEmpty() && !(result.data().containsKey("cap") && result.data().containsKey("rod"));
+        return !result.data().isEmpty() && !(result.data().containsKey("cap") && result.data().containsKey("rod")) && !result.hasDataHandler();
     }
 
     public static @Nullable Holder<Enchantment> enchantment(Level level, ResourceLocation id) {

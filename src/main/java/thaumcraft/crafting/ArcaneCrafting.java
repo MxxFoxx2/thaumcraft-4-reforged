@@ -2,6 +2,7 @@ package thaumcraft.crafting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
@@ -11,12 +12,16 @@ import thaumcraft.research.ResearchGate;
 public final class ArcaneCrafting {
     public static final int GRID_SIZE = 3;
 
-    private static final List<DynamicArcaneRecipe> DYNAMIC = List.of(new ArcaneWandRecipe(), new ArcaneSceptreRecipe());
+    private static final List<DynamicArcaneRecipe> DYNAMIC = new CopyOnWriteArrayList<>(List.of(new ArcaneWandRecipe(), new ArcaneSceptreRecipe()));
 
     public record Match(ItemStack result, AspectList aspects) {
     }
 
     private ArcaneCrafting() {
+    }
+
+    public static void registerDynamic(DynamicArcaneRecipe recipe) {
+        DYNAMIC.add(recipe);
     }
 
     public static @Nullable Match find(List<ItemStack> grid, Player player) {

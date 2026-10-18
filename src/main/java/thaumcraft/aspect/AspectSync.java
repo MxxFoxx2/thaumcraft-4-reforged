@@ -1,5 +1,8 @@
 package thaumcraft.aspect;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -11,7 +14,13 @@ import thaumcraft.platform.ModNetwork;
 
 @EventBusSubscriber(modid = Thaumcraft.MODID)
 public final class AspectSync {
+    private static final List<Consumer<AspectRegistry>> REGISTRARS = new CopyOnWriteArrayList<>();
+
     private AspectSync() {
+    }
+
+    public static void addRegistrar(Consumer<AspectRegistry> registrar) {
+        REGISTRARS.add(registrar);
     }
 
     @SubscribeEvent
@@ -35,6 +44,7 @@ public final class AspectSync {
         ModernAspects modern = new ModernAspects(registry);
         modern.registerBase();
         new ConfigAspects(registry).registerAll();
+        REGISTRARS.forEach(registrar -> registrar.accept(registry));
         modern.registerDerived();
         int items = registry.buildAll().size();
         AspectRegistry.setActive(registry);

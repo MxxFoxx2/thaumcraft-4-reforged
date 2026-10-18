@@ -1,7 +1,6 @@
 package thaumcraft.wand;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,32 @@ public final class WandRegistry {
         int craftCost,
         @Nullable String metal
     ) {
-        WandCap cap = new WandCap(tag, discount, special, specialDiscount, Thaumcraft.id(item), craftCost, metal);
+        return registerCap(
+            tag,
+            discount,
+            special,
+            specialDiscount,
+            Thaumcraft.id(item),
+            craftCost,
+            metal,
+            Thaumcraft.id("textures/model/wand_cap_" + tag + ".png")
+        );
+    }
+
+    public static synchronized WandCap registerCap(
+        String tag,
+        float discount,
+        List<Aspect> special,
+        float specialDiscount,
+        ResourceLocation item,
+        int craftCost,
+        @Nullable String metal,
+        ResourceLocation texture
+    ) {
+        if (CAPS.containsKey(tag)) {
+            throw new IllegalStateException("Wand cap already registered: " + tag);
+        }
+        WandCap cap = new WandCap(tag, discount, special, specialDiscount, item, craftCost, metal, texture);
         CAPS.put(tag, cap);
         return cap;
     }
@@ -70,33 +94,60 @@ public final class WandRegistry {
         boolean staff,
         boolean runes
     ) {
+        return registerRod(
+            base,
+            capacity,
+            item,
+            craftCost,
+            update,
+            glowing,
+            staff,
+            runes,
+            Thaumcraft.id("textures/model/wand_rod_" + base + ".png")
+        );
+    }
+
+    public static synchronized WandRod registerRod(
+        String base,
+        int capacity,
+        ResourceLocation item,
+        int craftCost,
+        @Nullable RodUpdate update,
+        boolean glowing,
+        boolean staff,
+        boolean runes,
+        ResourceLocation texture
+    ) {
         String tag = staff ? base + "_staff" : base;
-        WandRod rod = new WandRod(tag, base, capacity, item, craftCost, update, glowing, staff, runes);
+        if (RODS.containsKey(tag)) {
+            throw new IllegalStateException("Wand rod already registered: " + tag);
+        }
+        WandRod rod = new WandRod(tag, base, capacity, item, craftCost, update, glowing, staff, runes, texture);
         RODS.put(tag, rod);
         return rod;
     }
 
-    public static WandCap cap(String tag) {
+    public static synchronized WandCap cap(String tag) {
         return CAPS.getOrDefault(tag, CAP_IRON);
     }
 
-    public static WandRod rod(String tag) {
+    public static synchronized WandRod rod(String tag) {
         return RODS.getOrDefault(tag, ROD_WOOD);
     }
 
-    public static @Nullable WandCap findCap(String tag) {
+    public static synchronized @Nullable WandCap findCap(String tag) {
         return CAPS.get(tag);
     }
 
-    public static @Nullable WandRod findRod(String tag) {
+    public static synchronized @Nullable WandRod findRod(String tag) {
         return RODS.get(tag);
     }
 
-    public static Collection<WandCap> caps() {
-        return Collections.unmodifiableCollection(CAPS.values());
+    public static synchronized Collection<WandCap> caps() {
+        return List.copyOf(CAPS.values());
     }
 
-    public static Collection<WandRod> rods() {
-        return Collections.unmodifiableCollection(RODS.values());
+    public static synchronized Collection<WandRod> rods() {
+        return List.copyOf(RODS.values());
     }
 }

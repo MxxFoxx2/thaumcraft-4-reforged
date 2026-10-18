@@ -50,19 +50,35 @@ public class FocusPouchItem extends Item implements Bauble {
         return InteractionResult.SUCCESS;
     }
 
+    public int pouchSize(ItemStack pouch) {
+        return SIZE;
+    }
+
+    public boolean canStore(ItemStack stack) {
+        return stack.getItem() instanceof FocusItem;
+    }
+
+    public static int size(ItemStack pouch) {
+        return pouch.getItem() instanceof FocusPouchItem item ? item.pouchSize(pouch) : SIZE;
+    }
+
     public static List<ItemStack> getInventory(ItemStack pouch) {
-        NonNullList<ItemStack> stored = NonNullList.withSize(SIZE, ItemStack.EMPTY);
+        int size = size(pouch);
+        NonNullList<ItemStack> stored = NonNullList.withSize(size, ItemStack.EMPTY);
         FocusKeys.POUCH.getOrDefault(pouch, ItemContainerContents.EMPTY).copyInto(stored);
-        List<ItemStack> contents = new ArrayList<>(SIZE);
+        FocusPouchItem item = pouch.getItem() instanceof FocusPouchItem pouchItem ? pouchItem : null;
+        List<ItemStack> contents = new ArrayList<>(size);
         for (ItemStack stack : stored) {
-            contents.add(stack.getItem() instanceof FocusItem ? stack : ItemStack.EMPTY);
+            boolean allowed = item != null ? item.canStore(stack) : stack.getItem() instanceof FocusItem;
+            contents.add(allowed ? stack : ItemStack.EMPTY);
         }
         return contents;
     }
 
     public static void setInventory(ItemStack pouch, List<ItemStack> contents) {
-        List<ItemStack> stored = new ArrayList<>(SIZE);
-        for (int slot = 0; slot < SIZE; slot++) {
+        int size = size(pouch);
+        List<ItemStack> stored = new ArrayList<>(size);
+        for (int slot = 0; slot < size; slot++) {
             stored.add(slot < contents.size() ? contents.get(slot) : ItemStack.EMPTY);
         }
         FocusKeys.POUCH.set(pouch, ItemContainerContents.fromItems(stored));

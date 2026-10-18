@@ -77,26 +77,27 @@ public final class Registration {
             defense.put(ArmorItem.Type.LEGGINGS, material.leggingsDefense());
             defense.put(ArmorItem.Type.BOOTS, material.bootsDefense());
             defense.put(ArmorItem.Type.BODY, material.chestplateDefense());
-            return ARMOR_MATERIALS.register(name, () -> new ArmorMaterial(
+            return ARMOR_MATERIALS.register(name.replace(':', '/'), () -> new ArmorMaterial(
                 defense,
                 material.enchantability(),
                 material.equipSound(),
                 () -> Ingredient.of(material.repairItems()),
-                armorLayers(name),
+                armorLayers(material.assetId()),
                 material.toughness(),
                 material.knockbackResistance()
             ));
         });
     }
 
-    private static List<ArmorMaterial.Layer> armorLayers(String name) {
+    private static List<ArmorMaterial.Layer> armorLayers(net.minecraft.resources.ResourceLocation id) {
+        String name = id.getNamespace().equals(Thaumcraft.MODID) ? id.getPath() : id.toString();
         if (name.equals("robe") || name.equals("void_robe")) {
             return List.of(
                 new ArmorMaterial.Layer(Thaumcraft.id(name), "", true),
                 new ArmorMaterial.Layer(Thaumcraft.id(name), "_overlay", false)
             );
         }
-        return List.of(new ArmorMaterial.Layer(Thaumcraft.id(name)));
+        return List.of(new ArmorMaterial.Layer(id));
     }
 
     public static Item.Properties sword(Item.Properties properties, TcToolMaterial material, float attackDamage, float attackSpeed) {

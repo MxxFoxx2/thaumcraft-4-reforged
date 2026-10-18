@@ -160,6 +160,10 @@ public class ResearchItem {
         return this;
     }
 
+    public boolean isAvailable() {
+        return true;
+    }
+
     public String key() {
         return key;
     }

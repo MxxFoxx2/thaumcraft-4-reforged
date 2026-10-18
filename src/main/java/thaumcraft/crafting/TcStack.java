@@ -2,6 +2,9 @@ package thaumcraft.crafting;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -16,6 +19,9 @@ import thaumcraft.wand.WandKeys;
 import thaumcraft.wand.WandParts;
 
 public record TcStack(ResourceLocation item, int count, @Nullable AspectList aspects, Map<String, String> data) {
+    private static final Map<String, BiConsumer<ItemStack, String>> DATA_HANDLERS = new ConcurrentHashMap<>();
+    private static final Map<String, BiPredicate<ItemStack, String>> DATA_MATCHERS = new ConcurrentHashMap<>();
+
     public static final TcStack NONE = new TcStack(ResourceLocation.parse("minecraft:air"), 0, null, Map.of());
 
     public TcStack {
@@ -24,6 +30,14 @@ public record TcStack(ResourceLocation item, int count, @Nullable AspectList asp
 
     public TcStack(ResourceLocation item, int count, @Nullable AspectList aspects) {
         this(item, count, aspects, Map.of());
+    }
+
+    public static void registerDataHandler(String key, BiConsumer<ItemStack, String> handler) {
+        DATA_HANDLERS.put(key, handler);
+    }
+
+    public static void registerDataMatcher(String key, BiPredicate<ItemStack, String> matcher) {
+        DATA_MATCHERS.put(key, matcher);
     }
 
     public static TcStack of(String item) {
@@ -69,7 +83,21 @@ public record TcStack(ResourceLocation item, int count, @Nullable AspectList asp
                 WardedKeys.BANNER_COLOR.set(stack, color);
             }
         }
+        applyDataHandlers(stack);
         return stack;
+    }
+
+    public boolean hasDataHandler() {
+        return data.keySet().stream().anyMatch(DATA_HANDLERS::containsKey);
+    }
+
+    private void applyDataHandlers(ItemStack stack) {
+        data.forEach((key, value) -> {
+            BiConsumer<ItemStack, String> handler = DATA_HANDLERS.get(key);
+            if (handler != null) {
+                handler.accept(stack, value);
+            }
+        });
     }
 
     public boolean matches(ItemStack stack) {
@@ -80,6 +108,12 @@ public record TcStack(ResourceLocation item, int count, @Nullable AspectList asp
         if (data.containsKey("cap") && data.containsKey("rod")) {
             WandParts parts = WandKeys.PARTS.getOrDefault(stack, WandParts.DEFAULT);
             if (!parts.cap().equals(data.get("cap")) || !parts.rod().equals(data.get("rod"))) {
+                return false;
+            }
+        }
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            BiPredicate<ItemStack, String> matcher = DATA_MATCHERS.get(entry.getKey());
+            if (matcher != null && !matcher.test(stack, entry.getValue())) {
                 return false;
             }
         }

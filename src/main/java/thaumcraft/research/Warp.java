@@ -16,15 +16,19 @@ import thaumcraft.research.ResearchConfig;
 
 public final class Warp {
     private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
-    private static final Map<ResourceLocation, Integer> WARP_ITEMS = Map.of(
+    private static final Map<ResourceLocation, Integer> WARP_ITEMS = new java.util.concurrent.ConcurrentHashMap<>(Map.of(
         Thaumcraft.id("focus_nine_hells"), 1,
         Thaumcraft.id("compass_stone"), 1,
         Thaumcraft.id("liquid_death_bucket"), 1,
         Thaumcraft.id("bottled_taint"), 1,
         Thaumcraft.id("focus_primal"), 1
-    );
+    ));
 
     private Warp() {
+    }
+
+    public static void registerItem(ResourceLocation item, int warp) {
+        WARP_ITEMS.put(item, warp);
     }
 
     public static int get(Player player, WarpType type) {

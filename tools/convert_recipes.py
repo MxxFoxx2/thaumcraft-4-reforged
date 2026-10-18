@@ -1153,7 +1153,7 @@ def main():
                     stacks.append(java_stack({"id": spec[1], "count": 1}) if spec else None)
                     continue
                 if block.reference == "Blocks.lava":
-                    stacks.append(java_stack({"id": "minecraft:lava", "count": 1}))
+                    stacks.append(java_stack({"id": "minecraft:lava_bucket", "count": 1}))
                     continue
                 spec = resolver.result_spec(block)
                 if spec is None:

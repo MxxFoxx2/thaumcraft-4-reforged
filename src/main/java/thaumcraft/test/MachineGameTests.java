@@ -11,17 +11,21 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -46,7 +50,6 @@ import thaumcraft.registry.ModItems;
 import thaumcraft.research.Knowledge;
 import thaumcraft.research.ResearchCategories;
 import thaumcraft.wand.WandRegistry;
-import thaumcraft.wand.WandTriggers;
 import thaumcraft.wand.Wands;
 
 @GameTestHolder(Thaumcraft.MODID)
@@ -82,13 +85,19 @@ public final class MachineGameTests {
         Knowledge.get(player).addResearch("INFERNALFURNACE");
         ItemStack wand = Wands.create(WandRegistry.CAP_GOLD, WandRegistry.ROD_GREATWOOD, false);
         Wands.fill(wand);
-        return WandTriggers.perform(helper.getLevel(), wand, player, helper.absolutePos(origin.offset(0, 0, 0)), Direction.UP);
+        player.setItemInHand(InteractionHand.MAIN_HAND, wand);
+        BlockPos clicked = helper.absolutePos(origin);
+        return wand.getItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
+            new BlockHitResult(Vec3.atCenterOf(clicked), Direction.UP, clicked, false))).consumesAction();
     }
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void furnaceFormsAndSmelts(GameTestHelper helper) {
         BlockPos origin = new BlockPos(1, 2, 1);
         buildFurnace(helper, origin);
+        helper.setBlock(origin.offset(1, 1, 1), Blocks.AIR);
+        helper.assertTrue(!form(helper, origin), "furnace formed without its lava source");
+        helper.setBlock(origin.offset(1, 1, 1), Blocks.LAVA);
         helper.assertTrue(form(helper, origin), "wand trigger did not form the furnace");
         BlockPos core = origin.offset(1, 1, 1);
         helper.assertBlockPresent(ModBlocks.INFERNAL_FURNACE.get(), core);
@@ -191,6 +200,8 @@ public final class MachineGameTests {
 
     @GameTest(template = "test/platform", timeoutTicks = 200)
     public static void deviceRecipesResolve(GameTestHelper helper) {
+        var furnace = (thaumcraft.crafting.CompoundRecipe) TcRecipes.get("InfernalFurnace");
+        helper.assertTrue(furnace.blocks().get(13).create().is(Items.LAVA_BUCKET), "infernal furnace blueprint hides the required lava source");
         for (String key : new String[] {"ArcaneSpa", "ArcaneBoreBase", "ArcaneBore"}) {
             TcRecipe recipe = TcRecipes.get(key);
             helper.assertTrue(recipe != null, "recipe missing: " + key);

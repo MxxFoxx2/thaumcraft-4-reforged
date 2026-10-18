@@ -38,6 +38,13 @@ repositories {
             includeGroup "net.mezzdev.config"
         }
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 base {
@@ -92,6 +99,7 @@ configurations {
 }
 
 dependencies {
+    compileOnly "maven.modrinth:iris:${iris_version}"
     implementation "com.github.glitchfiend:TerraBlender-neoforge:${terrablender_version}"
     implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"

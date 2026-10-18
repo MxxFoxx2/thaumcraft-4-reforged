@@ -156,3 +156,8 @@ Fixes from `6651f14`: localized names for itemless fluid targets, continuous hel
 
 - Shared with main: infused stone spans the world bottom to the surface minus five, with attempts scaled from TC4's eight to preserve approximate density; cinnabar spans the bottom fifth with 18 attempts per 51 layers. Amber retains 20 near-surface attempts. Stone/deepslate ore replacement tags and tuff are accepted. Surface biome controls crystal aspect bias. Existing chunks are not regenerated.
 - Uses the branch's existing `WorldGenConfig` switches, `getMinBuildHeight()` and annotation-based GameTests. The global synchronization SHA is unchanged.
+
+## Aura node jar rendering
+
+- Shared with main: the node jar inherits the warded jar model, node glow uses full block and sky light, and the empty node jar item is hidden from the creative tab and JEI. Captured node jars retain their aspects and scan identity.
+- Iris is a compile-only dependency. While a shader pack is active, `client/platform/NodeRenderTypes` uses the vanilla particle shader getter intercepted by Iris; otherwise it retains the custom node shader with its low alpha cutoff. Main uses pipeline assignments instead. No Iris classes are loaded when the mod is absent.

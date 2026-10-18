@@ -8,6 +8,8 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
+import mezz.jei.api.constants.VanillaTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -35,6 +37,11 @@ public final class ThaumcraftJeiPlugin implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
         return Thaumcraft.id("jei");
+    }
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime runtime) {
+        runtime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, List.of(new ItemStack(ModBlocks.NODE_JAR_ITEM.get())));
     }
 
     @Override

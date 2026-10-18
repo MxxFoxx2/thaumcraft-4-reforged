@@ -6,7 +6,7 @@ public final class NodeGeometry {
     public static final int FRAMES = 32;
     public static final int ADDITIVE = 1;
     public static final int TRANSLUCENT = 771;
-    private static final int LIGHT = 220;
+    private static final int LIGHT = 0xF000F0;
     private static final float TAU = (float) (Math.PI * 2);
 
     private NodeGeometry() {

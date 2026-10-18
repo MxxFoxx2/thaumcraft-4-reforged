@@ -17,7 +17,7 @@ import thaumcraft.node.NodeType;
 public final class NodeRendering {
     public static final ResourceLocation TEXTURE = Thaumcraft.id("textures/misc/nodes.png");
     private static final int FRAMES = 32;
-    private static final int LIGHT = 220;
+    private static final int LIGHT = 0xF000F0;
     private static final int BLEND_ADDITIVE = 1;
     private static final int BLEND_TRANSLUCENT = 771;
 

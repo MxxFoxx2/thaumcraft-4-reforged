@@ -165,22 +165,7 @@ def devices(ctx):
 
 
 def jar(ctx):
-    ctx.block_model("node_jar", {
-        "parent": "minecraft:block/block",
-        "textures": {"particle": ctx.ref("jar_side"), "side": ctx.ref("jar_side"), "top": ctx.ref("jar_top"), "bottom": ctx.ref("jar_bottom")},
-        "elements": [
-            box(ctx, [3, 0, 3], [13, 10, 13], {
-                "down": {"texture": "#bottom"}, "up": {"texture": "#side"},
-                "north": {"texture": "#side"}, "south": {"texture": "#side"},
-                "west": {"texture": "#side"}, "east": {"texture": "#side"},
-            }),
-            box(ctx, [5, 10, 5], [11, 12, 11], {
-                "down": {"texture": "#top"}, "up": {"texture": "#top"},
-                "north": {"texture": "#top"}, "south": {"texture": "#top"},
-                "west": {"texture": "#top"}, "east": {"texture": "#top"},
-            }),
-        ],
-    })
+    ctx.block_model("node_jar", {"parent": ctx.ref("warded_jar")})
     ctx.simple_state("node_jar")
     item_base_from_block(ctx, "node_jar")
     special_item(ctx, "node_jar", {"type": f"{NS}:node_jar"})

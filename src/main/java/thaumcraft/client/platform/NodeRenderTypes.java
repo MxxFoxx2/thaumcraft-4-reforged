@@ -6,18 +6,23 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import thaumcraft.Thaumcraft;
 
 @EventBusSubscriber(modid = Thaumcraft.MODID, value = Dist.CLIENT)
 public final class NodeRenderTypes extends RenderType {
     private static ShaderInstance shader;
-    private static final ShaderStateShard NODE_SHADER = new ShaderStateShard(() -> shader);
+    private static final boolean IRIS_LOADED = ModList.get().isLoaded("iris");
+    private static final ShaderStateShard NODE_SHADER = new ShaderStateShard(
+        () -> IRIS_LOADED && IrisCompat.isShaderPackInUse() ? GameRenderer.getParticleShader() : shader
+    );
     private static final Map<Key, RenderType> TYPES = new HashMap<>();
 
     private record Key(ResourceLocation texture, boolean translucent, boolean depthIgnore) {

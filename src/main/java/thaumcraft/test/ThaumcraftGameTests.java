@@ -377,6 +377,14 @@ public final class ThaumcraftGameTests {
         level.setBlockAndUpdate(pos, ModBlocks.NODE_JAR.get().defaultBlockState());
         ModBlocks.NODE_JAR.get().setPlacedBy(level, pos, level.getBlockState(pos), player, jarStack);
         var jarTarget = ScanManager.resolveNode(level, pos);
+        var jar = (thaumcraft.blockentity.NodeJarBlockEntity) level.getBlockEntity(pos);
+        var jarCopy = new thaumcraft.blockentity.NodeJarBlockEntity(pos, jar.getBlockState());
+        jarCopy.setLevel(level);
+        jarCopy.loadWithComponents(jar.getUpdateTag(level.registryAccess()), level.registryAccess());
+        helper.assertTrue(jarCopy.getAspects().equals(aspects) && jarCopy.getAspectsBase().equals(aspects), "jar contents did not reach the client");
+        helper.assertTrue(jarCopy.getId().equals(id) && jarCopy.getNodeType() == NodeType.PURE && jarCopy.getNodeModifier() == thaumcraft.node.NodeModifier.BRIGHT, "jar metadata did not reach the client");
+        helper.assertTrue(ScanManager.resolveBlock(level, pos).key().equals(jarTarget.key()), "targeting the jar did not resolve its node");
+        helper.assertTrue(ScanManager.resolveChecked(player, new ScanPayload(ScanManager.KIND_NODE, pos, 0)) != null, "server rejected a jar scan in range");
         for (Aspect aspect : Aspect.values()) Knowledge.get(player).discoverAspect(aspect);
         helper.assertTrue(ScanManager.completeScan(player, jarTarget), "jar scan failed");
         int pool = Knowledge.get(player).getAspectPool(Aspect.AIR);
@@ -473,6 +481,11 @@ public final class ThaumcraftGameTests {
         boolean done = WandTriggers.perform(helper.getLevel(), wand, player, helper.absolutePos(center.offset(1, 1, 1)), Direction.UP);
         helper.assertTrue(done, "trigger did not fire");
         helper.assertBlockPresent(ModBlocks.NODE_JAR.get(), center);
+        var captured = (thaumcraft.blockentity.NodeJarBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(center));
+        helper.assertTrue(captured.getAspects().equals(primals(15)), "capture lost the node aspects");
+        helper.assertTrue(!captured.getId().isEmpty(), "capture lost the node scan identity");
+        var scan = ScanManager.resolveBlock(helper.getLevel(), helper.absolutePos(center));
+        helper.assertTrue(scan != null && scan.key().equals("NODE" + captured.getId()) && scan.aspects() != null, "captured jar cannot be scanned");
         helper.assertBlockPresent(Blocks.AIR, center.offset(1, 1, 1));
         helper.assertValueEqual(Wands.getVis(wand, Aspect.AIR), Wands.getMaxVis(wand) - 7000, "air vis left");
         helper.succeed();

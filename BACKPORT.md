@@ -167,3 +167,7 @@ Fixes from `6651f14`: localized names for itemless fluid targets, continuous hel
 The 1.21.1 branch exposes the addon contracts from main: aspect registrars before derived aspects, explicit wand component items/textures with duplicate checks, dynamic arcane recipes, item warp registration, stack data writers/matchers and custom infusion results. Research availability and extensible focus pouch inventories are also supported. Existing wand constructors and string armor material names remain valid; foreign armor texture namespaces are preserved.
 
 The changes are limited to these integration contracts and their five regression GameTests. All 228 required base GameTests passed after the additions. An earlier full run had one failing `mindspiderspawner` scenario; the following full run passed without changing encounter code.
+
+## Portable resource validation
+
+Vanilla report generation selects a suitable JDK from the version-specific JAVA_HOME variables supplied by CI, JAVA_HOME, or PATH. It checks the runtime version and reports how to configure Java if none is suitable. No Homebrew installation path is required. Regression tests cover Linux CI selection and generation when the registry report cache is absent.

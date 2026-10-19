@@ -3,7 +3,9 @@ import gzip
 import hashlib
 import io
 import json
+import os
 import re
+import shutil
 import struct
 import subprocess
 import sys
@@ -16,7 +18,7 @@ import mcformat
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "tools" / "cache"
 MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
-JAVA_HOMES = {"26.3": "openjdk@25", "1.21.1": "openjdk@21", "1.19.2": "openjdk@17"}
+JAVA_VERSIONS = {"26.3": 25, "1.21.1": 21, "1.19.2": 17}
 ASPECTS = ROOT / "src" / "main" / "java" / "thaumcraft" / "aspect" / "ConfigAspects.java"
 ID_PATTERN = re.compile(r'"(#?minecraft:[a-z0-9_./]+)"')
 LOOT_TYPES = ["loot_condition_type", "loot_function_type", "loot_pool_entry_type", "loot_number_provider_type", "enchantment_level_based_value_type"]
@@ -67,12 +69,33 @@ def fetch(version):
     return directory
 
 
+def java_executable(version):
+    required = JAVA_VERSIONS[version]
+    executable = "java.exe" if os.name == "nt" else "java"
+    homes = [os.environ.get(name) for name in [f"JAVA_HOME_{required}_X64", f"JAVA_HOME_{required}_ARM64", "JAVA_HOME"]]
+    candidates = [str(Path(home) / "bin" / executable) for home in homes if home]
+    if java := shutil.which("java"):
+        candidates.append(java)
+    checked = []
+    for candidate in dict.fromkeys(candidates):
+        try:
+            result = subprocess.run([candidate, "-version"], capture_output=True, text=True, timeout=10)
+        except (OSError, subprocess.TimeoutExpired):
+            checked.append(candidate + " (unavailable)")
+            continue
+        match = re.search(r'\bversion\s+"(?:1\.)?(\d+)', result.stdout + result.stderr)
+        if result.returncode == 0 and match and int(match.group(1)) >= required:
+            return candidate
+        checked.append(candidate + (f" (Java {match.group(1)})" if match else " (unrecognized version)"))
+    raise SystemExit(f"Minecraft {version} reports need Java {required} or newer. Set JAVA_HOME or add Java to PATH. Checked: " + (", ".join(checked) or "no Java installations"))
+
+
 def run_reports(directory, version, reports_directory=None):
     reports = reports_directory / "reports" if reports_directory and not (reports_directory / "registries.json").exists() else reports_directory or directory / "reports"
     registries = reports / ("registries.json" if reports_directory else "reports/registries.json")
     if not registries.exists():
         reports.mkdir(exist_ok=True)
-        command = [f"/opt/homebrew/opt/{JAVA_HOMES[version]}/bin/java", "-DbundlerMainClass=net.minecraft.data.Main", "-jar", "server.jar", "--reports", "--output", "reports"]
+        command = [java_executable(version), "-DbundlerMainClass=net.minecraft.data.Main", "-jar", "server.jar", "--reports", "--output", "reports"]
         result = subprocess.run(command, cwd=directory, capture_output=True, text=True)
         if result.returncode != 0 or not registries.exists():
             print(result.stdout[-2000:])

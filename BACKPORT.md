@@ -171,3 +171,7 @@ The changes are limited to these integration contracts and their five regression
 ## Portable resource validation
 
 Vanilla report generation selects a suitable JDK from the version-specific JAVA_HOME variables supplied by CI, JAVA_HOME, or PATH. It checks the runtime version and reports how to configure Java if none is suitable. No Homebrew installation path is required. Regression tests cover Linux CI selection and generation when the registry report cache is absent.
+
+## Release 1.1 branding
+
+The root `icon.png` and `poster.png` are packaged under `assets/thaumcraft/textures/gui/branding`. NeoForge 21.1 uses the mod-specific `logoFile` for the in-game banner and ignores the newer `bannerFile` and `iconFile` fields. Prism Launcher prefers the top-level `logoFile`, which points to the square icon; the mod-specific value points to the poster. This keeps each image's aspect ratio appropriate for its display.

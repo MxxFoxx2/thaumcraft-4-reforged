@@ -1,13 +1,14 @@
 modLoader="javafml"
 loaderVersion="[1,)"
 license="${mod_license}"
+logoFile="assets/thaumcraft/textures/gui/branding/icon.png"
 
 [[mods]]
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
-bannerFile="TCLogo.png"
-iconFile="icon.png"
+logoFile="assets/thaumcraft/textures/gui/branding/poster.png"
+logoBlur=true
 authors="${mod_authors}"
 credits="${mod_credits}"
 description='''

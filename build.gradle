@@ -15,6 +15,13 @@ sourceSets.main.resources {
     srcDir('src/generated/resources')
 }
 
+tasks.named('processResources', ProcessResources) {
+    from(project.layout.projectDirectory) {
+        include 'icon.png', 'poster.png'
+        into 'assets/thaumcraft/textures/gui/branding'
+    }
+}
+
 repositories {
     maven {
         name = "Minecraft Forge"

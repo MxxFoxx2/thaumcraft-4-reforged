@@ -2,6 +2,11 @@ package thaumcraft.client.jei;
 
 import java.util.ArrayList;
 import java.util.List;
+import thaumcraft.wand.Wands;
+import thaumcraft.wand.WandRegistry;
+import thaumcraft.client.platform.JeiWandSubtypes;
+import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.registration.IExtraIngredientRegistration;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -40,6 +45,21 @@ public final class ThaumcraftJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void registerItemSubtypes(ISubtypeRegistration registration) {
+        JeiWandSubtypes.register(registration);
+    }
+
+    @Override
+    public void registerExtraIngredients(IExtraIngredientRegistration registration) {
+        List<ItemStack> wands = new ArrayList<>();
+        wands.add(Wands.create(WandRegistry.CAP_IRON, WandRegistry.ROD_WOOD, false));
+        for (ArcaneDisplay recipe : ArcaneDisplay.wandRecipes()) {
+            wands.add(recipe.result());
+        }
+        registration.addExtraItemStacks(wands);
+    }
+
+    @Override
     public void onRuntimeAvailable(IJeiRuntime runtime) {
         runtime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK, List.of(new ItemStack(ModBlocks.NODE_JAR_ITEM.get())));
     }
@@ -58,7 +78,9 @@ public final class ThaumcraftJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
         List<CrucibleRecipe> crucible = TcRecipes.all(CrucibleRecipe.class).stream().filter(recipe -> recipe.result().exists()).toList();
-        List<ArcaneRecipe> arcane = TcRecipes.all(ArcaneRecipe.class).stream().filter(recipe -> recipe.result().exists()).toList();
+        List<ArcaneDisplay> arcane = new ArrayList<>(TcRecipes.all(ArcaneRecipe.class).stream()
+            .filter(recipe -> recipe.result().exists()).map(ArcaneDisplay::of).toList());
+        arcane.addAll(ArcaneDisplay.wandRecipes());
         List<InfusionRecipe> infusion = TcRecipes.all(InfusionRecipe.class).stream().filter(recipe -> recipe.result().exists()).toList();
         List<EnchantmentCategory.Entry> enchantments = enchantments();
         registration.addRecipes(CrucibleCategory.TYPE, crucible);

@@ -80,7 +80,8 @@ public class SlotCraftingArcaneWorkbench extends Slot {
     public void onTake(Player taker, ItemStack carried) {
         checkTakeAchievements(carried);
         List<ItemStack> grid = gridStacks();
-        AspectList aspects = ArcaneCrafting.findAspects(grid, player);
+        ArcaneCrafting.Match arcane = ArcaneCrafting.find(grid, player);
+        AspectList aspects = arcane == null ? new AspectList() : arcane.aspects();
         ItemStack wand = craftMatrix.getItem(ArcaneWorkbenchBlockEntity.WAND_SLOT);
         if (aspects.size() > 0 && wand.getItem() instanceof WandItem wandItem) {
             wandItem.consumeAllVisCrafting(wand, player, aspects, true);
@@ -89,9 +90,9 @@ public class SlotCraftingArcaneWorkbench extends Slot {
             }
         }
         CraftingInput.Positioned positioned = CraftingInput.ofPositioned(ArcaneCrafting.GRID_SIZE, ArcaneCrafting.GRID_SIZE, grid);
-        CraftingInput input = CraftingInput.of(ArcaneCrafting.GRID_SIZE, ArcaneCrafting.GRID_SIZE, grid);
-        int left = 0;
-        int top = 0;
+        CraftingInput input = positioned.input();
+        int left = positioned.left();
+        int top = positioned.top();
         NonNullList<ItemStack> remaining = NonNullList.withSize(input.size(), ItemStack.EMPTY);
         for (int index = 0; index < input.size(); index++) {
             remaining.set(index, input.getItem(index).getCraftingRemainingItem());
@@ -99,12 +100,12 @@ public class SlotCraftingArcaneWorkbench extends Slot {
         if (player.level() instanceof ServerLevel serverLevel) {
             Optional<RecipeHolder<CraftingRecipe>> vanilla = serverLevel.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, positioned.input(), serverLevel);
             if (vanilla.isPresent()) {
-                input = positioned.input();
-                left = positioned.left();
-                top = positioned.top();
                 CommonHooks.setCraftingPlayer(player);
-                remaining = vanilla.get().value().getRemainingItems(input);
-                CommonHooks.setCraftingPlayer(null);
+                try {
+                    remaining = vanilla.get().value().getRemainingItems(input);
+                } finally {
+                    CommonHooks.setCraftingPlayer(null);
+                }
             }
         }
         for (int y = 0; y < input.height(); y++) {

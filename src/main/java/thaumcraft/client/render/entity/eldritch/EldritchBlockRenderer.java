@@ -126,8 +126,8 @@ public final class EldritchBlockRenderer implements StateBlockRenderer<EldritchB
             poseStack.pushPose();
             poseStack.mulPose(Axis.YP.rotationDegrees(index * 90.0F));
             poseStack.translate(0.0F, 0.0F, -0.5F);
-            EldritchSurfaces.submitRectangle(collector, poseStack, TcRenderTypes.entityCutout(side), -0.5F, 0.0F, 0.0F, 0.5F, 3.0F, 0.0F, 1.0F, 0.0F, 0xFFFFFFFF, 0xF000F0);
             this.submitPortalLayers(poseStack, collector, state, -0.5F, 0.0F, 0.005F, 0.5F, 3.0F, 0.005F);
+            EldritchSurfaces.submitRectangle(collector.order(2), poseStack, TcRenderTypes.entityTranslucent(side), -0.5F, 0.0F, 0.0F, 0.5F, 3.0F, 0.0F, 1.0F, 0.0F, 0xFFFFFFFF, 0xF000F0);
             poseStack.popPose();
         }
         poseStack.popPose();

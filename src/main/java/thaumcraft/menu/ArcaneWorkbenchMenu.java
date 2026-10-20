@@ -144,6 +144,7 @@ public class ArcaneWorkbenchMenu extends AbstractContainerMenu {
             return;
         }
         ItemStack result = computeResult();
+        lastWandVis = wandVis();
         resultContainer.setItem(0, result);
         setRemoteSlot(RESULT_SLOT, result);
         if (serverPlayer.connection != null) {

@@ -123,6 +123,14 @@ The conversion scripts read from `reference/` (git ignored), which holds the ori
 
 All 22 original language files are converted, including the research texts. Manual additions and corrections are maintained for English and Russian in `tools/lang/` and merged by `tools/convert_assets.py`.
 
+## Add-on API (experimental)
+
+- Register custom aspects through `AddonAspects.addRegistrar(api -> api.register(tag, color, components, blend, texture))`, usually from the add-on mod constructor. Thaumcraft applies these callbacks during `FMLCommonSetupEvent` on both the physical client and dedicated server, before aspect payloads are decoded. Registrars added after initialization are applied immediately. Both sides must load the same set of add-on aspects.
+- Aspect tags are global, non-blank, unqualified strings (the `:` namespace separator is rejected). Give each add-on aspect a unique tag; a collision with any existing aspect throws `IllegalArgumentException`.
+- `Aspect` is now a registry-backed class rather than an enum so add-ons can define aspects dynamically. Built-in ordinals 0–47 are preserved; add-on ordinals follow lexicographic tag order. Tags, not ordinals, identify aspects in codecs, saved `AspectOrb` data and synchronized orb entity data. Ordinals remain runtime ordering only. `values()`/`ordinal()` remain available, but enum-only APIs such as `EnumMap`, `EnumSet`, `valueOf`, and enum `switch` statements are not compatible.
+- The low-level constructor `new Aspect("myaddon_example", 0x123456, new Aspect[] {Aspect.AIR, Aspect.FIRE}, Identifier.fromNamespaceAndPath("myaddon", "textures/aspects/example.png"), 1)` also registers immediately, but `AddonAspects.addRegistrar` is preferred for lifecycle-safe initialization. Supply exactly two non-null components, a texture identifier in the add-on namespace, a unique global unqualified tag, and the translation key `tc.aspect.myaddon_example`.
+- `Aspect.getAspect(tag)` returns the registered aspect or `null` if it is unknown. `AspectRegistry.mergeEntity(type, aspects, name, value, ...)` merges amounts only when the full set of NBT conditions matches; condition order does not matter, and duplicate or incomplete name/value pairs are rejected.
+
 ## Credits
 
 - **Azanor** for the original Thaumcraft

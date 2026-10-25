@@ -15,6 +15,7 @@ public record EntityAspects(AspectList aspects, List<Condition> conditions) {
         if (aspects == null) {
             throw new IllegalArgumentException("Entity aspect list must not be null");
         }
+        aspects = aspects.copy();
         if (conditions == null) {
             throw new IllegalArgumentException("Entity aspect conditions must not be null");
         }

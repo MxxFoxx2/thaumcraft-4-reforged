@@ -184,6 +184,17 @@ public final class AspectGameTests {
         helper.assertValueEqual(merged.getFirst().aspects().getAmount(Aspect.FIRE), 3, "merged entity tag did not sum aspect amounts");
         helper.assertValueEqual(merged.getFirst().conditions().getFirst().name(), "powered",
             "entity conditions were not stored in canonical name order");
+        AspectRegistry aliasingRegistry = new AspectRegistry();
+        AspectList mutableAspects = new AspectList();
+        aliasingRegistry.registerEntity(EntityTypes.PIG, mutableAspects);
+        mutableAspects.add(Aspect.FIRE, 2);
+        List<EntityAspects> aliased = aliasingRegistry.exportEntities().get(EntityTypes.PIG);
+        helper.assertTrue(aliased != null && aliased.size() == 1, "entity aspect registration was not stored");
+        helper.assertValueEqual(aliased.getFirst().aspects().size(), 0,
+            "registered entity aspects changed after the caller mutated the original list");
+        helper.assertValueEqual(aliased.getFirst().aspects().getAmount(Aspect.FIRE), 0,
+            "registered entity aspects kept the aspect added to the caller's list after registration");
+
         EntityAspects directlyConstructed = new EntityAspects(new AspectList(), List.of(
             new EntityAspects.Condition("variant", 1),
             new EntityAspects.Condition("powered", 1)

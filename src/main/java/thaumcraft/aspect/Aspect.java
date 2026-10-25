@@ -205,16 +205,20 @@ public final class Aspect implements StringRepresentable {
     private static DataResult<Aspect> decodeByTag(String tag) {
         Aspect aspect = getAspect(tag);
         return aspect == null
-            ? DataResult.error(() -> "Unknown aspect " + tag)
+            ? DataResult.error(() -> unknownAspectMessage(tag))
             : DataResult.success(aspect);
     }
 
     private static Aspect byTagOrThrow(String tag) {
         Aspect aspect = getAspect(tag);
         if (aspect == null) {
-            throw new IllegalArgumentException("Unknown aspect " + tag);
+            throw new IllegalArgumentException(unknownAspectMessage(tag));
         }
         return aspect;
+    }
+
+    private static String unknownAspectMessage(String tag) {
+        return "Unknown aspect " + tag + "; the add-on that provides it is missing on this side";
     }
 
     public static List<Aspect> getPrimalAspects() {

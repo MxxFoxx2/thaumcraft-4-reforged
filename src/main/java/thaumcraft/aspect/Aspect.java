@@ -5,9 +5,9 @@ import com.mojang.serialization.DataResult;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -18,8 +18,9 @@ import thaumcraft.Thaumcraft;
 
 public final class Aspect implements StringRepresentable {
     private static final int BUILTIN_COUNT = 48;
-    private static final Map<String, Aspect> BY_TAG = new LinkedHashMap<>();
+    private static final Map<String, Aspect> BY_TAG = new ConcurrentHashMap<>();
     private static final List<Aspect> VALUES = new ArrayList<>();
+    private static volatile Aspect[] ordered = new Aspect[0];
 
     public static final Aspect AIR = primal("aer", 0xFFFF7E, "e", 1);
     public static final Aspect EARTH = primal("terra", 0x56C000, "2", 1);
@@ -79,6 +80,7 @@ public final class Aspect implements StringRepresentable {
     private final Aspect @Nullable [] components;
     private final int blend;
     private final Identifier image;
+    private int ordinal = -1;
 
     public Aspect(String tag, int color, Aspect[] components, Identifier image, int blend) {
         this(tag, color, null, components, blend, image, true);
@@ -106,11 +108,23 @@ public final class Aspect implements StringRepresentable {
     }
 
     private static synchronized void register(Aspect aspect) {
-        if (BY_TAG.containsKey(aspect.tag)) {
+        if (BY_TAG.putIfAbsent(aspect.tag, aspect) != null) {
             throw new IllegalArgumentException(aspect.tag + " already registered!");
         }
-        BY_TAG.put(aspect.tag, aspect);
         VALUES.add(aspect);
+        reorder();
+    }
+
+    private static synchronized void reorder() {
+        int builtinsEnd = Math.min(BUILTIN_COUNT, VALUES.size());
+        List<Aspect> snapshot = new ArrayList<>(VALUES.subList(0, builtinsEnd));
+        List<Aspect> addOns = new ArrayList<>(VALUES.subList(builtinsEnd, VALUES.size()));
+        addOns.sort(Comparator.comparing(Aspect::getTag));
+        snapshot.addAll(addOns);
+        for (int index = 0; index < snapshot.size(); index++) {
+            snapshot.get(index).ordinal = index;
+        }
+        ordered = snapshot.toArray(new Aspect[0]);
     }
 
     private static Aspect primal(String tag, int color, @Nullable String chatcolor, int blend) {
@@ -121,25 +135,12 @@ public final class Aspect implements StringRepresentable {
         return new Aspect(tag, color, null, new Aspect[]{first, second}, blend, null, false);
     }
 
-    public static synchronized Aspect[] values() {
-        int builtinsEnd = Math.min(BUILTIN_COUNT, VALUES.size());
-        List<Aspect> snapshot = new ArrayList<>(VALUES.subList(0, builtinsEnd));
-        if (VALUES.size() > BUILTIN_COUNT) {
-            List<Aspect> addOns = new ArrayList<>(VALUES.subList(BUILTIN_COUNT, VALUES.size()));
-            addOns.sort(Comparator.comparing(Aspect::getTag));
-            snapshot.addAll(addOns);
-        }
-        return snapshot.toArray(new Aspect[0]);
+    public static Aspect[] values() {
+        return ordered.clone();
     }
 
     public int ordinal() {
-        Aspect[] snapshot = values();
-        for (int index = 0; index < snapshot.length; index++) {
-            if (snapshot[index] == this) {
-                return index;
-            }
-        }
-        return -1;
+        return ordinal;
     }
 
     public String getTag() {
@@ -155,7 +156,7 @@ public final class Aspect implements StringRepresentable {
     }
 
     public Aspect @Nullable [] getComponents() {
-        return components == null ? null : components.clone();
+        return components;
     }
 
     public int getBlend() {
@@ -198,7 +199,7 @@ public final class Aspect implements StringRepresentable {
         return tag;
     }
 
-    public static synchronized @Nullable Aspect getAspect(String tag) {
+    public static @Nullable Aspect getAspect(String tag) {
         return BY_TAG.get(tag);
     }
 

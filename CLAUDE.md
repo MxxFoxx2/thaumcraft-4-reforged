@@ -9,7 +9,6 @@
 - Источник истины по поведению: декомпилят TC4 в `reference/decompiled`. Код TC3 Reforged (`~/projects/thaumcraft-reforged`) можно брать как заготовку для классов с общей родословной, логику сверять с TC4.
 - Баги TC4 чиним только если они ломают игру (дюп, потеря предметов, NPE, рассинхрон, краш сервера). Игровые особенности оставляем.
 - Сервер проверяет то, чему TC4 верил с клиента. Клиентские классы на сервер не протекают, всё должно работать на выделенном сервере.
-- Идентичность аспекта в сохранении и синхронизации — строковый тег, не `ordinal`; пользовательские аспекты должны иметь одинаковый набор тегов на клиенте и dedicated server и регистрироваться до декодирования payload.
 - Ресурсы делают Python-генераторы в `tools/`, datagen не используется.
 
 ## Ветки и версии
@@ -126,12 +125,10 @@ python3 tools/gen_resources.py && git status --short src/generated
 
 ## API для аддонов
 
-- `AspectSync.addRegistrar(Consumer<AspectRegistry>)`: добавляет аспекты предметов/сущностей и вызывается в `rebuild` после `ConfigAspects`, до `registerDerived`. `rebuild` создаёт новый `AspectRegistry` и заменяет `AspectRegistry.active()`, поэтому прямые изменения активного реестра не переживают перестроение (например, после `/reload`) — данные предметов/сущностей от аддона регистрируй только через этот callback.
-- `AddonAspects.addRegistrar(Consumer<Addon>)`: основной API пользовательских аспектов. Регистрировать callback из конструктора мода; `AddonAspects.init()` вызывается через `FMLCommonSetupEvent` на клиенте и выделенном сервере до декодирования аспектов в сетевых payload. Callback, добавленный после инициализации, применяется сразу. Набор аспектов и теги должны совпадать на обеих сторонах.
-- `Addon.register(tag, color, components, blend, texture)` создаёт и регистрирует аспект. Тег должен быть непустой строкой без разделителя namespace `:`; нужны ровно два непустых компонента и непустой `Identifier` текстуры. Тег глобален, поэтому аддон сам выбирает уникальное значение; текстуру обычно размещают в его namespace. Дубликат тега приводит к `IllegalArgumentException`.
-- `new Aspect(String tag, int color, Aspect[] components, Identifier image, int blend)` — низкоуровневый конструктор, который регистрирует аспект немедленно; для обычных аддонов предпочитай `AddonAspects.addRegistrar`, чтобы регистрация происходила в правильной фазе жизненного цикла на обеих сторонах. Встроенные ordinal 0–47 неизменны, ordinal аддонов задаются сортировкой по тегу; для сериализации используются теги, не ordinal. У `Aspect` больше нет enum API (`EnumMap`, `EnumSet`, `valueOf`, `switch` по enum).
-- `Aspect.getAspect(String tag)`: основной поиск по сериализованному тегу; для неизвестного тега возвращает `null`. Перевод `tc.aspect.<tag>` и текстуру аспекта аддон добавляет сам.
-- `AspectRegistry.mergeEntity(EntityType<?>, AspectList, Object...)`: складывает количества аспектов с существующей записью при совпадении полного набора NBT-условий; порядок пар значения не имеет, условия сортируются по имени. Повторяющиеся имена, null и неполные пары отклоняются; при другом условии добавляется отдельная запись. `AspectRegistrar.entityCopy` — защищённый вариант для registrar API.
+- `AspectSync.addRegistrar(Consumer<AspectRegistry>)`: вызывается в `rebuild` после `ConfigAspects`, до `registerDerived`. Прямые правки `AspectRegistry.active()` теряются при `/reload`.
+- `AddonAspects.addRegistrar(Consumer<Addon>)`: аддон вызывает из своего конструктора, применяется в `FMLCommonSetupEvent` на обеих сторонах, после инициализации срабатывает сразу. `new Aspect(tag, color, components, image, blend)` регистрирует аспект немедленно: тег без `:`, ровно два компонента, дубликат бросает исключение. Lang `tc.aspect.<tag>` и текстуру аддон добавляет сам.
+- `Aspect` реализован классом с реестром: встроенные ordinal 0–47 неизменны, аддонные идут после них по тегу. В сохранениях и пакетах аспект пишется тегом, ordinal годится только внутри сессии.
+- `AspectRegistry.mergeEntity(type, aspects, nbt...)` (и `AspectRegistrar.entityCopy`): складывает аспекты с записью сущности, у которой совпадает набор NBT-условий, иначе добавляет новую.
 - `WandRegistry.registerCap`/`registerRod`: явные `item` и `texture` Identifier любого namespace, дубликат тега бросает исключение. Ключи исследования `CAP_<tag>`/`ROD_<tag>`, lang `item.Wand.<tag>.cap`/`.rod` аддон добавляет сам.
 - `ArcaneCrafting.registerDynamic(DynamicArcaneRecipe)`: добавляется после рецептов жезла и скипетра.
 - `Warp.registerItem(Identifier, int)`: изменяемая карта `WARP_ITEMS`.

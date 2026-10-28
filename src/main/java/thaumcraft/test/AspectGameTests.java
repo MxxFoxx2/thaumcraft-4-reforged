@@ -17,7 +17,9 @@ import net.minecraft.gametest.framework.TestData;
 import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -30,15 +32,17 @@ import thaumcraft.aspect.AspectList;
 import thaumcraft.aspect.AspectRegistry;
 import thaumcraft.aspect.EntityAspects;
 import thaumcraft.entity.AspectOrb;
+import thaumcraft.research.ScanManager;
 
 @EventBusSubscriber(modid = Thaumcraft.MODID)
 public final class AspectGameTests {
     private static final DeferredRegister<Consumer<GameTestHelper>> FUNCTIONS = DeferredRegister.create(Registries.TEST_FUNCTION, Thaumcraft.MODID);
-    private static final String[] TESTS = {"addon_aspect_registration"};
+    private static final String[] TESTS = {"addon_aspect_registration", "block_aspect_scan_target"};
     private static final Identifier IMAGE = Identifier.fromNamespaceAndPath("testaddon", "textures/aspects/testaspect.png");
 
     static {
         FUNCTIONS.register(TESTS[0], () -> AspectGameTests::addonAspectRegistration);
+        FUNCTIONS.register(TESTS[1], () -> AspectGameTests::blockAspectScanTarget);
     }
 
     private AspectGameTests() {
@@ -124,6 +128,24 @@ public final class AspectGameTests {
         rejects(helper, () -> new Aspect("single_component", 0, new Aspect[]{Aspect.AIR}, IMAGE, 1), "one component");
         rejects(helper, () -> new Aspect("no_image", 0, new Aspect[]{Aspect.AIR, Aspect.FIRE}, null, 1), "missing image");
         helper.assertTrue(Aspect.getAspect("single_component") == null && Aspect.getAspect("no_image") == null, "rejected aspect was registered");
+    }
+
+    private static void blockAspectScanTarget(GameTestHelper helper) {
+        AspectRegistry previous = AspectRegistry.active();
+        try {
+            AspectRegistry registry = new AspectRegistry();
+            registry.registerBlock(Blocks.END_PORTAL, new AspectList().add(Aspect.FIRE, 4));
+            AspectRegistry.setActive(registry);
+            BlockPos relative = BlockPos.ZERO.above();
+            helper.setBlock(relative, Blocks.END_PORTAL);
+            ScanManager.Target target = ScanManager.resolveBlock(helper.getLevel(), helper.absolutePos(relative));
+            helper.assertTrue(target != null && target.aspects() != null, "block aspect target was not resolved");
+            helper.assertValueEqual(target.aspects().getAmount(Aspect.FIRE), 4, "block aspects must come from the block registry");
+            helper.assertValueEqual(target.key(), "minecraft:end_portal", "scan key must be the block id");
+        } finally {
+            AspectRegistry.setActive(previous);
+        }
+        helper.succeed();
     }
 
     private static void rejects(GameTestHelper helper, Runnable action, String message) {

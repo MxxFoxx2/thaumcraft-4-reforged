@@ -128,6 +128,7 @@ All 22 original language files are converted, including the research texts. Manu
 - Custom aspects: call `AddonAspects.addRegistrar(api -> api.register(tag, color, components, blend, texture))` from the add-on constructor. Callbacks run during `FMLCommonSetupEvent` on both sides, so the client and the server must load the same add-ons. Tags are global and must not contain `:`, each aspect needs exactly two components, and the add-on provides the `tc.aspect.<tag>` translation and the texture.
 - `Aspect` is a registry-backed class. Built-in ordinals 0-47 are stable, add-on aspects follow in tag order. Saves and packets store tags.
 - Item and entity aspects: register them through `AspectSync.addRegistrar(registry -> ...)`, which runs on every rebuild including `/reload`. `AspectRegistry.mergeEntity` adds amounts to an entity entry with the same NBT conditions.
+- Block scan aspects: `AspectRegistry.registerBlock` (or `AspectRegistrar.block`) assigns scan aspects to blocks with no item form such as portals; the table syncs in `AspectTagsPayload` and `ScanManager` checks it before falling back to the item stack.
 
 ## Credits
 

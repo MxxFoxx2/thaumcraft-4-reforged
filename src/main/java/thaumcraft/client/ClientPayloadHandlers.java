@@ -116,7 +116,7 @@ public final class ClientPayloadHandlers {
     }
 
     private static void aspectTags(AspectTagsPayload payload, Player player) {
-        AspectRegistry.setActive(AspectRegistry.fromSync(payload.items(), payload.entities()));
+        AspectRegistry.setActive(AspectRegistry.fromSync(payload.items(), payload.blocks(), payload.entities()));
     }
 
     private static void nodeZap(NodeZapPayload payload, Player player) {

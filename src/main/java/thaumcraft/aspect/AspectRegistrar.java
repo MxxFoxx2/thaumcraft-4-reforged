@@ -56,6 +56,13 @@ public abstract class AspectRegistrar {
         }
     }
 
+    protected void block(String target, AspectList aspects) {
+        BuiltInRegistries.BLOCK.getOptional(Identifier.parse(target)).ifPresentOrElse(
+            block -> registry.registerBlock(block, aspects.copy()),
+            () -> Thaumcraft.LOGGER.debug("Aspect block target {} is not registered", target)
+        );
+    }
+
     protected void entity(String target, AspectList aspects, Object... nbt) {
         BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(target)).ifPresentOrElse(
             type -> registry.registerEntity(type, aspects.copy(), nbt),

@@ -21,6 +21,8 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Prediction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import thaumcraft.node.Node;
 import thaumcraft.node.NodeBlockEntity;
@@ -378,6 +380,9 @@ public final class ThaumcraftCommand {
                 context.getSource().sendFailure(Component.translatable("commands.thaumcraft.node.unknown_modifier", modifierName));
                 return 0;
             }
+        }
+        if (!level.isEmptyBlock(pos) && !(level.getBlockEntity(pos) instanceof Node)) {
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
         }
         NodeGenerator.createRandomNodeAt(level, pos, level.getRandom(), false, false, false);
         BlockEntity entity = level.getBlockEntity(pos);

@@ -100,6 +100,10 @@ public final class ScanManager {
         if (state.is(Blocks.LAVA)) {
             return new Target(ScanKind.OBJECT, "minecraft:lava", new AspectList().add(Aspect.FIRE, 3).add(Aspect.EARTH, 1), ItemStack.EMPTY, null);
         }
+        AspectList blockAspects = AspectRegistry.active().getBlockTags(state.getBlock());
+        if (blockAspects != null) {
+            return new Target(ScanKind.OBJECT, BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString(), blockAspects, ItemStack.EMPTY, null);
+        }
         ItemStack stack = state.getCloneItemStack(level, pos, false);
         if (stack.isEmpty()) {
             return null;
@@ -128,7 +132,14 @@ public final class ScanManager {
         return level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, fluids, player) {
             @Override
             public VoxelShape getBlockShape(BlockState state, BlockGetter view, BlockPos pos) {
-                return state.is(Blocks.FIRE) ? Shapes.block() : super.getBlockShape(state, view, pos);
+                if (state.is(Blocks.FIRE)) {
+                    return Shapes.block();
+                }
+                VoxelShape shape = super.getBlockShape(state, view, pos);
+                if (shape.isEmpty() && AspectRegistry.active().getBlockTags(state.getBlock()) != null) {
+                    return Shapes.block();
+                }
+                return shape;
             }
         });
     }

@@ -136,4 +136,13 @@ public interface FxProxy {
 
     default void taintSwarm(Level level, Entity target, int maxParticles, float speed, float turnSpeed, float gravity) {
     }
+
+    default void blocksplosion(Level level, BlockPos center, int color) {
+    }
+
+    default void containmentCapture(Level level, double x, double y, double z, int color) {
+    }
+
+    default void deadCreature(Level level, double x, double y, double z, int color) {
+    }
 }

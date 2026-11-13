@@ -82,4 +82,11 @@ public sealed interface ResearchPage {
     static ResearchPage smelting(TcStack input, TcStack output) {
         return new Smelting(input, output);
     }
+
+    static ResearchPage creatureInfusion(String payload) {
+        return new CreatureInfusion(payload);
+    }
+
+    record CreatureInfusion(String payload) implements ResearchPage {
+    }
 }

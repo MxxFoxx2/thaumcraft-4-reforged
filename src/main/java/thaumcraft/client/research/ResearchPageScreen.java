@@ -203,6 +203,8 @@ public class ResearchPageScreen extends Screen {
             case ResearchPage.Smelting smelting -> PageRecipes.smelting(renderer, side, x - 4, y - 8, smelting);
             case ResearchPage.Image image -> {
             }
+            case ResearchPage.CreatureInfusion creature ->
+                renderer.centered(Component.translatable("tc.research_page.creature_infusion"), x + 56, y + 40, 0xFF000000);
         }
     }
 

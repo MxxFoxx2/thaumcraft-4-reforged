@@ -26,6 +26,20 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
 - `TcStack.registerDataHandler(key, BiConsumer<ItemStack, String>)`: `TcStack.create()` calls the handler for a recipe stack with this `data` key. An infusion result with such a key is created through `create()` instead of copying the central item.
 - `TcStack.registerDataMatcher(key, BiPredicate<ItemStack, String>)`: `TcStack.matches()` requires the matcher to accept every `data` value with this key, like the metadata check in TC4 (for example a potion type).
 
+## Nodes and vis
+
+- `NodeGenerator.createNodeAt(LevelAccessor, BlockPos, NodeType, NodeModifier, AspectList)` places an aura node with exact aspects and type. `NodeType` includes `SYNTHETIC` and `ETHEREAL` for add-on machines; add-on node types must be appended after the built-ins so ordinal-based sync stays stable.
+- `thaumcraft.node.Node` (implemented by `NodeBlockEntity`, `NodeJarBlockEntity`) exposes aspects, base capacity, type and modifier; `thaumcraft.vis.VisNet.drainVis(Level, BlockPos, Aspect, int)` drains vis from the nearest source network.
+
+## Research pages
+
+- `ResearchPage.creatureInfusion(String payload)` adds an add-on page type; the stock screen renders a localized placeholder line (`tc.research_page.creature_infusion`) and add-ons may render the payload themselves.
+- Custom research entries and categories use the same public statics as the built-in ones (`ResearchCategories.registerCategory`, `ResearchItem.registerResearchItem`).
+
+## FX
+
+- `Fx.get()` returns the side-safe particle proxy. All methods are optional no-ops on the dedicated server; `blocksplosion`, `containmentCapture` and `deadCreature` are reserved for add-on machines.
+
 ## Other hooks
 
 - `Warp.registerItem(Identifier, int)` makes an item give warp when crafted.

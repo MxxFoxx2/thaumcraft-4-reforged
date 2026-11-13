@@ -13,7 +13,9 @@ public enum NodeType implements StringRepresentable {
     DARK,
     TAINTED,
     HUNGRY,
-    PURE;
+    PURE,
+    SYNTHETIC,
+    ETHEREAL;
 
     public static final Codec<NodeType> CODEC = StringRepresentable.fromEnum(NodeType::values);
     public static final StreamCodec<ByteBuf, NodeType> STREAM_CODEC = ByteBufCodecs.idMapper(index -> values()[index], NodeType::ordinal);

@@ -67,6 +67,7 @@ public class WandItem extends Item implements Architect {
         if (Wands.isSceptre(stack)) {
             modifier -= 0.1F;
         }
+        modifier = thaumcraft.api.addon.VisCostModifiers.apply(player, aspect, modifier);
         return Math.max(modifier, 0.1F);
     }
 

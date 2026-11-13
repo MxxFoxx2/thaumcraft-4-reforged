@@ -31,6 +31,14 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
 - `NodeGenerator.createNodeAt(LevelAccessor, BlockPos, NodeType, NodeModifier, AspectList)` places an aura node with exact aspects and type. `NodeType` includes `SYNTHETIC` and `ETHEREAL` for add-on machines; add-on node types must be appended after the built-ins so ordinal-based sync stays stable.
 - `thaumcraft.node.Node` (implemented by `NodeBlockEntity`, `NodeJarBlockEntity`) exposes aspects, base capacity, type and modifier; `thaumcraft.vis.VisNet.drainVis(Level, BlockPos, Aspect, int)` drains vis from the nearest source network.
 
+## Wands
+
+- `thaumcraft.api.addon.VisCostModifiers.register((player, aspect, modifier) -> ...)` scales the final vis consumption multiplier for a player; the result is clamped by the wand as usual.
+
+## Golems
+
+- `GolemType` includes add-on materials (`GRASS`, `DIRT`, `PLANT`, `ROCK`, `METAL`, `CLOTH`, `SAND`, `REDSTONE`, `TNT`, `ICE`, `CACTUS`, `CAKE`, `WEB`, `VOID`) with a `visCost` field; append further materials after the built-ins. `GolemPlacerItem(Properties, GolemType)` and `GolemBellItem` work with any `GolemBase` subclass; golem deaths surface through the standard `LivingDeathEvent`.
+
 ## Research pages
 
 - `ResearchPage.creatureInfusion(String payload)` adds an add-on page type; the stock screen renders a localized placeholder line (`tc.research_page.creature_infusion`) and add-ons may render the payload themselves.

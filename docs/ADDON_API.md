@@ -17,6 +17,8 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
 - `WandRegistry.registerCap(tag, discount, special, specialDiscount, item, craftCost, metal, texture)` and `WandRegistry.registerRod(base, capacity, item, craftCost, update, glowing, staff, runes, texture)`.
   - `item` and `texture` are full `Identifier`s in any namespace. A duplicate tag throws.
   - The add-on provides the research keys `CAP_<tag>` / `ROD_<tag>` and the translations `item.Wand.<tag>.cap` / `item.Wand.<tag>.rod`.
+- `Wands.isWand(stack)` accepts any `WandItem` subclass, so an add-on may register its own wand item (for example a disposable wand with custom vis rules) and it is recognized by the workbench, focus use, charging and HUD like the base wand.
+  - An add-on wand item sets its default parts and vis with `WandKeys.PARTS.apply(properties, new WandParts(...))` and `WandKeys.VIS.apply(properties, new WandVis(...))` in its `Item.Properties` operator. Build these records directly; do not create an `ItemStack` during registration (components are not bound yet).
 - `WandTriggers.register(Predicate<BlockState>, WandTrigger)` adds a wand right-click action on a block.
 - Focus pouches: subclass `FocusPouchItem` and override `pouchSize(stack)` and `canStore(stack)`. The static `getInventory` / `setInventory` and the wand focus switcher use the item's size and filter.
 

@@ -35,6 +35,16 @@ public class NodeTransducerBlockEntity extends TcBlockEntity {
         return status;
     }
 
+    /**
+     * Stops this converter after an external node transformation (for example,
+     * a Thaumic Horizons transducer overload replacing the energized node).
+     */
+    public void stopForVortexConversion() {
+        status = -1;
+        count = 0;
+        sync();
+    }
+
     private boolean isAuraNode(BlockPos pos) {
         return level.getBlockState(pos).is(ModBlocks.AURA_NODE.get());
     }

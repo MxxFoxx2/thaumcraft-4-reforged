@@ -38,13 +38,12 @@ public final class ClientFx implements FxProxy {
         if (!level.isClientSide()) {
             return;
         }
-        machineBeams.values().removeIf(BeamFx::isDead);
-        float red = (color >> 16 & 255) / 255.0F;
-        float green = (color >> 8 & 255) / 255.0F;
-        float blue = (color & 255) / 255.0F;
         GlobalPos beamKey = GlobalPos.of(level.dimension(), key);
         BeamFx beam = machineBeams.get(beamKey);
         if (beam == null || beam.isDead()) {
+            float red = (color >> 16 & 255) / 255.0F;
+            float green = (color >> 8 & 255) / 255.0F;
+            float blue = (color & 255) / 255.0F;
             beam = new BeamFx(level, from.x, from.y, from.z, to.x, to.y, to.z,
                 red, green, blue, 4);
             beam.setType(type);

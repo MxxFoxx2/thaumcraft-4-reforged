@@ -17,8 +17,10 @@ public enum NodeType implements StringRepresentable {
     SYNTHETIC,
     ETHEREAL;
 
-    public static final Codec<NodeType> CODEC = StringRepresentable.fromEnum(NodeType::values);
-    public static final StreamCodec<ByteBuf, NodeType> STREAM_CODEC = ByteBufCodecs.idMapper(index -> values()[index], NodeType::ordinal);
+    private static final NodeType[] VALUES = values();
+
+    public static final Codec<NodeType> CODEC = StringRepresentable.fromEnum(() -> VALUES);
+    public static final StreamCodec<ByteBuf, NodeType> STREAM_CODEC = ByteBufCodecs.idMapper(index -> VALUES[index], NodeType::ordinal);
 
     @Override
     public String getSerializedName() {

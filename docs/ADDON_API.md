@@ -49,6 +49,7 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
 ## FX
 
 - `Fx.get()` returns the side-safe particle proxy. All methods are optional no-ops on the dedicated server; `blocksplosion`, `containmentCapture` and `deadCreature` are reserved for add-on machines.
+- `Fx.get().machineBeam(level, key, from, to, color, width, type)` creates or updates a persistent client-side beam per dimension and block position. The color, width and texture type are fixed when the beam is first created; later calls only move its endpoints.
 
 ## Other hooks
 

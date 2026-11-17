@@ -26,6 +26,7 @@ public class ResearchPageScreen extends Screen {
     private static final Deque<HistoryEntry> HISTORY = new ArrayDeque<>();
     private static final int PANE_WIDTH = 256;
     private static final int PANE_HEIGHT = 181;
+    private static final Component CREATURE_INFUSION_TITLE = Component.translatable("tc.research_page.creature_infusion");
 
     private final ResearchItem research;
     private final List<DisplayPage> pages;
@@ -140,9 +141,10 @@ public class ResearchPageScreen extends Screen {
         graphics.pose().scale(1.3F, 1.3F);
         GuiBlit.blit(graphics, BookText.BOOK, 0, 0, PANE_WIDTH, PANE_HEIGHT, 0, 0, PANE_WIDTH, PANE_HEIGHT, 256, 256, 0xFFFFFFFF);
         graphics.pose().popMatrix();
-        if (lastCycle < System.currentTimeMillis()) {
+        long now = System.currentTimeMillis();
+        if (lastCycle < now) {
             renderer.cycle++;
-            lastCycle = System.currentTimeMillis() + 1000L;
+            lastCycle = now + 1000L;
         }
         for (int index = page; index <= page + 1 && index < pages.size(); index++) {
             drawPage(graphics, pages.get(index), index % 2, left, top);
@@ -204,7 +206,7 @@ public class ResearchPageScreen extends Screen {
             case ResearchPage.Image image -> {
             }
             case ResearchPage.CreatureInfusion creature ->
-                renderer.centered(Component.translatable("tc.research_page.creature_infusion"), x + 56, y + 40, 0xFF000000);
+                renderer.centered(CREATURE_INFUSION_TITLE, x + 56, y + 40, 0xFF000000);
         }
     }
 

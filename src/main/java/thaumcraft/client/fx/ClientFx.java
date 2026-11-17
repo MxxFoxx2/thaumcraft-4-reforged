@@ -29,7 +29,31 @@ import thaumcraft.fx.FxProxy;
 public final class ClientFx implements FxProxy {
     private static final int EXCAVATION_COLOR = 65382;
     private final Map<Integer, WandBeamFx> beams = new HashMap<>();
+    private final Map<BlockPos, BeamFx> machineBeams = new HashMap<>();
     private final Map<UUID, List<TaintSwarmFx>> taintSwarmParticles = new HashMap<>();
+
+    @Override
+    public void machineBeam(Level level, BlockPos key, Vec3 from, Vec3 to, int color, float width, int type) {
+        if (!level.isClientSide()) {
+            return;
+        }
+        machineBeams.values().removeIf(BeamFx::isDead);
+        float red = (color >> 16 & 255) / 255.0F;
+        float green = (color >> 8 & 255) / 255.0F;
+        float blue = (color & 255) / 255.0F;
+        BeamFx beam = machineBeams.get(key);
+        if (beam == null || beam.isDead()) {
+            beam = new BeamFx(level, from.x, from.y, from.z, to.x, to.y, to.z,
+                red, green, blue, 4);
+            beam.setType(type);
+            beam.setWidth(width);
+            beam.setPulse(false);
+            beam.setBlendMode(771);
+            WorldFxRenderer.add(beam);
+            machineBeams.put(key.immutable(), beam);
+        }
+        beam.updateBeam(from.x, from.y, from.z, to.x, to.y, to.z);
+    }
 
     @Override
     public void beamPulse(Level level, Entity source, Entity target, int color) {

@@ -3,7 +3,9 @@ package thaumcraft.client.research;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -11,7 +13,9 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.Aspect;
 import thaumcraft.aspect.AspectList;
 import thaumcraft.client.platform.GuiBlit;
@@ -24,6 +28,7 @@ import thaumcraft.research.ResearchPage;
 
 public class ResearchPageScreen extends Screen {
     private static final Deque<HistoryEntry> HISTORY = new ArrayDeque<>();
+    private static final Map<Identifier, int[]> IMAGE_SIZES = new HashMap<>();
     private static final int PANE_WIDTH = 256;
     private static final int PANE_HEIGHT = 181;
     private static final Component CREATURE_INFUSION_TITLE = Component.translatable("tc.research_page.creature_infusion");
@@ -203,11 +208,38 @@ public class ResearchPageScreen extends Screen {
             case ResearchPage.Infusion infusion -> PageRecipes.infusion(renderer, side, x - 4, y - 8, infusion);
             case ResearchPage.InfusionEnchantment enchantment -> PageRecipes.infusionEnchantment(renderer, side, x - 4, y - 8, enchantment);
             case ResearchPage.Smelting smelting -> PageRecipes.smelting(renderer, side, x - 4, y - 8, smelting);
-            case ResearchPage.Image image -> {
-            }
+            case ResearchPage.Image image -> drawImagePage(graphics, side, x, y, image);
             case ResearchPage.CreatureInfusion creature ->
                 renderer.centered(CREATURE_INFUSION_TITLE, x + 56, y + 40, 0xFF000000);
         }
+    }
+
+    private void drawImagePage(GuiGraphicsExtractor graphics, int side, int x, int y, ResearchPage.Image image) {
+        int center = x + 56 + side * 152;
+        int[] size = IMAGE_SIZES.computeIfAbsent(image.image(), ResearchPageScreen::textureSize);
+        if (size[0] > 0 && size[1] > 0) {
+            float scale = Math.min(1.0F, Math.min(120.0F / size[0], 140.0F / size[1]));
+            int drawWidth = Math.max(1, Math.round(size[0] * scale));
+            int drawHeight = Math.max(1, Math.round(size[1] * scale));
+            GuiBlit.blit(graphics, image.image(), center - drawWidth / 2, y, 0, 0, drawWidth, drawHeight,
+                drawWidth, drawHeight, 0xFFFFFFFF);
+            renderer.centered(Component.translatable(image.caption()), center, y + drawHeight + 8, 0xFF000000);
+        }
+    }
+
+    private static int[] textureSize(Identifier image) {
+        try (var stream = Minecraft.getInstance().getResourceManager().getResourceOrThrow(image).open()) {
+            byte[] header = stream.readNBytes(24);
+            if (header.length >= 24 && header[12] == 'I' && header[13] == 'H' && header[14] == 'D' && header[15] == 'R') {
+                return new int[] {
+                    (header[16] & 0xFF) << 24 | (header[17] & 0xFF) << 16 | (header[18] & 0xFF) << 8 | (header[19] & 0xFF),
+                    (header[20] & 0xFF) << 24 | (header[21] & 0xFF) << 16 | (header[22] & 0xFF) << 8 | (header[23] & 0xFF),
+                };
+            }
+        } catch (Exception exception) {
+            Thaumcraft.LOGGER.warn("Research page image {} could not be sized", image);
+        }
+        return new int[] {0, 0};
     }
 
     @Override

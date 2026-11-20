@@ -57,7 +57,7 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
 
 ## Golems
 
-- `GolemType` includes add-on materials (`GRASS`, `DIRT`, `PLANT`, `ROCK`, `METAL`, `CLOTH`, `SAND`, `REDSTONE`, `TNT`, `ICE`, `CACTUS`, `CAKE`, `WEB`, `VOID`) with a `visCost` field; append further materials after the built-ins. `GolemPlacerItem(Properties, GolemType)` and `GolemBellItem` work with any `GolemBase` subclass; golem deaths surface through the standard `LivingDeathEvent`.
+- `GolemBase.golemStats()` returns a `GolemStats` record (`health`, `armor`, `speed`, `fireResist`, `upgrades`, `carry`, `regenDelay`, `strength`, `visCost`, `heavy`) and is overridable, so an add-on golem can carry its own material characteristics instead of a stock `GolemType`. `GolemBase.getGolemTexture()` is overridable the same way for the model texture. `GolemPlacerItem(Properties, GolemType)` and `GolemBellItem` work with any `GolemBase` subclass; golem deaths surface through the standard `LivingDeathEvent`.
 
 ## Research pages
 

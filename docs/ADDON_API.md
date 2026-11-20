@@ -10,6 +10,7 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
   - The add-on provides the `tc.aspect.<tag>` translation and the texture.
 - `Aspect` is a registry-backed class. Built-in ordinals 0-47 are stable, add-on aspects follow in tag order. Saves and packets store the tag; an ordinal is only valid within one session.
 - `AspectSync.addRegistrar(Consumer<AspectRegistry>)` adds item and entity aspects. It runs on every rebuild, including `/reload`, after the built-in tables and before derived aspects are computed. Direct edits to `AspectRegistry.active()` are lost on `/reload`.
+- `AspectRegistrar.block(target, aspects)` registers scan aspects for a block. Block aspects sync to the client with the other aspect tables and `ScanManager` serves them as `block:<id>` object scans, independent of the block's drop item.
 - `AspectRegistry.mergeEntity(type, aspects, nbt...)` and `AspectRegistrar.entityCopy(...)` add amounts to the entity entry with the same NBT conditions, or create a new entry.
 
 ## Wands

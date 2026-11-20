@@ -34,7 +34,8 @@ public final class AspectSync {
             rebuild(event.getPlayerList().getServer());
         }
         AspectRegistry registry = AspectRegistry.active();
-        AspectTagsPayload payload = new AspectTagsPayload(registry.exportTags(), registry.exportEntities());
+        AspectTagsPayload payload = new AspectTagsPayload(registry.exportTags(), registry.exportBlockTags(),
+            registry.exportEntities());
         event.getRelevantPlayers().forEach(player -> ModNetwork.sendToPlayer(player, payload));
     }
 

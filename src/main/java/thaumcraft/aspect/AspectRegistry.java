@@ -24,6 +24,7 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.TagValueOutput;
 import org.jspecify.annotations.Nullable;
 
@@ -33,6 +34,7 @@ public final class AspectRegistry {
     private static volatile AspectRegistry active = new AspectRegistry();
 
     private final Map<Item, AspectList> tags = new HashMap<>();
+    private final Map<Block, AspectList> blockTags = new HashMap<>();
     private final Map<EntityType<?>, List<EntityAspects>> entities = new HashMap<>();
     private final Map<Item, List<CraftingSource>> craftingByOutput = new HashMap<>();
     private final Map<Item, List<CraftingSource>> processingByOutput = new HashMap<>();
@@ -57,15 +59,25 @@ public final class AspectRegistry {
         active = registry;
     }
 
-    public static AspectRegistry fromSync(Map<Item, AspectList> tags, Map<EntityType<?>, List<EntityAspects>> entities) {
+    public static AspectRegistry fromSync(Map<Item, AspectList> tags, Map<Block, AspectList> blockTags,
+        Map<EntityType<?>, List<EntityAspects>> entities) {
         AspectRegistry registry = new AspectRegistry();
         tags.forEach((item, aspects) -> registry.tags.put(item, aspects.copy()));
+        blockTags.forEach((block, aspects) -> registry.blockTags.put(block, aspects.copy()));
         entities.forEach((type, list) -> registry.entities.put(type, new ArrayList<>(list)));
         return registry;
     }
 
     public void register(Item item, @Nullable AspectList aspects) {
         tags.put(item, aspects == null ? new AspectList() : aspects.copy());
+    }
+
+    public void registerBlock(Block block, @Nullable AspectList aspects) {
+        blockTags.put(block, aspects == null ? new AspectList() : aspects.copy());
+    }
+
+    public @Nullable AspectList getBlockTags(Block block) {
+        return cap(blockTags.get(block));
     }
 
     public boolean exists(Item item) {
@@ -173,6 +185,16 @@ public final class AspectRegistry {
     public Map<EntityType<?>, List<EntityAspects>> exportEntities() {
         Map<EntityType<?>, List<EntityAspects>> result = new LinkedHashMap<>();
         entities.forEach((type, list) -> result.put(type, List.copyOf(list)));
+        return result;
+    }
+
+    public Map<Block, AspectList> exportBlockTags() {
+        Map<Block, AspectList> result = new LinkedHashMap<>();
+        blockTags.forEach((block, aspects) -> {
+            if (!aspects.isEmpty()) {
+                result.put(block, aspects.copy());
+            }
+        });
         return result;
     }
 

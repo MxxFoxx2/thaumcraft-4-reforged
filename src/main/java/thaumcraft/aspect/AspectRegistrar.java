@@ -8,6 +8,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import thaumcraft.Thaumcraft;
 
 public abstract class AspectRegistrar {
@@ -54,6 +55,13 @@ public abstract class AspectRegistrar {
                 registry.register(item, combined);
             }
         }
+    }
+
+    protected void block(String target, AspectList aspects) {
+        BuiltInRegistries.BLOCK.getOptional(Identifier.parse(target)).ifPresentOrElse(
+            block -> registry.registerBlock(block, aspects.copy()),
+            () -> Thaumcraft.LOGGER.debug("Aspect block target {} is not registered", target)
+        );
     }
 
     protected void entity(String target, AspectList aspects, Object... nbt) {

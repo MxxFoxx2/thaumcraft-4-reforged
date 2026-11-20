@@ -43,7 +43,8 @@ class AddonContentLoaderTest {
             """.formatted(key);
     }
 
-    private static String researchJson(String key, int column) {
+    private static String researchJson(String key, int column, boolean concealed) {
+        String flags = concealed ? "\"flags\": [\"CONCEALED\"],\n            " : "";
         return """
             {
               "key": "%s",
@@ -53,13 +54,12 @@ class AddonContentLoaderTest {
               "complexity": 2,
               "icon": {"item": "minecraft:stone"},
               "tags": {"ignis": 3},
-              "flags": ["CONCEALED"],
-              "pages": [
+              %s"pages": [
                 {"text": "1"},
                 {"recipes": ["testaddon:one"]}
               ]
             }
-            """.formatted(key, CATEGORY, column);
+            """.formatted(key, CATEGORY, column, flags);
     }
 
     @Test
@@ -111,7 +111,7 @@ class AddonContentLoaderTest {
     void researchJsonRegistersWithFlagsAndPages() {
         ResearchCategories.registerCategory(CATEGORY,
             Identifier.parse("thaumcraft:test_icon"), Identifier.parse("thaumcraft:test_background"));
-        Map<Identifier, String> files = Map.of(RESEARCH_FILE, researchJson("testaddon:test_research_a", 3));
+        Map<Identifier, String> files = Map.of(RESEARCH_FILE, researchJson("testaddon:test_research_a", 3, true));
         assertEquals(1, AddonContentLoader.loadResearch(files));
         ResearchItem entry = ResearchCategories.get(CATEGORY).get("testaddon:test_research_a");
         assertNotNull(entry);
@@ -124,12 +124,62 @@ class AddonContentLoaderTest {
     }
 
     @Test
-    void researchReloadIsSkipped() {
+    void researchReloadReRegistersWithEdits() {
         ResearchCategories.registerCategory(CATEGORY,
             Identifier.parse("thaumcraft:test_icon"), Identifier.parse("thaumcraft:test_background"));
-        Map<Identifier, String> files = Map.of(RESEARCH_FILE, researchJson("testaddon:test_research_b", 4));
-        assertEquals(1, AddonContentLoader.loadResearch(files));
+        Identifier file = Identifier.parse("testaddon:research/one.json");
+        Map<Identifier, String> first = Map.of(file, researchJson("testaddon:test_research_b", 4, false));
+        assertEquals(1, AddonContentLoader.loadResearch(first));
+        assertFalse(ResearchCategories.get(CATEGORY).get("testaddon:test_research_b").isConcealed());
+        Map<Identifier, String> second = Map.of(file, researchJson("testaddon:test_research_b", 4, true));
+        assertEquals(1, AddonContentLoader.loadResearch(second));
+        assertTrue(ResearchCategories.get(CATEGORY).get("testaddon:test_research_b").isConcealed());
+    }
+
+    @Test
+    void researchCollidingWithCodeRegistrationIsSkipped() {
+        ResearchCategories.registerCategory(CATEGORY,
+            Identifier.parse("thaumcraft:test_icon"), Identifier.parse("thaumcraft:test_background"));
+        ResearchItem codeEntry = new ResearchItem("testaddon:researchCollision", CATEGORY, new AspectList(),
+            9, 0, 1, Identifier.parse("thaumcraft:test_icon"));
+        codeEntry.registerResearchItem();
+        Map<Identifier, String> files = Map.of(RESEARCH_FILE,
+            researchJson("testaddon:researchCollision", 9, false));
         assertEquals(0, AddonContentLoader.loadResearch(files));
-        assertNotNull(ResearchCategories.get(CATEGORY).get("testaddon:test_research_b"));
+        assertSame(codeEntry, ResearchCategories.get(CATEGORY).get("testaddon:researchCollision"));
+    }
+
+    @Test
+    void deletedResearchFileIsRemovedOnReload() {
+        ResearchCategories.registerCategory(CATEGORY,
+            Identifier.parse("thaumcraft:test_icon"), Identifier.parse("thaumcraft:test_background"));
+        Map<Identifier, String> both = Map.of(
+            RESEARCH_FILE, resourcelessResearch("testaddon:test_research_c", 3),
+            Identifier.parse("testaddon:research/two.json"), resourcelessResearch("testaddon:test_research_d", 4));
+        assertEquals(2, AddonContentLoader.loadResearch(both));
+        assertTrue(ResearchCategories.get(CATEGORY).hasKey("testaddon:test_research_c"));
+        assertTrue(ResearchCategories.get(CATEGORY).hasKey("testaddon:test_research_d"));
+        Map<Identifier, String> after = Map.of(
+            RESEARCH_FILE, resourcelessResearch("testaddon:test_research_c", 3));
+        assertEquals(1, AddonContentLoader.loadResearch(after));
+        assertFalse(ResearchCategories.get(CATEGORY).hasKey("testaddon:test_research_d"));
+        assertTrue(ResearchCategories.get(CATEGORY).hasKey("testaddon:test_research_c"));
+    }
+
+    @Test
+    void deletedRecipeFileIsRemovedOnReload() {
+        Map<Identifier, String> both = Map.of(
+            RECIPE_FILE, recipeJson("testaddon:gone"),
+            Identifier.parse("testaddon:recipes/two.json"), recipeJson("testaddon:kept"));
+        assertEquals(2, AddonContentLoader.loadRecipes(both));
+        assertNotNull(TcRecipes.get("testaddon:gone"));
+        Map<Identifier, String> after = Map.of(RECIPE_FILE, recipeJson("testaddon:kept"));
+        assertEquals(1, AddonContentLoader.loadRecipes(after));
+        assertNull(TcRecipes.get("testaddon:gone"));
+        assertNotNull(TcRecipes.get("testaddon:kept"));
+    }
+
+    private static String resourcelessResearch(String key, int column) {
+        return researchJson(key, column, false);
     }
 }

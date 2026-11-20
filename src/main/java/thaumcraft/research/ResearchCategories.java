@@ -52,8 +52,20 @@ public final class ResearchCategories {
             Thaumcraft.LOGGER.error("Research {} has unknown category {}", item.key(), item.category());
             return;
         }
+        for (ResearchCategory existing : CATEGORIES.values()) {
+            if (existing.hasKey(item.key())) {
+                Thaumcraft.LOGGER.error("Research {} not added as its key is already used in category {}",
+                    item.key(), existing.key());
+                return;
+            }
+        }
         if (!category.add(item)) {
             Thaumcraft.LOGGER.error("Research {} not added as it overlaps with existing research", item.key());
         }
+    }
+
+    public static boolean removeResearch(String category, String key) {
+        ResearchCategory existing = CATEGORIES.get(category);
+        return existing != null && existing.remove(key);
     }
 }

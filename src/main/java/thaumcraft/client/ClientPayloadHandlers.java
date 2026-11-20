@@ -5,6 +5,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import thaumcraft.api.addon.AddonContentLoader;
 import thaumcraft.aspect.AspectRegistry;
 import thaumcraft.client.fx.ShieldRunesFx;
 import thaumcraft.client.hud.GearHud;
@@ -14,6 +15,7 @@ import thaumcraft.client.research.ResearchNotifications;
 import thaumcraft.device.ArcaneBoreBlockEntity;
 import thaumcraft.fx.Fx;
 import thaumcraft.infusion.InfusionMatrixBlockEntity;
+import thaumcraft.network.AddonContentPayload;
 import thaumcraft.network.AspectDiscoveryPayload;
 import thaumcraft.network.AspectPoolPayload;
 import thaumcraft.network.AspectTagsPayload;
@@ -46,6 +48,7 @@ public final class ClientPayloadHandlers {
         });
         ClientNetwork.handle(BeamPulsePayload.TYPE, ClientPayloadHandlers::beamPulse);
         ClientNetwork.handle(AspectTagsPayload.TYPE, ClientPayloadHandlers::aspectTags);
+        ClientNetwork.handle(AddonContentPayload.TYPE, ClientPayloadHandlers::addonContent);
         ClientNetwork.handle(NodeZapPayload.TYPE, ClientPayloadHandlers::nodeZap);
         ClientNetwork.handle(VisDrainFxPayload.TYPE, ClientPayloadHandlers::visDrain);
         ClientNetwork.handle(ResearchCompletePayload.TYPE, ResearchNotifications::researchComplete);
@@ -117,6 +120,11 @@ public final class ClientPayloadHandlers {
 
     private static void aspectTags(AspectTagsPayload payload, Player player) {
         AspectRegistry.setActive(AspectRegistry.fromSync(payload.items(), payload.blocks(), payload.entities()));
+    }
+
+    private static void addonContent(AddonContentPayload payload, Player player) {
+        AddonContentLoader.loadRecipeTexts(payload.recipes());
+        AddonContentLoader.loadResearchTexts(payload.research());
     }
 
     private static void nodeZap(NodeZapPayload payload, Player player) {

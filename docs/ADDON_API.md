@@ -39,12 +39,12 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
 
 ## Data-driven content
 
-- Add-ons ship JSON content under `data/<addonid>/thaumcraft_recipes/*.json` and `data/<addonid>/thaumcraft_research/*.json`; both are loaded on every server resource reload.
+- Add-ons ship JSON content under `data/<addonid>/thaumcraft_recipes/*.json` and `data/<addonid>/thaumcraft_research/*.json`. The server loads both on startup and on every `/reload`; the parsed entries are then synced to joining players through the `thaumcraft:addon_content` payload, so clients need no JSON of their own.
 - Recipe schema: `key` (namespaced), `type` (`arcane_shaped`, `arcane_shapeless`, `crucible`, `infusion`, `infusion_enchantment`, `compound`, `vanilla`), `research`, `result` stack, plus per-type fields: `pattern` and `symbols` for arcane_shaped, `ingredients` for arcane_shapeless, `catalyst` for crucible, `central`/`components`/`instability` for infusion and infusion_enchantment, `enchantment` for infusion_enchantment, `width`/`height`/`depth`/`blocks` for compound, `recipe` for vanilla, and `aspects` for the recipe cost.
   - Stacks are `{"item": "...", "count": n, "aspects": {...}, "data": {...}}` (only `item` is required). Ingredients are `{"item": "..."}`, `{"tag": "..."}`, `{"stack": {...}}` or `{"any": [...]}`.
-  - JSON-registered keys are tracked: a resource reload replaces them, while a key colliding with a code-registered recipe is skipped with an error. Malformed files and unknown aspect tags are skipped with an error and never break the reload.
-- Research schema: `key` (namespaced), `category` (must already exist), `column`, `row`, `icon` (`item` or `texture`), `tags`, `complexity`, `flags`, `parents`, `parentsHidden`, `siblings`, `warp` and `pages` (`text`, `recipes`, `arcane`, `crucible`, `image` with `caption`, `aspects`).
-  - Entries with an infusion page automatically gain the hidden `INFUSION` parent. Research JSON loads once per session; re-reloads skip already-loaded keys because `ResearchCategories` has no replace path.
+  - Every reload replaces JSON-owned recipes and removes entries whose files no longer exist. Keys colliding with a code-registered recipe are skipped with an error, as are malformed files and unknown aspect tags — a bad file never breaks the reload.
+- Research schema: `key` (namespaced), `category` (must already exist), `column`, `row`, `icon` (`item` or `texture`), `tags`, `complexity`, `flags`, `parents`, `parentsHidden`, `siblings`, `warp` and `pages` — all stock page kinds (`text`, `recipes`, `arcane`, `crucible`, `infusion`, `infusion_enchantment`, `compound`, `smelting`, `image` with `caption`, `aspects`, `concealed`, `creatureInfusion`).
+  - Research keys are unique across all categories. Every reload removes and re-registers JSON-owned entries, so edits apply on `/reload` and deleted files disappear. Entries with an infusion page automatically gain the hidden `INFUSION` parent. Research keys colliding with code-registered entries are skipped with an error.
 
 ## Nodes and vis
 

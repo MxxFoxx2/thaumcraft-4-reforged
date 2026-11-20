@@ -126,6 +126,10 @@ public final class TcRecipes {
         return RECIPES.get(key);
     }
 
+    public static @Nullable TcRecipe remove(String key) {
+        return RECIPES.remove(key);
+    }
+
     public static Collection<TcRecipe> all() {
         return Collections.unmodifiableCollection(RECIPES.values());
     }

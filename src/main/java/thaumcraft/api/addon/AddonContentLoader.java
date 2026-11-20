@@ -16,6 +16,8 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import thaumcraft.platform.ModNetwork;
 import org.jspecify.annotations.Nullable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.aspect.AspectList;
@@ -30,6 +32,7 @@ import thaumcraft.crafting.ShapelessArcaneRecipe;
 import thaumcraft.crafting.TcIngredient;
 import thaumcraft.crafting.TcRecipes;
 import thaumcraft.crafting.TcStack;
+import thaumcraft.network.AddonContentPayload;
 import thaumcraft.research.ResearchCategories;
 import thaumcraft.research.ResearchItem;
 import thaumcraft.research.ResearchPage;
@@ -39,9 +42,10 @@ public final class AddonContentLoader {
     private static final String RECIPES_PATH = "thaumcraft_recipes";
     private static final String RESEARCH_PATH = "thaumcraft_research";
     private static final String PAGE_PREFIX = "tc.research_page.";
-    private static final String INFUSION = "INFUSION";
     private static final Set<String> RECIPE_KEYS = new HashSet<>();
-    private static final Set<String> RESEARCH_KEYS = new HashSet<>();
+    private static final Map<String, String> RESEARCH_CATEGORIES = new HashMap<>();
+    private static final Map<String, String> RECIPE_TEXTS = new HashMap<>();
+    private static final Map<String, String> RESEARCH_TEXTS = new HashMap<>();
 
     private AddonContentLoader() {
     }
@@ -56,44 +60,124 @@ public final class AddonContentLoader {
         loadResearch(manager);
     }
 
-    public static int loadRecipes(ResourceManager manager) {
-        return loadRecipes(readTexts(manager, RECIPES_PATH));
+    @SubscribeEvent
+    public static void onDatapackSync(OnDatapackSyncEvent event) {
+        if (RECIPE_TEXTS.isEmpty() && RESEARCH_TEXTS.isEmpty()) {
+            return;
+        }
+        AddonContentPayload payload = new AddonContentPayload(Map.copyOf(RECIPE_TEXTS), Map.copyOf(RESEARCH_TEXTS));
+        event.getRelevantPlayers().forEach(player -> ModNetwork.sendToPlayer(player, payload));
     }
 
-    static int loadRecipes(Map<Identifier, String> files) {
-        int loaded = 0;
-        for (Map.Entry<Identifier, String> entry : files.entrySet()) {
-            JsonObject json = parseJson(entry.getKey(), entry.getValue());
-            if (json == null || !registerRecipe(entry.getKey(), json)) {
-                continue;
-            }
-            loaded++;
-        }
-        if (loaded > 0) {
-            Thaumcraft.LOGGER.info("Loaded {} add-on recipes from JSON", loaded);
-        }
-        return loaded;
+    private static String categoryOf(JsonObject json) {
+        JsonElement category = json.get("category");
+        return category == null ? "" : category.getAsString();
+    }
+
+    public static int loadRecipes(ResourceManager manager) {
+        return loadRecipes(readTexts(manager, RECIPES_PATH));
     }
 
     public static int loadResearch(ResourceManager manager) {
         return loadResearch(readTexts(manager, RESEARCH_PATH));
     }
 
-    static int loadResearch(Map<Identifier, String> files) {
-        int loaded = 0;
-        for (Map.Entry<Identifier, String> entry : files.entrySet()) {
-            JsonObject json = parseJson(entry.getKey(), entry.getValue());
+    public static int loadRecipeTexts(Map<String, String> texts) {
+        Map<Identifier, String> byId = new java.util.TreeMap<>();
+        texts.forEach((key, json) -> byId.put(Identifier.parse(key), json));
+        return loadRecipes(byId);
+    }
+
+    public static int loadResearchTexts(Map<String, String> texts) {
+        Map<Identifier, String> byId = new java.util.TreeMap<>();
+        texts.forEach((key, json) -> byId.put(Identifier.parse(key), json));
+        return loadResearch(byId);
+    }
+
+    public static int loadRecipes(Map<Identifier, String> files) {
+        Map<String, JsonObject> parsed = new java.util.TreeMap<>();
+        Map<String, Identifier> fileByKey = new java.util.TreeMap<>();
+        for (Map.Entry<Identifier, String> entry : new java.util.TreeMap<>(files).entrySet()) {
+            Identifier id = entry.getKey();
+            JsonObject json = parseJson(id, entry.getValue());
             if (json == null) {
                 continue;
             }
-            String key = string(json, "key", entry.getKey());
-            if (key == null || !registerResearch(entry.getKey(), key, json)) {
+            String key = requireKey(id, json);
+            if (key == null) {
                 continue;
             }
+            Identifier previous = fileByKey.putIfAbsent(key, id);
+            if (previous != null) {
+                Thaumcraft.LOGGER.error("Add-on recipes {} and {} both define key '{}'; the entry from {} is used",
+                    previous, id, key, previous);
+                continue;
+            }
+            parsed.put(key, json);
+        }
+        int removed = 0;
+        for (String stale : List.copyOf(RECIPE_KEYS)) {
+            if (!parsed.containsKey(stale)) {
+                TcRecipes.remove(stale);
+                RECIPE_KEYS.remove(stale);
+                removed++;
+            }
+        }
+        int loaded = 0;
+        for (Map.Entry<String, JsonObject> entry : parsed.entrySet()) {
+            if (!registerRecipe(fileByKey.get(entry.getKey()), entry.getKey(), entry.getValue())) {
+                continue;
+            }
+            RECIPE_KEYS.add(entry.getKey());
+            RECIPE_TEXTS.put(entry.getKey(), files.get(entry.getKey()));
             loaded++;
         }
-        if (loaded > 0) {
-            Thaumcraft.LOGGER.info("Loaded {} add-on research entries from JSON", loaded);
+        if (loaded + removed > 0) {
+            Thaumcraft.LOGGER.info("Loaded {} add-on recipes from JSON ({} removed)", loaded, removed);
+        }
+        return loaded;
+    }
+
+    public static int loadResearch(Map<Identifier, String> files) {
+        Map<String, JsonObject> parsed = new java.util.TreeMap<>();
+        Map<String, Identifier> fileByKey = new java.util.TreeMap<>();
+        for (Map.Entry<Identifier, String> entry : new java.util.TreeMap<>(files).entrySet()) {
+            Identifier id = entry.getKey();
+            JsonObject json = parseJson(id, entry.getValue());
+            if (json == null) {
+                continue;
+            }
+            String key = requireKey(id, json);
+            if (key == null) {
+                continue;
+            }
+            Identifier previous = fileByKey.putIfAbsent(key, id);
+            if (previous != null) {
+                Thaumcraft.LOGGER.error("Add-on research files {} and {} both define key '{}'; the entry from {} is used",
+                    previous, id, key, previous);
+                continue;
+            }
+            parsed.put(key, json);
+        }
+        int removed = 0;
+        for (String stale : List.copyOf(RESEARCH_CATEGORIES.keySet())) {
+            if (!parsed.containsKey(stale)) {
+                ResearchCategories.removeResearch(RESEARCH_CATEGORIES.get(stale), stale);
+                RESEARCH_CATEGORIES.remove(stale);
+                removed++;
+            }
+        }
+        int loaded = 0;
+        for (Map.Entry<String, JsonObject> entry : parsed.entrySet()) {
+            if (!registerResearch(fileByKey.get(entry.getKey()), entry.getKey(), entry.getValue())) {
+                continue;
+            }
+            RESEARCH_CATEGORIES.put(entry.getKey(), categoryOf(entry.getValue()));
+            RESEARCH_TEXTS.put(entry.getKey(), files.get(entry.getKey()));
+            loaded++;
+        }
+        if (loaded + removed > 0) {
+            Thaumcraft.LOGGER.info("Loaded {} add-on research entries from JSON ({} removed)", loaded, removed);
         }
         return loaded;
     }
@@ -119,12 +203,8 @@ public final class AddonContentLoader {
         }
     }
 
-    private static boolean registerRecipe(Identifier id, JsonObject json) {
+    private static boolean registerRecipe(Identifier id, String key, JsonObject json) {
         try {
-            String key = requireKey(id, json);
-            if (key == null) {
-                return false;
-            }
             String research = requireResearch(id, json, key);
             if (research == null) {
                 return false;
@@ -152,13 +232,7 @@ public final class AddonContentLoader {
                 case "vanilla" -> builder.vanilla(json);
                 default -> throw new IllegalArgumentException("Unknown recipe type " + type);
             };
-            if (recipe == null) {
-                return false;
-            }
-            if (!registerKey(id, key, recipe)) {
-                return false;
-            }
-            return true;
+            return registerKey(id, key, recipe);
         } catch (Exception exception) {
             Thaumcraft.LOGGER.error("Add-on recipe {} failed to load: {}", id, exception.getMessage());
             return false;
@@ -181,10 +255,6 @@ public final class AddonContentLoader {
 
     private static boolean registerResearch(Identifier id, String key, JsonObject json) {
         try {
-            if (RESEARCH_KEYS.contains(key)) {
-                Thaumcraft.LOGGER.info("Add-on research '{}' is already loaded; reload skipped", key);
-                return false;
-            }
             String category = string(json, "category", id);
             if (category == null || ResearchCategories.get(category) == null) {
                 Thaumcraft.LOGGER.error("Add-on research {} references unknown category '{}'", id, category);
@@ -199,6 +269,10 @@ public final class AddonContentLoader {
             if (icon == null) {
                 return false;
             }
+            AspectList tags = aspectTags(json, id);
+            if (tags == null) {
+                return false;
+            }
             ResearchItem item;
             if (icon.has("item")) {
                 JsonElement itemElement = icon.get("item");
@@ -206,14 +280,14 @@ public final class AddonContentLoader {
                     Thaumcraft.LOGGER.error("Add-on research {} icon item must be a string", id);
                     return false;
                 }
-                item = new ResearchItem(key, category, aspectTags(json, id), column, row,
+                item = new ResearchItem(key, category, tags, column, row,
                     integerOr(json, "complexity", 1), TcStack.of(itemElement.getAsString()));
             } else if (icon.has("texture")) {
                 String texture = string(icon, "texture", id);
                 if (texture == null) {
                     return false;
                 }
-                item = new ResearchItem(key, category, aspectTags(json, id), column, row,
+                item = new ResearchItem(key, category, tags, column, row,
                     integerOr(json, "complexity", 1), Identifier.parse(texture));
             } else {
                 Thaumcraft.LOGGER.error("Add-on research {} icon needs an item or texture", id);
@@ -227,18 +301,27 @@ public final class AddonContentLoader {
             if (warp != null && warp != 0) {
                 item.setWarp(warp);
             }
-            ResearchPage[] pages = pages(json, id);
+            ResearchPage[] pages = pages(key, json, id);
             if (pages == null) {
                 return false;
             }
             item.setPages(pages);
-            item.requireInfusionResearch();
-            ResearchCategories.addResearch(item);
-            if (ResearchCategories.get(category).get(key) != null) {
-                RESEARCH_KEYS.add(key);
+            if (RESEARCH_CATEGORIES.containsKey(key)) {
+                ResearchCategories.removeResearch(RESEARCH_CATEGORIES.get(key), key);
+            }
+            item.registerResearchItem();
+            ResearchItem registered = null;
+            for (ResearchItem candidate : ResearchCategories.get(category).research()) {
+                if (candidate == item) {
+                    registered = candidate;
+                    break;
+                }
+            }
+            if (registered != null) {
+                RESEARCH_CATEGORIES.put(key, category);
                 return true;
             }
-            Thaumcraft.LOGGER.error("Add-on research {} was not added (duplicate key or overlapping position)", id);
+            Thaumcraft.LOGGER.error("Add-on research {} was not added (key collides with existing research or position overlaps)", id);
             return false;
         } catch (Exception exception) {
             Thaumcraft.LOGGER.error("Add-on research {} failed to load: {}", id, exception.getMessage());
@@ -276,7 +359,7 @@ public final class AddonContentLoader {
         setter.accept(values.toArray(String[]::new));
     }
 
-    private static ResearchPage[] pages(JsonObject json, Identifier id) {
+    private static ResearchPage[] pages(String key, JsonObject json, Identifier id) {
         JsonElement element = json.get("pages");
         if (element == null || !element.isJsonArray()) {
             return new ResearchPage[0];
@@ -289,15 +372,37 @@ public final class AddonContentLoader {
             }
             JsonObject object = page.getAsJsonObject();
             if (object.has("text")) {
-                pages.add(ResearchPage.text(PAGE_PREFIX + json.get("key").getAsString() + "." + object.get("text").getAsString()));
+                pages.add(ResearchPage.text(PAGE_PREFIX + key + "." + object.get("text").getAsString()));
+            } else if (object.has("concealed")) {
+                JsonObject concealed = object.getAsJsonObject("concealed");
+                String research = string(concealed, "research", id);
+                String text = concealed.has("text") ? concealed.get("text").getAsString() : null;
+                if (research == null || text == null) {
+                    return null;
+                }
+                pages.add(ResearchPage.concealed(research, PAGE_PREFIX + research + "." + text));
             } else if (object.has("recipes")) {
-                pages.add(ResearchPage.crafting(object.getAsJsonArray("recipes").asList().stream()
-                    .map(JsonElement::getAsString).toArray(String[]::new)));
+                pages.add(ResearchPage.crafting(strings(object, "recipes")));
             } else if (object.has("arcane")) {
-                pages.add(ResearchPage.arcane(object.getAsJsonArray("arcane").asList().stream()
-                    .map(JsonElement::getAsString).toArray(String[]::new)));
+                pages.add(ResearchPage.arcane(strings(object, "arcane")));
             } else if (object.has("crucible")) {
-                pages.add(ResearchPage.crucible(object.get("crucible").getAsString()));
+                pages.add(ResearchPage.crucible(strings(object, "crucible")));
+            } else if (object.has("infusion")) {
+                pages.add(ResearchPage.infusion(strings(object, "infusion")));
+            } else if (object.has("infusionEnchantment")) {
+                pages.add(ResearchPage.infusionEnchantment(object.get("infusionEnchantment").getAsString()));
+            } else if (object.has("compound")) {
+                pages.add(ResearchPage.compound(object.get("compound").getAsString()));
+            } else if (object.has("smelting")) {
+                JsonObject stacks = object.getAsJsonObject("smelting");
+                TcStack input = stack(stacks, "input", id);
+                TcStack output = stack(stacks, "output", id);
+                if (input == null || output == null) {
+                    return null;
+                }
+                pages.add(ResearchPage.smelting(input, output));
+            } else if (object.has("creatureInfusion")) {
+                pages.add(ResearchPage.creatureInfusion(object.get("creatureInfusion").getAsString()));
             } else if (object.has("image")) {
                 pages.add(ResearchPage.image(object.get("image").getAsString(), string(object, "caption", id)));
             } else if (object.has("aspects")) {
@@ -312,6 +417,14 @@ public final class AddonContentLoader {
             }
         }
         return pages.toArray(new ResearchPage[0]);
+    }
+
+    private static String[] strings(JsonObject json, String field) {
+        JsonElement element = json.get(field);
+        if (element == null || !element.isJsonArray()) {
+            return new String[0];
+        }
+        return element.getAsJsonArray().asList().stream().map(JsonElement::getAsString).toArray(String[]::new);
     }
 
     private static final class TcRecipeBuilder {

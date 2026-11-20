@@ -87,4 +87,30 @@ public final class ResearchCategory {
         maxRow = Math.max(maxRow, item.row());
         return true;
     }
+
+    public boolean hasKey(String researchKey) {
+        return research.containsKey(researchKey);
+    }
+
+    boolean remove(String researchKey) {
+        ResearchItem removed = research.remove(researchKey);
+        if (removed == null) {
+            return false;
+        }
+        recomputeBounds();
+        return true;
+    }
+
+    private void recomputeBounds() {
+        minColumn = 0;
+        minRow = 0;
+        maxColumn = 0;
+        maxRow = 0;
+        for (ResearchItem item : research.values()) {
+            minColumn = Math.min(minColumn, item.column());
+            minRow = Math.min(minRow, item.row());
+            maxColumn = Math.max(maxColumn, item.column());
+            maxRow = Math.max(maxRow, item.row());
+        }
+    }
 }

@@ -26,6 +26,7 @@ class ResearchItemTest {
             Identifier.parse("thaumcraft:test_icon"));
     }
 
+
     private static void registerTestCategory() {
         ResearchCategories.registerCategory(CATEGORY,
             Identifier.parse("thaumcraft:test_category_icon"),
@@ -79,6 +80,19 @@ class ResearchItemTest {
         item.registerResearchItem();
         assertFalse(item.parentsHidden().contains("INFUSION"));
         assertNotNull(ResearchCategories.get(CATEGORY).get("plainParent"));
+    }
+
+    @Test
+    void researchKeysAreUniqueAcrossCategories() {
+        String other = "test_category_b";
+        ResearchCategories.registerCategory(other,
+            Identifier.parse("thaumcraft:test_icon"), Identifier.parse("thaumcraft:test_background"));
+        research("crossCategoryDup", 6, 6).registerResearchItem();
+        ResearchItem otherItem = new ResearchItem("crossCategoryDup", other, new AspectList(), 5, 5, 1,
+            Identifier.parse("thaumcraft:test_icon"));
+        otherItem.registerResearchItem();
+        assertFalse(ResearchCategories.get(other).hasKey("crossCategoryDup"));
+        assertNotNull(ResearchCategories.get(CATEGORY).get("crossCategoryDup"));
     }
 
     @Test

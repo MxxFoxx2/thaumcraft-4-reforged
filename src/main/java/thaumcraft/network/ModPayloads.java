@@ -13,6 +13,7 @@ public final class ModPayloads {
         ModNetwork.toClient(BoreDigPayload.TYPE, BoreDigPayload.STREAM_CODEC);
         ModNetwork.toClient(BeamPulsePayload.TYPE, BeamPulsePayload.STREAM_CODEC);
         ModNetwork.toClient(AspectTagsPayload.TYPE, AspectTagsPayload.STREAM_CODEC);
+        ModNetwork.toClient(AddonContentPayload.TYPE, AddonContentPayload.STREAM_CODEC);
         ModNetwork.toClient(NodeZapPayload.TYPE, NodeZapPayload.STREAM_CODEC);
         ModNetwork.toClient(VisDrainFxPayload.TYPE, VisDrainFxPayload.STREAM_CODEC);
         ModNetwork.toClient(ResearchCompletePayload.TYPE, ResearchCompletePayload.STREAM_CODEC);

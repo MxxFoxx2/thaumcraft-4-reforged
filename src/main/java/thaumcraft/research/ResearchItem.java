@@ -1,7 +1,10 @@
 package thaumcraft.research;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import thaumcraft.aspect.Aspect;
@@ -9,6 +12,9 @@ import thaumcraft.aspect.AspectList;
 import thaumcraft.crafting.TcStack;
 
 public class ResearchItem {
+    private static final String PAGE_PREFIX = "tc.research_page.";
+    private static final String INFUSION = "INFUSION";
+
     private final String key;
     private final String category;
     private final AspectList tags;
@@ -35,6 +41,8 @@ public class ResearchItem {
     private List<Aspect> aspectTriggers = List.of();
     private List<ResearchPage> pages = List.of();
     private List<String> requiredTags = List.of();
+    private BooleanSupplier availability = () -> true;
+    private boolean infusionParent;
 
     public ResearchItem setRequiredTags(String... tags) {
         this.requiredTags = List.of(tags);
@@ -46,7 +54,7 @@ public class ResearchItem {
             var key = net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.parse(tag));
             if (!net.minecraft.core.registries.BuiltInRegistries.ITEM.get(key).map(set -> set.size() > 0).orElse(false)) return false;
         }
-        return true;
+        return availability.getAsBoolean();
     }
 
     public ResearchItem(String key, String category) {
@@ -169,7 +177,31 @@ public class ResearchItem {
         return this;
     }
 
+    public ResearchItem when(BooleanSupplier condition) {
+        this.availability = Objects.requireNonNull(condition, "condition");
+        return this;
+    }
+
+    public ResearchItem setTextPages(String... pageKeys) {
+        ResearchPage[] converted = new ResearchPage[pageKeys.length];
+        for (int index = 0; index < pageKeys.length; index++) {
+            converted[index] = ResearchPage.text(PAGE_PREFIX + key + "." + pageKeys[index]);
+        }
+        return setPages(converted);
+    }
+
+    public ResearchItem requireInfusionResearch() {
+        infusionParent = true;
+        return this;
+    }
+
     public ResearchItem registerResearchItem() {
+        if (infusionParent && !parentsHidden.contains(INFUSION)
+            && pages.stream().anyMatch(page -> page instanceof ResearchPage.Infusion)) {
+            List<String> hidden = new ArrayList<>(parentsHidden);
+            hidden.add(INFUSION);
+            parentsHidden = List.copyOf(hidden);
+        }
         ResearchCategories.addResearch(this);
         return this;
     }

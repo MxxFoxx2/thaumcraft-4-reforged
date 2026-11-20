@@ -47,6 +47,9 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
 
 ## Research pages
 
+- `ResearchItem.when(BooleanSupplier)` gates `isAvailable()`: the entry stays unavailable while the supplier fails. Keep the supplier config-driven and identical on the client and the dedicated server.
+- `ResearchItem.setTextPages(String... pages)` builds text pages with `tc.research_page.<key>.<page>` lang keys instead of manual `ResearchPage.text(...)` calls.
+- `ResearchItem.requireInfusionResearch()` adds a hidden `INFUSION` parent at registration when the entry has an infusion page; opt-in, not every infusion-bearing entry needs it.
 - `ResearchPage.creatureInfusion(String payload)` adds an add-on page type; the stock screen renders a localized placeholder line (`tc.research_page.creature_infusion`) and add-ons may render the payload themselves.
 - Custom research entries and categories use the same public statics as the built-in ones (`ResearchCategories.registerCategory`, `ResearchItem.registerResearchItem`).
 

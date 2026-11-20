@@ -116,7 +116,9 @@ public class GolemBase extends PathfinderMob implements MenuProvider, GolemConta
 
     public GolemType getGolemType() { return GolemType.byId(entityData.get(TYPE)); }
 
-    public GolemStats golemStats() { return GolemStats.of(getGolemType()); }
+    public GolemStats golemStats() { return golemStats(getGolemType()); }
+
+    public GolemStats golemStats(GolemType type) { return GolemStats.of(type); }
 
     public Identifier getGolemTexture() {
         return Identifier.fromNamespaceAndPath("thaumcraft", "textures/model/golem_"
@@ -251,8 +253,8 @@ public class GolemBase extends PathfinderMob implements MenuProvider, GolemConta
     }
 
     public void configure(GolemType type, GolemSnapshot state) {
-        GolemStats stats = golemStats();
         entityData.set(TYPE, type.ordinal());
+        GolemStats stats = golemStats(type);
         entityData.set(CORE, state.core());
         entityData.set(ADVANCED, state.advanced());
         entityData.set(DECORATION, state.decoration());

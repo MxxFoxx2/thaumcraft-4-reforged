@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import net.minecraft.resources.Identifier;
 import org.junit.jupiter.api.Test;
+import thaumcraft.aspect.AspectList;
 
 class TcRecipesTest {
     private static final String BASE = "test:";
@@ -90,5 +91,61 @@ class TcRecipesTest {
         assertThrows(IllegalArgumentException.class, () -> TcRecipes.register(blankKey));
         assertSame(existing, TcRecipes.get(BASE + "rejected"));
         assertNull(TcRecipes.get(" "));
+    }
+
+    @Test
+    void arcaneExpandsPatternIntoPaddedGrid() {
+        TcIngredient stone = TcIngredient.item("minecraft:stone");
+        TcIngredient dirt = TcIngredient.item("minecraft:dirt");
+        ShapedArcaneRecipe recipe = TcRecipes.arcane(BASE + "arcaneGrid", "testResearch",
+            TcStack.of("minecraft:stone"), new AspectList(), new String[] {"AB", " C"},
+            'A', stone, 'B', dirt, 'C', dirt);
+        assertEquals(2, recipe.width());
+        assertEquals(2, recipe.height());
+        assertEquals(4, recipe.grid().size());
+        assertEquals(stone.getClass(), recipe.grid().get(0).getClass());
+        assertSame(TcIngredient.EMPTY, recipe.grid().get(2));
+    }
+
+    @Test
+    void arcaneThrowsOnUnmappedSymbol() {
+        assertThrows(IllegalArgumentException.class, () -> TcRecipes.arcane(BASE + "arcaneMissing", "testResearch",
+            TcStack.of("minecraft:stone"), new AspectList(), new String[] {"AX"},
+            'A', TcIngredient.item("minecraft:stone")));
+    }
+
+    @Test
+    void constructionHelpersRegisterUnderTheirKey() {
+        AspectList aspects = new AspectList();
+        TcStack result = TcStack.of("minecraft:stone");
+        TcIngredient ingredient = TcIngredient.item("minecraft:stone");
+        ShapedArcaneRecipe arcane = TcRecipes.arcane(BASE + "helperArcane", "testResearch", result, aspects,
+            new String[] {"A"}, 'A', ingredient);
+        assertSame(arcane, TcRecipes.get(BASE + "helperArcane"));
+        ShapelessArcaneRecipe shapeless = TcRecipes.arcaneShapeless(BASE + "helperShapeless", "testResearch",
+            result, aspects, ingredient);
+        assertSame(shapeless, TcRecipes.get(BASE + "helperShapeless"));
+        InfusionRecipe infusion = TcRecipes.infusion(BASE + "helperInfusion", result, 2, aspects, ingredient, ingredient);
+        assertEquals(BASE + "helperInfusion", infusion.research());
+        CrucibleRecipe crucible = TcRecipes.crucible(BASE + "helperCrucible", result, ingredient, aspects);
+        assertEquals(BASE + "helperCrucible", crucible.research());
+        InfusionEnchantmentRecipe enchantment = TcRecipes.enchantment(BASE + "helperEnchantment", "testResearch",
+            Identifier.parse("minecraft:sharpness"), 1, aspects, ingredient);
+        assertSame(enchantment, TcRecipes.get(BASE + "helperEnchantment"));
+        CompoundRecipe compound = TcRecipes.compound(BASE + "helperCompound", "testResearch", aspects, 1, 1, 1, result);
+        assertSame(compound, TcRecipes.get(BASE + "helperCompound"));
+        CraftingRecipeRef vanilla = TcRecipes.vanilla(BASE + "helperVanilla", "testResearch",
+            Identifier.parse("minecraft:test_recipe"), result);
+        assertSame(vanilla, TcRecipes.get(BASE + "helperVanilla"));
+    }
+
+    @Test
+    void constructionHelpersRejectDuplicateKeys() {
+        TcIngredient ingredient = TcIngredient.item("minecraft:stone");
+        TcStack result = TcStack.of("minecraft:stone");
+        AspectList aspects = new AspectList();
+        TcRecipes.infusion(BASE + "helperDuplicate", result, 1, aspects, ingredient);
+        assertThrows(IllegalStateException.class, () -> TcRecipes.infusion(BASE + "helperDuplicate", result, 1,
+            aspects, ingredient));
     }
 }

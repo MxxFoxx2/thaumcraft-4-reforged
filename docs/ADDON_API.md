@@ -28,6 +28,10 @@ All hooks are plain static calls on Thaumcraft classes. Call them from your mod 
   - `TcRecipes.registerUnique(recipe)` throws instead: a key collision names the previously registered recipe and leaves it in place.
   - `TcRecipes.replace(recipe)` overwrites the key deliberately, without the warning.
   - Keys must be non-blank; add-ons should namespace them (`addonid:key`) so collisions stay impossible.
+- `TcRecipes.arcane(key, research, result, aspects, pattern, symbols...)`, `arcaneShapeless(...)`, `infusion(...)`, `crucible(...)`, `enchantment(...)`, `compound(...)` and `vanilla(...)` construct and register a recipe in one call with `registerUnique` semantics.
+  - Pattern rows expand into a grid padded with `TcIngredient.EMPTY`; every non-space symbol must map to an ingredient or the registration throws.
+  - `crucible` and `infusion` have key-only overloads that reuse the key as the research key.
+  - `vanilla(key, research, recipe, result)` takes the full `Identifier` of the vanilla crafting recipe.
 - `ArcaneCrafting.registerDynamic(DynamicArcaneRecipe)` adds an arcane recipe computed at match time. Dynamic recipes are checked after the wand and sceptre recipes.
 - `TcStack.registerDataHandler(key, BiConsumer<ItemStack, String>)`: `TcStack.create()` calls the handler for a recipe stack with this `data` key. An infusion result with such a key is created through `create()` instead of copying the central item.
 - `TcStack.registerDataMatcher(key, BiPredicate<ItemStack, String>)`: `TcStack.matches()` requires the matcher to accept every `data` value with this key, like the metadata check in TC4 (for example a potion type).

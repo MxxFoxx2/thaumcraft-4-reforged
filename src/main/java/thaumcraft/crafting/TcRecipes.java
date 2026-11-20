@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.Nullable;
 import thaumcraft.Thaumcraft;
+import thaumcraft.aspect.AspectList;
 
 public final class TcRecipes {
     private static final Map<String, TcRecipe> RECIPES = new LinkedHashMap<>();
@@ -51,6 +53,73 @@ public final class TcRecipes {
             throw new IllegalArgumentException("Recipe key must not be blank (recipe class "
                 + recipe.getClass().getName() + ")");
         }
+    }
+
+    public static ShapedArcaneRecipe arcane(String key, String research, TcStack result, AspectList aspects,
+        String[] pattern, Object... symbols) {
+        List<TcIngredient> grid = new ArrayList<>();
+        int width = 0;
+        for (String row : pattern) {
+            width = Math.max(width, row.length());
+        }
+        for (String row : pattern) {
+            for (int column = 0; column < width; column++) {
+                grid.add(column < row.length() ? symbol(row.charAt(column), symbols) : TcIngredient.EMPTY);
+            }
+        }
+        return registerUnique(new ShapedArcaneRecipe(key, research, result, aspects, width, pattern.length, grid));
+    }
+
+    public static ShapelessArcaneRecipe arcaneShapeless(String key, String research, TcStack result, AspectList aspects,
+        TcIngredient... ingredients) {
+        return registerUnique(new ShapelessArcaneRecipe(key, research, result, aspects, List.of(ingredients)));
+    }
+
+    public static InfusionRecipe infusion(String key, String research, TcStack result, int instability,
+        AspectList aspects, TcIngredient central, TcIngredient... components) {
+        return registerUnique(new InfusionRecipe(key, research, result, instability, aspects, central,
+            List.of(components)));
+    }
+
+    public static InfusionRecipe infusion(String key, TcStack result, int instability, AspectList aspects,
+        TcIngredient central, TcIngredient... components) {
+        return infusion(key, key, result, instability, aspects, central, components);
+    }
+
+    public static InfusionEnchantmentRecipe enchantment(String key, String research, Identifier enchantment,
+        int instability, AspectList aspects, TcIngredient... components) {
+        return registerUnique(new InfusionEnchantmentRecipe(key, research, enchantment, instability, aspects,
+            List.of(components)));
+    }
+
+    public static CompoundRecipe compound(String key, String research, AspectList aspects, int width, int height,
+        int depth, TcStack... blocks) {
+        return registerUnique(new CompoundRecipe(key, research, aspects, width, height, depth, List.of(blocks)));
+    }
+
+    public static CrucibleRecipe crucible(String key, TcStack result, TcIngredient catalyst, AspectList aspects) {
+        return crucible(key, key, result, catalyst, aspects);
+    }
+
+    public static CrucibleRecipe crucible(String key, String research, TcStack result, TcIngredient catalyst,
+        AspectList aspects) {
+        return registerUnique(new CrucibleRecipe(key, research, result, catalyst, aspects));
+    }
+
+    public static CraftingRecipeRef vanilla(String key, String research, Identifier recipe, TcStack result) {
+        return registerUnique(new CraftingRecipeRef(key, research, recipe, result));
+    }
+
+    private static TcIngredient symbol(char symbol, Object[] symbols) {
+        if (symbol == ' ') {
+            return TcIngredient.EMPTY;
+        }
+        for (int index = 0; index + 1 < symbols.length; index += 2) {
+            if (symbols[index] instanceof Character key && key == symbol) {
+                return (TcIngredient) symbols[index + 1];
+            }
+        }
+        throw new IllegalArgumentException("No ingredient for pattern symbol " + symbol);
     }
 
     public static @Nullable TcRecipe get(String key) {
